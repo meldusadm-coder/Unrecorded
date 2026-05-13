@@ -1,0 +1,20 @@
+---
+description: Unrecorded project rules
+globs:
+  - "**/*.dart"
+  - "**/*.kt"
+  - "**/*.swift"
+  - "**/*.yaml"
+  - "**/*.md"
+alwaysApply: true
+---
+
+Follow the project guidance in `AGENTS.md`.
+
+Keep edits small, testable, and privacy-first.
+
+Do not add analytics, cloud services, ad SDKs, accounts, telemetry, ML detection, or extra AI configuration files unless explicitly requested.
+
+When changing detection, scoring, permissions, or privacy-sensitive behaviour, update the relevant tests and concise docs.
+
+Unrecorded must never claim to prove someone is recording. It only alerts users to possible nearby recording risk.
