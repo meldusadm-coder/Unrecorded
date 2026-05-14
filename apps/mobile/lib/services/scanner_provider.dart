@@ -135,9 +135,9 @@ class ScanController extends StateNotifier<ScanState> {
   }
 
   void stopScan() {
-    _subscription?.cancel();
+    unawaited(_subscription?.cancel());
     _subscription = null;
-    _scanner.stop();
+    unawaited(_scanner.stop());
     state = state.copyWith(status: ScanStatus.idle);
   }
 

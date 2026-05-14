@@ -138,8 +138,10 @@ void main() {
   });
 
   test('re-entrant startScan during preflight is ignored', () async {
-    final runtime =
-        _DelayedRuntime(const Duration(milliseconds: 50), const ScanPreflightResult.ok());
+    final runtime = _DelayedRuntime(
+      const Duration(milliseconds: 50),
+      const ScanPreflightResult.ok(),
+    );
     final streamController = StreamController<List<RadioScanResult>>();
     final scanner = _StreamScanner(streamController.stream);
     final controller = ScanController(
