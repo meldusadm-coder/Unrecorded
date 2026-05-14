@@ -20,6 +20,24 @@ class _TestRuntime extends ScanRuntime {
   Future<ScanPreflightResult> ensureAndroidReady() async => result;
 }
 
+class _DelayedRuntime extends ScanRuntime {
+  _DelayedRuntime(this.delay, this.result);
+
+  final Duration delay;
+  final ScanPreflightResult result;
+  int calls = 0;
+
+  @override
+  bool get isAndroid => true;
+
+  @override
+  Future<ScanPreflightResult> ensureAndroidReady() async {
+    calls += 1;
+    await Future<void>.delayed(delay);
+    return result;
+  }
+}
+
 void main() {
   test('startScan sets permissionDenied state when preflight fails', () async {
     final controller = ScanController(
@@ -117,6 +135,27 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 10));
 
     expect(controller.state.status, ScanStatus.timedOut);
+  });
+
+  test('re-entrant startScan during preflight is ignored', () async {
+    final runtime =
+        _DelayedRuntime(const Duration(milliseconds: 50), const ScanPreflightResult.ok());
+    final streamController = StreamController<List<RadioScanResult>>();
+    final scanner = _StreamScanner(streamController.stream);
+    final controller = ScanController(
+      scanner: scanner,
+      runtime: runtime,
+      scannerMode: ScannerMode.auto,
+      scoringEngine: RiskScoringEngine(),
+    );
+
+    final first = controller.startScan();
+    final second = controller.startScan();
+
+    await Future.wait([first, second]);
+
+    expect(runtime.calls, 1);
+    await streamController.close();
   });
 }
 
