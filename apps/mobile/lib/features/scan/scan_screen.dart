@@ -52,11 +52,11 @@ class ScanScreen extends ConsumerWidget {
               color: state.status == ScanStatus.scanning
                   ? Colors.red.shade400
                   : null,
-              onPressed: () {
+              onPressed: () async {
                 if (state.status == ScanStatus.scanning) {
                   controller.stopScan();
                 } else {
-                  controller.startScan();
+                  await controller.startScan();
                 }
               },
             ),
@@ -148,9 +148,20 @@ class _StatusSection extends StatelessWidget {
 
   String get _statusText => switch (state.status) {
         ScanStatus.idle => 'Tap the button below to start scanning.',
+        ScanStatus.requestingPermission =>
+          state.statusMessage ?? 'Checking Bluetooth permissions…',
+        ScanStatus.permissionDenied =>
+          state.statusMessage ?? 'Permission is required to scan.',
+        ScanStatus.bluetoothUnsupported =>
+          state.statusMessage ?? 'Bluetooth scanning is unsupported.',
+        ScanStatus.bluetoothOff =>
+          state.statusMessage ?? 'Bluetooth is off. Turn it on and retry.',
         ScanStatus.scanning =>
           '${state.signals.length} signal${state.signals.length == 1 ? '' : 's'} detected nearby.',
+        ScanStatus.timedOut =>
+          state.statusMessage ?? 'Scan timed out. Start again when ready.',
         ScanStatus.paused => 'Scanning is paused.',
-        ScanStatus.error => 'An error occurred. Try scanning again.',
+        ScanStatus.error =>
+          state.statusMessage ?? 'An error occurred. Try scanning again.',
       };
 }
