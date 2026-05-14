@@ -73,6 +73,26 @@ dart format --set-exit-if-changed .
 dart analyze
 ```
 
+## CI/CD test automation (no paid device farm required)
+
+Recommended baseline on GitHub Actions:
+
+- `flutter pub get` from repo root.
+- `dart format --set-exit-if-changed .`
+- `dart analyze --fatal-infos`
+- `cd packages/unrecorded_core && dart test`
+- `cd packages/unrecorded_radio && flutter test`
+- `cd apps/mobile && flutter test`
+
+For Android smoke in CI without paid platform fees, run app tests on a
+GitHub-hosted Android emulator (API 30+). Keep fake/demo scanner mode available
+for deterministic emulator execution.
+
+Optional external setup (still free tiers available):
+
+- GitHub Actions + Android emulator runner (open source action).
+- Firebase Test Lab free quota for occasional physical-device smoke tests.
+
 ## Privacy model
 
 All scanning is local. No account, no cloud, no analytics. See [docs/privacy-model.md](docs/privacy-model.md).

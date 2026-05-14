@@ -51,6 +51,73 @@ void main() {
     expect(controller.state.status, ScanStatus.scanning);
     await streamController.close();
   });
+
+  test('startScan sets bluetoothUnsupported state', () async {
+    final controller = ScanController(
+      scanner: FakeRadioScanner(),
+      runtime: _TestRuntime(
+        const ScanPreflightResult.fail(
+          ScanPreflightFailure.bluetoothUnsupported,
+        ),
+      ),
+      scannerMode: ScannerMode.auto,
+      scoringEngine: RiskScoringEngine(),
+    );
+
+    await controller.startScan();
+
+    expect(controller.state.status, ScanStatus.bluetoothUnsupported);
+  });
+
+  test('startScan sets bluetoothOff state', () async {
+    final controller = ScanController(
+      scanner: FakeRadioScanner(),
+      runtime: _TestRuntime(
+        const ScanPreflightResult.fail(ScanPreflightFailure.bluetoothOff),
+      ),
+      scannerMode: ScannerMode.auto,
+      scoringEngine: RiskScoringEngine(),
+    );
+
+    await controller.startScan();
+
+    expect(controller.state.status, ScanStatus.bluetoothOff);
+  });
+
+  test('scan stream error sets error state', () async {
+    final streamController = StreamController<List<RadioScanResult>>();
+    final scanner = _StreamScanner(streamController.stream);
+    final controller = ScanController(
+      scanner: scanner,
+      runtime: _TestRuntime(const ScanPreflightResult.ok()),
+      scannerMode: ScannerMode.auto,
+      scoringEngine: RiskScoringEngine(),
+    );
+
+    await controller.startScan();
+    streamController.addError(Exception('boom'));
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+
+    expect(controller.state.status, ScanStatus.error);
+    await streamController.close();
+  });
+
+  test('scan stream done sets timedOut state', () async {
+    final streamController = StreamController<List<RadioScanResult>>();
+    final scanner = _StreamScanner(streamController.stream);
+    final controller = ScanController(
+      scanner: scanner,
+      runtime: _TestRuntime(const ScanPreflightResult.ok()),
+      scannerMode: ScannerMode.auto,
+      scoringEngine: RiskScoringEngine(),
+    );
+
+    await controller.startScan();
+    await streamController.close();
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+
+    expect(controller.state.status, ScanStatus.timedOut);
+  });
 }
 
 class _StreamScanner implements RadioScanner {

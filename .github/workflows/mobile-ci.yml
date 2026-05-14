@@ -1,0 +1,50 @@
+name: Mobile CI
+
+on:
+  pull_request:
+  push:
+    branches: [dev, main]
+
+jobs:
+  lint_and_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Workspace dependencies
+        run: flutter pub get
+
+      - name: Format check
+        run: dart format --set-exit-if-changed .
+
+      - name: Analyze
+        run: dart analyze --fatal-infos
+
+      - name: Core tests
+        run: cd packages/unrecorded_core && dart test
+
+      - name: Radio tests
+        run: cd packages/unrecorded_radio && flutter test
+
+      - name: App widget/unit tests
+        run: cd apps/mobile && flutter test
+
+  android_emulator_smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - name: Workspace dependencies
+        run: flutter pub get
+      - name: Emulator smoke (app tests)
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          arch: x86_64
+          script: cd apps/mobile && flutter test
