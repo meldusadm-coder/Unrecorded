@@ -55,16 +55,18 @@ class ScanRuntime {
   }
 
   Future<bool> _requestPermissions() async {
-    final sdkInt = await FlutterBluePlus.androidSdk;
-    if (sdkInt >= 31) {
-      final statuses = await [
-        Permission.bluetoothScan,
-        Permission.bluetoothConnect,
-      ].request();
-      return statuses.values.every((s) => s.isGranted);
-    }
+    final statuses = await [
+      Permission.bluetoothScan,
+      Permission.bluetoothConnect,
+      Permission.locationWhenInUse,
+    ].request();
 
-    final status = await Permission.locationWhenInUse.request();
-    return status.isGranted;
+    final hasBluetoothRuntime =
+        (statuses[Permission.bluetoothScan]?.isGranted ?? false) &&
+        (statuses[Permission.bluetoothConnect]?.isGranted ?? false);
+    final hasLegacyLocation =
+        statuses[Permission.locationWhenInUse]?.isGranted ?? false;
+
+    return hasBluetoothRuntime || hasLegacyLocation;
   }
 }

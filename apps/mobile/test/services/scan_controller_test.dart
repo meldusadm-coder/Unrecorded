@@ -8,13 +8,12 @@ import 'package:unrecorded_mobile/services/scanner_provider.dart';
 import 'package:unrecorded_radio/unrecorded_radio.dart';
 
 class _TestRuntime extends ScanRuntime {
-  _TestRuntime(this.result, {this.android = true});
+  _TestRuntime(this.result);
 
   final ScanPreflightResult result;
-  final bool android;
 
   @override
-  bool get isAndroid => android;
+  bool get isAndroid => true;
 
   @override
   Future<ScanPreflightResult> ensureAndroidReady() async => result;
