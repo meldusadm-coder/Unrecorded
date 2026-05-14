@@ -25,19 +25,20 @@ jobs:
         run: dart analyze --fatal-infos
 
       - name: Core tests
-        run: cd packages/unrecorded_core && dart test | tee /tmp/core-test.log
+        run: bash -o pipefail -c 'cd packages/unrecorded_core && dart test | tee /tmp/core-test.log'
 
       - name: Radio tests
-        run: cd packages/unrecorded_radio && flutter test | tee /tmp/radio-test.log
+        run: bash -o pipefail -c 'cd packages/unrecorded_radio && flutter test | tee /tmp/radio-test.log'
 
       - name: App widget/unit tests
-        run: cd apps/mobile && flutter test | tee /tmp/mobile-test.log
+        run: bash -o pipefail -c 'cd apps/mobile && flutter test | tee /tmp/mobile-test.log'
 
       - name: Upload test logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: unit-and-widget-test-logs
+          if-no-files-found: warn
           path: |
             /tmp/core-test.log
             /tmp/radio-test.log
@@ -57,7 +58,7 @@ jobs:
         with:
           api-level: 30
           arch: x86_64
-          script: cd apps/mobile && flutter test | tee /tmp/emulator-smoke.log
+          script: bash -o pipefail -c 'cd apps/mobile && flutter test | tee /tmp/emulator-smoke.log'
 
       - name: Capture emulator screenshot
         if: always()
@@ -69,6 +70,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: android-emulator-reassurance
+          if-no-files-found: warn
           path: |
             /tmp/emulator-smoke.log
             /tmp/android-emulator-smoke.png
