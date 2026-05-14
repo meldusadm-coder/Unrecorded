@@ -88,6 +88,11 @@ For Android smoke in CI without paid platform fees, run app tests on a
 GitHub-hosted Android emulator (API 30+). Keep fake/demo scanner mode available
 for deterministic emulator execution.
 
+For lightweight visual reassurance, the CI workflow can upload:
+
+- test logs as artifacts for each test lane
+- a single emulator screenshot captured after smoke tests
+
 Optional external setup (still free tiers available):
 
 - GitHub Actions + Android emulator runner (open source action).

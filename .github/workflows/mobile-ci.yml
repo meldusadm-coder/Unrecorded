@@ -25,13 +25,23 @@ jobs:
         run: dart analyze --fatal-infos
 
       - name: Core tests
-        run: cd packages/unrecorded_core && dart test
+        run: cd packages/unrecorded_core && dart test | tee /tmp/core-test.log
 
       - name: Radio tests
-        run: cd packages/unrecorded_radio && flutter test
+        run: cd packages/unrecorded_radio && flutter test | tee /tmp/radio-test.log
 
       - name: App widget/unit tests
-        run: cd apps/mobile && flutter test
+        run: cd apps/mobile && flutter test | tee /tmp/mobile-test.log
+
+      - name: Upload test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-and-widget-test-logs
+          path: |
+            /tmp/core-test.log
+            /tmp/radio-test.log
+            /tmp/mobile-test.log
 
   android_emulator_smoke:
     runs-on: ubuntu-latest
@@ -47,4 +57,18 @@ jobs:
         with:
           api-level: 30
           arch: x86_64
-          script: cd apps/mobile && flutter test
+          script: cd apps/mobile && flutter test | tee /tmp/emulator-smoke.log
+
+      - name: Capture emulator screenshot
+        if: always()
+        run: |
+          adb exec-out screencap -p > /tmp/android-emulator-smoke.png || true
+
+      - name: Upload emulator reassurance artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-emulator-reassurance
+          path: |
+            /tmp/emulator-smoke.log
+            /tmp/android-emulator-smoke.png
