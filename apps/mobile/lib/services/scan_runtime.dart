@@ -36,12 +36,16 @@ class ScanRuntime {
 
     final permissionGranted = await _requestPermissions();
     if (!permissionGranted) {
-      return const ScanPreflightResult.fail(ScanPreflightFailure.permissionDenied);
+      return const ScanPreflightResult.fail(
+        ScanPreflightFailure.permissionDenied,
+      );
     }
 
     final adapterState = await FlutterBluePlus.adapterState.first;
     if (adapterState != BluetoothAdapterState.on) {
-      return const ScanPreflightResult.fail(ScanPreflightFailure.bluetoothOff);
+      return const ScanPreflightResult.fail(
+        ScanPreflightFailure.bluetoothOff,
+      );
     }
 
     return const ScanPreflightResult.ok();
