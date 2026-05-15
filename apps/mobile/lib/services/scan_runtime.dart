@@ -1,3 +1,4 @@
+// dart format off
 import 'dart:io';
 
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -18,6 +19,7 @@ class ScanPreflightResult {
 
   bool get isOk => failure == null;
 }
+// dart format on
 
 class ScanRuntime {
   const ScanRuntime();
