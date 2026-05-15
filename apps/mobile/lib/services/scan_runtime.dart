@@ -19,8 +19,6 @@ class ScanPreflightResult {
 
   bool get isOk => failure == null;
 }
-// dart format on
-
 class ScanRuntime {
   const ScanRuntime();
 
