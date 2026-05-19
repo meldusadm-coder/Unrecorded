@@ -25,6 +25,7 @@ class _AppBootstrapState extends ConsumerState<AppBootstrap> {
 
   Future<void> _init() async {
     ref.read(widgetSyncServiceProvider);
+    await ref.read(scannerConfigInitProvider.future);
 
     final prefs = await ProtectionPrefs.load();
     if (prefs.protectionEnabled) {

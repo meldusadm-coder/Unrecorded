@@ -1,27 +1,44 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:unrecorded_core/unrecorded_core.dart';
 import 'package:unrecorded_radio/unrecorded_radio.dart';
 
 import '../features/scan/scan_state.dart';
+import 'dev_testing_prefs.dart';
 import 'protection_prefs.dart';
 import 'scan_runtime.dart';
+import 'scanner_config.dart';
 
-/// Provides the active [RadioScanner] implementation.
-final scannerModeProvider = StateProvider<ScannerMode>((ref) {
-  final demoFlag = const bool.fromEnvironment('UNRECORDED_DEMO_MODE');
-  return demoFlag ? ScannerMode.demo : ScannerMode.auto;
+/// Resolved scanner configuration (null until [scannerConfigInitProvider] completes).
+final scannerConfigProvider = StateProvider<ScannerConfig?>((ref) => null);
+
+final scannerConfigInitProvider = FutureProvider<void>((ref) async {
+  final runtime = ref.read(scanRuntimeProvider);
+  final config = await resolveScannerConfig(
+    isEmulator: runtime.isEmulator,
+  );
+  ref.read(scannerConfigProvider.notifier).state = config;
 });
 
 final scanRuntimeProvider = Provider<ScanRuntime>((ref) => const ScanRuntime());
 
-final radioScannerProvider = Provider<RadioScanner>((ref) {
-  final mode = ref.watch(scannerModeProvider);
-  if (mode == ScannerMode.demo) return FakeRadioScanner();
+RadioScanner _scannerForConfig(ScannerConfig config) {
+  if (config.mode == ScannerMode.demo) {
+    return FakeRadioScanner(scenario: config.scenario);
+  }
   if (Platform.isAndroid) return BleRadioScanner();
-  return FakeRadioScanner();
+  return FakeRadioScanner(scenario: config.scenario);
+}
+
+final radioScannerProvider = Provider<RadioScanner>((ref) {
+  final config = ref.watch(scannerConfigProvider);
+  if (config == null) {
+    return FakeRadioScanner(scenario: FakeDemoScenario.high);
+  }
+  return _scannerForConfig(config);
 });
 
 final riskScoringEngineProvider = Provider<RiskScoringEngine>((ref) {
@@ -32,14 +49,20 @@ final riskScoringEngineProvider = Provider<RiskScoringEngine>((ref) {
 final scanControllerProvider =
     StateNotifierProvider<ScanController, ScanState>((ref) {
   final controller = ScanController(
-    scanner: ref.watch(radioScannerProvider),
-    runtime: ref.watch(scanRuntimeProvider),
-    scannerMode: ref.watch(scannerModeProvider),
+    scannerFactory: () => ref.read(radioScannerProvider),
+    runtime: ref.read(scanRuntimeProvider),
+    scannerModeFactory: () =>
+        ref.read(scannerConfigProvider)?.mode ?? ScannerMode.demo,
     scoringEngine: ref.watch(riskScoringEngineProvider),
     onStateChanged: (state) {
       ref.read(widgetSyncTriggerProvider.notifier).state++;
     },
   );
+
+  ref.listen<ScannerConfig?>(scannerConfigProvider, (previous, next) {
+    if (previous == null || next == null || previous == next) return;
+    unawaited(controller.onScannerConfigChanged());
+  });
 
   return controller;
 });
@@ -47,30 +70,79 @@ final scanControllerProvider =
 /// Bumped when scan state changes so widget sync can listen.
 final widgetSyncTriggerProvider = StateProvider<int>((ref) => 0);
 
+/// Debug-only: update scanner mode/scenario and restart scan if needed.
+final scannerConfigControllerProvider = Provider<ScannerConfigController>((ref) {
+  return ScannerConfigController(ref);
+});
+
+class ScannerConfigController {
+  ScannerConfigController(this._ref);
+
+  final Ref _ref;
+
+  Future<void> setMode(ScannerMode mode) async {
+    if (kReleaseMode) return;
+    final prefs = await DevTestingPrefs.load();
+    await prefs.setScannerMode(mode);
+    final current = _ref.read(scannerConfigProvider);
+    final next = (current ?? const ScannerConfig(
+      mode: ScannerMode.demo,
+      scenario: FakeDemoScenario.high,
+    )).copyWith(mode: mode);
+    _ref.read(scannerConfigProvider.notifier).state = next;
+  }
+
+  Future<void> setScenario(FakeDemoScenario scenario) async {
+    if (kReleaseMode) return;
+    final prefs = await DevTestingPrefs.load();
+    await prefs.setDemoScenario(scenario);
+    final current = _ref.read(scannerConfigProvider);
+    final next = (current ?? const ScannerConfig(
+      mode: ScannerMode.demo,
+      scenario: FakeDemoScenario.high,
+    )).copyWith(scenario: scenario);
+    _ref.read(scannerConfigProvider.notifier).state = next;
+  }
+
+  Future<void> clearOverrides() async {
+    if (kReleaseMode) return;
+    final prefs = await DevTestingPrefs.load();
+    await prefs.clearAll();
+    final runtime = _ref.read(scanRuntimeProvider);
+    final config = await resolveScannerConfig(
+      isEmulator: runtime.isEmulator,
+    );
+    _ref.read(scannerConfigProvider.notifier).state = config;
+  }
+}
+
 class ScanController extends StateNotifier<ScanState> {
   ScanController({
-    required RadioScanner scanner,
+    required RadioScanner Function() scannerFactory,
     required ScanRuntime runtime,
-    required ScannerMode scannerMode,
+    required ScannerMode Function() scannerModeFactory,
     required RiskScoringEngine scoringEngine,
     void Function(ScanState state)? onStateChanged,
-  })  : _scanner = scanner,
+  })  : _scannerFactory = scannerFactory,
         _runtime = runtime,
-        _scannerMode = scannerMode,
+        _scannerModeFactory = scannerModeFactory,
         _scoringEngine = scoringEngine,
         _onStateChanged = onStateChanged,
         super(const ScanState());
 
-  final RadioScanner _scanner;
+  final RadioScanner Function() _scannerFactory;
   final RiskScoringEngine _scoringEngine;
   final ScanRuntime _runtime;
-  final ScannerMode _scannerMode;
+  final ScannerMode Function() _scannerModeFactory;
   final void Function(ScanState state)? _onStateChanged;
 
   StreamSubscription<List<RadioScanResult>>? _subscription;
+  RadioScanner? _activeScanner;
   bool _startInFlight = false;
   bool _restartInFlight = false;
   ProtectionPrefs? _prefs;
+
+  ScannerMode get _scannerMode => _scannerModeFactory();
 
   void _emit(ScanState newState) {
     state = newState;
@@ -80,6 +152,25 @@ class ScanController extends StateNotifier<ScanState> {
   Future<ProtectionPrefs> _ensurePrefs() async {
     _prefs ??= await ProtectionPrefs.load();
     return _prefs!;
+  }
+
+  /// Injects a high-risk batch for debug UAT (no BLE required).
+  void simulateHighRiskAlert() {
+    _onResults(FakeRadioScanner.highRiskBatch());
+  }
+
+  /// Restarts the scan stream after scanner config changes.
+  Future<void> onScannerConfigChanged() async {
+    if (!state.protectionEnabled ||
+        state.status == ScanStatus.paused ||
+        state.status == ScanStatus.idle) {
+      return;
+    }
+    await _subscription?.cancel();
+    _subscription = null;
+    await _activeScanner?.stop();
+    _activeScanner = null;
+    await _beginScanStream();
   }
 
   /// Starts continuous protection scanning.
@@ -149,7 +240,9 @@ class ScanController extends StateNotifier<ScanState> {
       ),
     );
 
-    final stream = _scanner.scan();
+    await _activeScanner?.stop();
+    _activeScanner = _scannerFactory();
+    final stream = _activeScanner!.scan();
     _subscription = stream.listen(
       _onResults,
       onError: (_) {
@@ -178,7 +271,8 @@ class ScanController extends StateNotifier<ScanState> {
     try {
       await _subscription?.cancel();
       _subscription = null;
-      await _scanner.stop();
+      await _activeScanner?.stop();
+      _activeScanner = null;
       if (!state.protectionEnabled) return;
       await Future<void>.delayed(const Duration(milliseconds: 300));
       if (!state.protectionEnabled) return;
@@ -197,7 +291,8 @@ class ScanController extends StateNotifier<ScanState> {
 
     await _subscription?.cancel();
     _subscription = null;
-    await _scanner.stop();
+    await _activeScanner?.stop();
+    _activeScanner = null;
 
     _emit(
       state.copyWith(
@@ -246,7 +341,7 @@ class ScanController extends StateNotifier<ScanState> {
   @override
   void dispose() {
     unawaited(_subscription?.cancel());
-    unawaited(_scanner.stop());
+    unawaited(_activeScanner?.stop());
     super.dispose();
   }
 }

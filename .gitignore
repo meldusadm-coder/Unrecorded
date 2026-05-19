@@ -60,6 +60,7 @@ coverage/
 # IDE
 .idea/
 .vscode/
+!.vscode/launch.json
 *.iml
 *.swp
 *.swo

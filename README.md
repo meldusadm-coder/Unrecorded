@@ -50,9 +50,15 @@ flutter pub get
 # Run the app (in apps/mobile)
 cd apps/mobile && flutter run
 
+# Demo / UAT on emulator (scripted BLE, deterministic alerts)
+./scripts/dev-run-demo.sh
+# or: flutter run --dart-define=UNRECORDED_DEMO_MODE=true --dart-define=UNRECORDED_DEMO_SCENARIO=high
+
 # Or build a debug APK
 cd apps/mobile && flutter build apk --debug
 ```
+
+See [docs/local-testing.md](docs/local-testing.md) for BLE vs demo mode, debug settings, and UAT checklists.
 
 ### Dev container (recommended on Windows)
 

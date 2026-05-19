@@ -1,6 +1,8 @@
 // dart format off
 import 'dart:io';
 
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -28,6 +30,21 @@ class ScanRuntime {
   const ScanRuntime();
 
   bool get isAndroid => Platform.isAndroid;
+
+  /// True on Android emulators / iOS simulators (debug UAT default).
+  Future<bool> isEmulator() async {
+    if (kIsWeb) return false;
+    final info = DeviceInfoPlugin();
+    if (Platform.isAndroid) {
+      final android = await info.androidInfo;
+      return !android.isPhysicalDevice;
+    }
+    if (Platform.isIOS) {
+      final ios = await info.iosInfo;
+      return !ios.isPhysicalDevice;
+    }
+    return false;
+  }
 
   Future<ScanPreflightResult> ensureAndroidReady() async {
     final supported = await FlutterBluePlus.isSupported;

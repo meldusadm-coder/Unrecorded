@@ -32,10 +32,14 @@ Develop Unrecorded inside a reproducible Linux container with Flutter, Dart, Jav
 3. **Run the app** — in the container terminal:
 
    ```bash
-   ./scripts/dev-run.sh
+   ./scripts/dev-run-demo.sh
    ```
 
-   Or press **F5** → **Unrecorded (mobile)** (connects to the host emulator automatically).
+   For real BLE on a USB device: `./scripts/dev-run.sh`
+
+   Or press **F5** → **Unrecorded (demo UAT)** or **Unrecorded (real BLE)**.
+
+   See [local-testing.md](local-testing.md).
 
    Build a debug APK instead:
 
@@ -61,7 +65,7 @@ Develop Unrecorded inside a reproducible Linux container with Flutter, Dart, Jav
 | `flutter pub get`, `dart format`, `dart analyze`, tests, APK build | Dev container |
 | Android emulator | Windows host (recommended) |
 | Real BLE scanning | Physical device (not the emulator) |
-| Demo / fake scanner | Works in emulator and tests |
+| Demo / fake scanner | `./scripts/dev-run-demo.sh` or debug Settings → Developer testing |
 
 ## CI parity commands (inside container)
 
@@ -133,6 +137,33 @@ sudo chown -R "$(id -u):$(id -g)" /sdks/flutter
 ### No AVDs listed
 
 - Open Android Studio → **Device Manager** → create a device (API 30+, x86_64).
+
+### `assembleDebug` very slow or appears stuck
+
+The **first** Android debug build inside a dev container on **Windows + Docker** is often **10–20+ minutes** (sometimes longer). Gradle is not frozen—it is downloading dependencies and compiling on a slow bind-mounted workspace. The message `31 packages have newer versions…` from `flutter pub get` is **informational only**; it does not block the build.
+
+**Do this:**
+
+1. Give **Docker Desktop → Settings → Resources** at least **8 GB RAM** (more helps).
+2. Prefer warming the build once, then run the app:
+
+   ```bash
+   ./scripts/warm-android-build.sh
+   ./scripts/dev-run-demo.sh
+   ```
+
+3. See live Gradle progress in a second terminal:
+
+   ```bash
+   cd apps/mobile/android
+   ./gradlew :app:assembleDebug --info
+   ```
+
+4. Keep Gradle’s cache **off** the Windows bind mount (default in this repo): `GRADLE_USER_HOME=/home/vscode/.gradle` in `devcontainer.json`.
+
+5. After a successful build, `flutter run` / hot reload is much faster than the first assemble.
+
+If it still never finishes after 30+ minutes, check Docker memory and disk space, then rebuild the dev container (**Dev Containers: Rebuild Container**).
 
 ### In-container Android emulator
 

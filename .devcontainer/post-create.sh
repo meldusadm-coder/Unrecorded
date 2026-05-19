@@ -24,10 +24,16 @@ fi
 echo "==> flutter pub get"
 flutter pub get
 
+echo "==> Gradle wrapper (downloads once; cache lives in ~/.gradle, not the bind mount)"
+mkdir -p "${HOME}/.gradle"
+if [ -f /workspace/apps/mobile/android/gradlew ]; then
+  (cd /workspace/apps/mobile/android && ./gradlew --version) || true
+fi
+
 echo "==> flutter doctor"
 flutter doctor -v
 
 echo "==> Dev container ready."
 echo "    Windows host (once per session): start-dev.cmd"
-echo "    Then in this container: ./scripts/dev-run.sh"
-echo "    Or press F5 -> Unrecorded (mobile)"
+echo "    UAT in container: ./scripts/dev-run-demo.sh"
+echo "    First Android debug build can take 10–20+ min on Windows Docker; later runs are faster."

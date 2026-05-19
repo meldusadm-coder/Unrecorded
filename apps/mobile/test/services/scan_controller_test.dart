@@ -20,6 +20,19 @@ class _TestRuntime extends ScanRuntime {
   Future<ScanPreflightResult> ensureAndroidReady() async => result;
 }
 
+ScanController _controller({
+  required RadioScanner scanner,
+  required ScanRuntime runtime,
+  ScannerMode scannerMode = ScannerMode.auto,
+}) {
+  return ScanController(
+    scannerFactory: () => scanner,
+    runtime: runtime,
+    scannerModeFactory: () => scannerMode,
+    scoringEngine: RiskScoringEngine(),
+  );
+}
+
 class _DelayedRuntime extends ScanRuntime {
   _DelayedRuntime(this.delay, this.result);
 
@@ -46,13 +59,11 @@ void main() {
   });
 
   test('startProtection sets permissionRequired when preflight fails', () async {
-    final controller = ScanController(
+    final controller = _controller(
       scanner: FakeRadioScanner(),
       runtime: _TestRuntime(
         const ScanPreflightResult.fail(ScanPreflightFailure.permissionDenied),
       ),
-      scannerMode: ScannerMode.auto,
-      scoringEngine: RiskScoringEngine(),
     );
 
     await controller.startProtection(persist: false);
@@ -66,11 +77,9 @@ void main() {
     final streamController =
         StreamController<List<RadioScanResult>>.broadcast();
     final scanner = _StreamScanner(streamController.stream);
-    final controller = ScanController(
+    final controller = _controller(
       scanner: scanner,
       runtime: _TestRuntime(const ScanPreflightResult.ok()),
-      scannerMode: ScannerMode.auto,
-      scoringEngine: RiskScoringEngine(),
     );
 
     await controller.startProtection(persist: false);
@@ -81,15 +90,13 @@ void main() {
 
   test('startProtection sets permissionRequired for bluetoothUnsupported',
       () async {
-    final controller = ScanController(
+    final controller = _controller(
       scanner: FakeRadioScanner(),
       runtime: _TestRuntime(
         const ScanPreflightResult.fail(
           ScanPreflightFailure.bluetoothUnsupported,
         ),
       ),
-      scannerMode: ScannerMode.auto,
-      scoringEngine: RiskScoringEngine(),
     );
 
     await controller.startProtection(persist: false);
@@ -101,11 +108,9 @@ void main() {
     final streamController =
         StreamController<List<RadioScanResult>>.broadcast();
     final scanner = _StreamScanner(streamController.stream);
-    final controller = ScanController(
+    final controller = _controller(
       scanner: scanner,
       runtime: _TestRuntime(const ScanPreflightResult.ok()),
-      scannerMode: ScannerMode.auto,
-      scoringEngine: RiskScoringEngine(),
     );
 
     await controller.startProtection(persist: false);
@@ -120,11 +125,9 @@ void main() {
     final streamController =
         StreamController<List<RadioScanResult>>.broadcast();
     final scanner = _RestartScanner(streamController);
-    final controller = ScanController(
+    final controller = _controller(
       scanner: scanner,
       runtime: _TestRuntime(const ScanPreflightResult.ok()),
-      scannerMode: ScannerMode.auto,
-      scoringEngine: RiskScoringEngine(),
     );
 
     await controller.startProtection(persist: false);
@@ -140,11 +143,9 @@ void main() {
     final streamController =
         StreamController<List<RadioScanResult>>.broadcast();
     final scanner = _StreamScanner(streamController.stream);
-    final controller = ScanController(
+    final controller = _controller(
       scanner: scanner,
       runtime: _TestRuntime(const ScanPreflightResult.ok()),
-      scannerMode: ScannerMode.auto,
-      scoringEngine: RiskScoringEngine(),
     );
 
     await controller.startProtection(persist: false);
@@ -165,12 +166,23 @@ void main() {
     await streamController.close();
   });
 
+  test('simulateHighRiskAlert sets possibleRiskDetected', () {
+    final controller = _controller(
+      scanner: FakeRadioScanner(),
+      runtime: _TestRuntime(const ScanPreflightResult.ok()),
+    );
+
+    controller.simulateHighRiskAlert();
+
+    expect(controller.state.status, ScanStatus.possibleRiskDetected);
+    expect(controller.state.riskLevel, anyOf(RiskLevel.medium, RiskLevel.high));
+  });
+
   test('pauseProtection sets paused state', () async {
-    final controller = ScanController(
+    final controller = _controller(
       scanner: FakeRadioScanner(),
       runtime: _TestRuntime(const ScanPreflightResult.ok()),
       scannerMode: ScannerMode.demo,
-      scoringEngine: RiskScoringEngine(),
     );
 
     await controller.startProtection(persist: false);
@@ -188,11 +200,9 @@ void main() {
     final streamController =
         StreamController<List<RadioScanResult>>.broadcast();
     final scanner = _StreamScanner(streamController.stream);
-    final controller = ScanController(
+    final controller = _controller(
       scanner: scanner,
       runtime: runtime,
-      scannerMode: ScannerMode.auto,
-      scoringEngine: RiskScoringEngine(),
     );
 
     final first = controller.startProtection(persist: false);

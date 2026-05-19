@@ -6,6 +6,7 @@ import 'package:unrecorded_ui/unrecorded_ui.dart';
 
 import '../../services/ads_service.dart';
 import '../../services/entitlement_service.dart';
+import 'debug_testing_section.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -66,7 +67,7 @@ class SettingsScreen extends ConsumerWidget {
                         ? 'Ads are removed on this device. Thank you for your support.'
                         : 'Optional banner ads may appear. Scan data is never sent to ad networks.',
                   ),
-                  const Divider(height: 32),
+                  const DebugTestingSection(),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: Icon(Icons.volunteer_activism_outlined,
