@@ -18,7 +18,8 @@ class PrivacyDisclaimer {
   /// Privacy-model summary for the settings screen.
   static const String privacyModel =
       'All scanning happens on your device. No account is required. '
-      'No data is uploaded by default. No analytics or tracking are included.';
+      'No data is uploaded by default. No analytics or telemetry are included. '
+      'Optional banner ads never receive scan results or nearby device data.';
 
   /// Funding transparency note.
   static const String fundingNote =

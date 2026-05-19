@@ -115,6 +115,10 @@ Optional external setup (still free tiers available):
 
 All scanning is local. No account, no cloud, no analytics. See [docs/privacy-model.md](docs/privacy-model.md).
 
+## Monetisation and widget
+
+Optional bottom banner ads and pay-what-you-want remove-ads IAP are documented in [docs/monetisation.md](docs/monetisation.md). Android home screen widget notes: [docs/widget.md](docs/widget.md).
+
 ## Funding
 
 See [FUNDING.md](FUNDING.md).

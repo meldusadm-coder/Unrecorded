@@ -11,3 +11,4 @@ export 'src/scoring/risk_scoring_engine.dart';
 export 'src/scoring/scoring_rule.dart';
 export 'src/scoring/default_scoring_rules.dart';
 export 'src/privacy/privacy_disclaimer.dart';
+export 'src/copy/app_copy.dart';

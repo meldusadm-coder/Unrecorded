@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'app_theme.dart';
+
 /// Displays a single detected signal in a compact card format.
 class SignalCard extends StatelessWidget {
   final String name;
@@ -18,18 +20,28 @@ class SignalCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final suspiciousBg = isDark
+        ? AppThemeConstants.suspiciousBackgroundDark
+        : AppThemeConstants.suspiciousBackgroundLight;
+    final suspiciousBorder = isDark
+        ? AppThemeConstants.suspiciousBorderDark
+        : AppThemeConstants.suspiciousBorderLight;
+
     return Card(
       elevation: 0,
       color: isSuspicious
-          ? const Color(0xFFFFF3E0)
+          ? suspiciousBg
           : theme.colorScheme.surfaceContainerHighest.withAlpha(60),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppThemeConstants.cardRadius),
+      ),
       child: ListTile(
         dense: true,
         leading: Icon(
           isSuspicious ? Icons.warning_amber_rounded : Icons.bluetooth,
           color: isSuspicious
-              ? const Color(0xFFFFA726)
+              ? suspiciousBorder
               : theme.colorScheme.onSurfaceVariant,
           size: 22,
         ),

@@ -55,8 +55,9 @@ class BleRadioScanner implements RadioScanner {
 
       _scanning = true;
 
+      // No timeout — scan runs until [stop] is called. The scan controller
+      // restarts the stream if the platform ends a session early.
       await FlutterBluePlus.startScan(
-        timeout: const Duration(seconds: 15),
         androidUsesFineLocation: true,
       );
 
