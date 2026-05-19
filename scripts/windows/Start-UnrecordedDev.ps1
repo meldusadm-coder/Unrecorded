@@ -19,6 +19,7 @@ param(
   [switch] $SkipDocker,
   [switch] $SkipEmulator,
   [switch] $RestartEmulator,
+  [switch] $ColdBoot,
   [switch] $OpenCursor,
   [switch] $ListAvds,
   [switch] $NoPause
@@ -96,13 +97,100 @@ function Get-AvdList {
 
 function Get-RunningEmulatorSerials {
   param([string] $Adb)
+
+  $result = Invoke-AdbQuiet -Adb $Adb devices
+  if ($result.ExitCode -ne 0) { return @() }
+
   $serials = @()
-  $lines = & $Adb devices 2>&1 | Where-Object { $_ -match '^\S+\s+device' }
-  foreach ($line in $lines) {
-    $serial = ($line -split '\s+', 2)[0]
-    if ($serial -match '^emulator-\d+$') { $serials += $serial }
+  foreach ($line in ($result.Output -split "`n")) {
+    if ($line -match '^(\S+)\s+device') {
+      $serial = $Matches[1]
+      if ($serial -match '^emulator-\d+$') { $serials += $serial }
+    }
   }
   return $serials
+}
+
+function Test-EmulatorProcessRunning {
+  foreach ($name in @('emulator', 'qemu-system-x86_64-headless', 'qemu-system-x86_64')) {
+    if (Get-Process -Name $name -ErrorAction SilentlyContinue) {
+      return $true
+    }
+  }
+  return $false
+}
+
+function Wait-EmulatorBoot {
+  param(
+    [string] $Adb,
+    [string] $ExpectedSerial = '',
+    [int] $TimeoutSec = 300,
+    [switch] $RequireEmulatorProcess
+  )
+
+  Write-Step 'Waiting for emulator to boot'
+
+  $elapsed = 0
+  $interval = 3
+  $lastStatus = ''
+
+  while ($elapsed -lt $TimeoutSec) {
+    if ($RequireEmulatorProcess -and -not (Test-EmulatorProcessRunning)) {
+      $devices = (Invoke-AdbQuiet -Adb $Adb devices).Output
+      throw @"
+Emulator process exited before adb connected.
+  adb devices:
+$devices
+  Open Android Studio -> Device Manager and start the AVD manually to see the error.
+  Or retry with: .\scripts\windows\Start-UnrecordedDev.ps1 -RestartEmulator
+"@
+    }
+
+    $serials = Get-RunningEmulatorSerials -Adb $Adb
+    $serial = ''
+
+    if ($ExpectedSerial -and ($serials -contains $ExpectedSerial)) {
+      $serial = $ExpectedSerial
+    }
+    elseif (-not $ExpectedSerial -and $serials.Count -gt 0) {
+      $serial = $serials[0]
+    }
+
+    if ($serial) {
+      $state = (Invoke-AdbQuiet -Adb $Adb -s $serial get-state).Output
+      if ($state -eq 'device') {
+        $boot = (Invoke-AdbQuiet -Adb $Adb -s $serial shell getprop sys.boot_completed).Output
+        if ($boot -match '1') {
+          Write-Ok "Emulator booted (${elapsed}s)."
+          return $serial
+        }
+        $status = 'android starting'
+      }
+      else {
+        $status = "adb state: $state"
+      }
+    }
+    else {
+      $status = if (Test-EmulatorProcessRunning) { 'emulator running, waiting for adb' } else { 'waiting for emulator' }
+    }
+
+    if ($status -ne $lastStatus -or ($elapsed -gt 0 -and $elapsed % 15 -eq 0)) {
+      Write-Host "    ${status} ... ${elapsed}s" -ForegroundColor DarkGray
+      $lastStatus = $status
+    }
+
+    Start-Sleep -Seconds $interval
+    $elapsed += $interval
+  }
+
+  $devices = (Invoke-AdbQuiet -Adb $Adb devices).Output
+  throw @"
+Emulator did not finish booting within ${TimeoutSec}s.
+  adb devices:
+$devices
+  Try starting the AVD from Android Studio -> Device Manager.
+  First boot can take several minutes; retry or use -RestartEmulator if it stays stuck.
+"@
 }
 
 function Stop-AllEmulators {
@@ -112,45 +200,6 @@ function Stop-AllEmulators {
     & $Adb -s $serial emu kill 2>$null
   }
   Start-Sleep -Seconds 3
-}
-
-function Wait-EmulatorBoot {
-  param(
-    [string] $Adb,
-    [string] $ExpectedSerial = '',
-    [int] $TimeoutSec = 300
-  )
-
-  Write-Step 'Waiting for emulator to boot'
-  & $Adb wait-for-device | Out-Null
-
-  $elapsed = 0
-  while ($elapsed -lt $TimeoutSec) {
-    if ($ExpectedSerial) {
-      $state = (& $Adb -s $ExpectedSerial get-state 2>$null)
-      if ($state -ne 'device') {
-        Start-Sleep -Seconds 2
-        $elapsed += 2
-        continue
-      }
-      $boot = & $Adb -s $ExpectedSerial shell getprop sys.boot_completed 2>$null
-    } else {
-      $boot = & $Adb shell getprop sys.boot_completed 2>$null
-    }
-
-    if (($boot | Out-String).Trim() -match '1') {
-      Write-Ok "Emulator booted (${elapsed}s)."
-      return
-    }
-
-    Start-Sleep -Seconds 2
-    $elapsed += 2
-    if ($elapsed % 10 -eq 0) {
-      Write-Host "    booting ... ${elapsed}s" -ForegroundColor DarkGray
-    }
-  }
-
-  throw "Emulator did not finish booting within ${TimeoutSec}s."
 }
 
 function Start-HostEmulator {
@@ -185,17 +234,16 @@ function Start-HostEmulator {
   }
 
   Write-Step "Launching AVD: $SelectedAvd"
-  $emuArgs = @('-avd', $SelectedAvd, '-no-snapshot-load')
-  Start-Process -FilePath $emulator -ArgumentList $emuArgs -WindowStyle Minimized | Out-Null
-
-  Wait-EmulatorBoot -Adb $adb
-
-  $serials = Get-RunningEmulatorSerials -Adb $adb
-  if ($serials.Count -eq 0) {
-    throw 'Emulator started but adb does not list an emulator device.'
+  $emuArgs = @('-avd', $SelectedAvd)
+  if ($ColdBoot -or $RestartEmulator) {
+    $emuArgs += '-no-snapshot-load'
+    Write-Host '    cold boot (no snapshot)' -ForegroundColor DarkGray
   }
 
-  $serial = $serials[0]
+  Start-Process -FilePath $emulator -ArgumentList $emuArgs -WindowStyle Normal | Out-Null
+  Write-Ok 'Emulator window opened (first boot can take a few minutes)'
+
+  $serial = Wait-EmulatorBoot -Adb $adb -RequireEmulatorProcess
   Write-Ok "Emulator serial: $serial"
   Write-Ok 'adb devices:'
   & $adb devices -l

@@ -51,6 +51,7 @@ Develop Unrecorded inside a reproducible Linux container with Flutter, Dart, Jav
 | `-SkipDocker` | Skip Docker start/check |
 | `-SkipEmulator` | Docker only (emulator already running) |
 | `-RestartEmulator` | Kill and restart the emulator |
+| `-ColdBoot` | Skip emulator snapshot (slower, useful if boot is stuck) |
 | `-OpenCursor` | Open the repo in Cursor if `cursor` is on PATH |
 
 ## What runs where
@@ -85,6 +86,22 @@ The repo must be bind-mounted at `/workspace`. If the explorer is empty after re
 1. **Dev Containers: Rebuild Container** (picks up `workspaceMount` in `devcontainer.json`).
 2. Confirm you opened the **repository root** (the folder that contains `.devcontainer/`), not a parent or subfolder.
 3. In a container terminal, run `ls /workspace` — you should see `apps/`, `packages/`, `pubspec.yaml`, etc.
+
+### Stuck on "waiting for emulator to boot"
+
+- An **emulator window** should appear on Windows — if it closes immediately, open the AVD from **Android Studio → Device Manager** to see the error.
+- First boot can take **several minutes**; the script now prints progress every 15s.
+- Retry with a clean restart:
+
+  ```powershell
+  .\scripts\windows\Start-UnrecordedDev.ps1 -RestartEmulator
+  ```
+
+- If still stuck, start the AVD manually in Android Studio, then run:
+
+  ```cmd
+  start-dev.cmd -SkipEmulator
+  ```
 
 ### `connect-host-emulator.sh` fails
 
