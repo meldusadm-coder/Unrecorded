@@ -77,6 +77,10 @@ cd apps/mobile && flutter build apk --debug
 
 VS Code task **CI: format + analyze + all tests** runs the test subset.
 
+## Git commits
+
+Git identity is **not** stored in the repo. Copy [`.devcontainer/gitconfig.example`](../.devcontainer/gitconfig.example) to `.devcontainer/gitconfig` (gitignored), set your name and email, then reopen or rebuild the dev container — `postCreate` installs it as `~/.gitconfig`. If the file is missing on first create, the example is copied for you to edit.
+
 ## Troubleshooting
 
 ### Blank workspace (no files in the container)
