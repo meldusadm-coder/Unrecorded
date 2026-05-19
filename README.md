@@ -54,6 +54,19 @@ cd apps/mobile && flutter run
 cd apps/mobile && flutter build apk --debug
 ```
 
+### Dev container (recommended on Windows)
+
+Use a [Dev Container](docs/devcontainer.md) for Flutter, Dart, Android SDK, and CI-parity tooling without installing Flutter on the host.
+
+**Windows (Android Studio + Docker Desktop installed):**
+
+```powershell
+.\scripts\windows\Start-UnrecordedDev.ps1
+# or double-click: start-dev.cmd
+```
+
+Then open the repo in Cursor → **Dev Containers: Reopen in Container**. See [docs/devcontainer.md](docs/devcontainer.md) for emulator bridge and troubleshooting.
+
 ## Running tests
 
 ```bash
