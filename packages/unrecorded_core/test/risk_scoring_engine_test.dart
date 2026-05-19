@@ -10,10 +10,7 @@ void main() {
 
   group('RiskScoringEngine', () {
     test('empty scan returns low risk', () {
-      final snapshot = ScanSnapshot(
-        signals: [],
-        capturedAt: DateTime.now(),
-      );
+      final snapshot = ScanSnapshot(signals: [], capturedAt: DateTime.now());
       final result = engine.evaluate(snapshot);
 
       expect(result.level, RiskLevel.low);

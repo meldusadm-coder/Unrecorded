@@ -22,9 +22,7 @@ void main() {
         if (!completer.isCompleted) completer.complete(batch);
       });
 
-      final first = await completer.future.timeout(
-        const Duration(seconds: 10),
-      );
+      final first = await completer.future.timeout(const Duration(seconds: 10));
       expect(first, isNotEmpty);
 
       await sub.cancel();
@@ -37,9 +35,7 @@ void main() {
         if (!completer.isCompleted) completer.complete(batch);
       });
 
-      final batch = await completer.future.timeout(
-        const Duration(seconds: 10),
-      );
+      final batch = await completer.future.timeout(const Duration(seconds: 10));
 
       for (final result in batch) {
         expect(result.id, isNotEmpty);

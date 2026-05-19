@@ -54,6 +54,19 @@ cd apps/mobile && flutter run
 cd apps/mobile && flutter build apk --debug
 ```
 
+### Dev container (recommended on Windows)
+
+Use a [Dev Container](docs/devcontainer.md) for Flutter, Dart, Android SDK, and CI-parity tooling without installing Flutter on the host.
+
+**Windows (Android Studio + Docker Desktop installed):**
+
+```powershell
+.\scripts\windows\Start-UnrecordedDev.ps1
+# or double-click: start-dev.cmd
+```
+
+Then open the repo in Cursor → **Dev Containers: Reopen in Container**. See [docs/devcontainer.md](docs/devcontainer.md) for emulator bridge and troubleshooting.
+
 ## Running tests
 
 ```bash
@@ -72,6 +85,31 @@ dart format --set-exit-if-changed .
 # Static analysis
 dart analyze
 ```
+
+## CI/CD test automation (no paid device farm required)
+
+Recommended baseline on GitHub Actions:
+
+- `flutter pub get` from repo root.
+- `dart format --set-exit-if-changed .`
+- `dart analyze --fatal-infos`
+- `cd packages/unrecorded_core && dart test`
+- `cd packages/unrecorded_radio && flutter test`
+- `cd apps/mobile && flutter test`
+
+For Android smoke in CI without paid platform fees, run app tests on a
+GitHub-hosted Android emulator (API 30+). Keep fake/demo scanner mode available
+for deterministic emulator execution.
+
+For lightweight visual reassurance, the CI workflow can upload:
+
+- test logs as artifacts for each test lane
+- a single emulator screenshot captured after smoke tests
+
+Optional external setup (still free tiers available):
+
+- GitHub Actions + Android emulator runner (open source action).
+- Firebase Test Lab free quota for occasional physical-device smoke tests.
 
 ## Privacy model
 

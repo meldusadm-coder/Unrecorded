@@ -4,6 +4,18 @@ Thanks for your interest in contributing.
 
 ## Getting started
 
+### Option A: Dev container (Windows-friendly)
+
+With [Docker Desktop](https://www.docker.com/products/docker-desktop/) and [Android Studio](https://developer.android.com/studio) (one AVD created):
+
+```powershell
+.\scripts\windows\Start-UnrecordedDev.ps1
+```
+
+Reopen the repo in a Dev Container, then follow [docs/devcontainer.md](docs/devcontainer.md).
+
+### Option B: Local Flutter install
+
 ```bash
 # Clone and enter the repo
 git clone https://github.com/YOUR_ORG/unrecorded.git

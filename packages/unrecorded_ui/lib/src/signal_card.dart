@@ -40,10 +40,7 @@ class SignalCard extends StatelessWidget {
             fontSize: 14,
           ),
         ),
-        subtitle: Text(
-          subtitle,
-          style: theme.textTheme.bodySmall,
-        ),
+        subtitle: Text(subtitle, style: theme.textTheme.bodySmall),
         trailing: rssi != null
             ? Text(
                 '$rssi dBm',

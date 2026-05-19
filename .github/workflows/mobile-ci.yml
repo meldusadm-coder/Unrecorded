@@ -1,0 +1,76 @@
+name: Mobile CI
+
+on:
+  pull_request:
+  push:
+    branches: [dev, main]
+
+jobs:
+  lint_and_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Workspace dependencies
+        run: flutter pub get
+
+      - name: Format check
+        run: dart format --set-exit-if-changed .
+
+      - name: Analyze
+        run: dart analyze --fatal-infos
+
+      - name: Core tests
+        run: bash -o pipefail -c 'cd packages/unrecorded_core && dart test | tee /tmp/core-test.log'
+
+      - name: Radio tests
+        run: bash -o pipefail -c 'cd packages/unrecorded_radio && flutter test | tee /tmp/radio-test.log'
+
+      - name: App widget/unit tests
+        run: bash -o pipefail -c 'cd apps/mobile && flutter test | tee /tmp/mobile-test.log'
+
+      - name: Upload test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-and-widget-test-logs
+          if-no-files-found: warn
+          path: |
+            /tmp/core-test.log
+            /tmp/radio-test.log
+            /tmp/mobile-test.log
+
+  android_emulator_smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - name: Workspace dependencies
+        run: flutter pub get
+      - name: Emulator smoke (app tests)
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          arch: x86_64
+          script: bash -o pipefail -c 'cd apps/mobile && flutter test | tee /tmp/emulator-smoke.log'
+
+      - name: Capture emulator screenshot
+        if: always()
+        run: |
+          adb exec-out screencap -p > /tmp/android-emulator-smoke.png || true
+
+      - name: Upload emulator reassurance artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-emulator-reassurance
+          if-no-files-found: warn
+          path: |
+            /tmp/emulator-smoke.log
+            /tmp/android-emulator-smoke.png

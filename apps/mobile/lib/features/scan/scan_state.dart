@@ -1,6 +1,16 @@
 import 'package:unrecorded_core/unrecorded_core.dart';
 
-enum ScanStatus { idle, scanning, paused, error }
+enum ScanStatus {
+  idle,
+  requestingPermission,
+  permissionDenied,
+  bluetoothUnsupported,
+  bluetoothOff,
+  scanning,
+  timedOut,
+  paused,
+  error,
+}
 
 class ScanState {
   final ScanStatus status;
@@ -8,6 +18,7 @@ class ScanState {
   final RiskLevel riskLevel;
   final int score;
   final List<String> reasons;
+  final String? statusMessage;
 
   const ScanState({
     this.status = ScanStatus.idle,
@@ -15,6 +26,7 @@ class ScanState {
     this.riskLevel = RiskLevel.low,
     this.score = 0,
     this.reasons = const [],
+    this.statusMessage,
   });
 
   ScanState copyWith({
@@ -23,6 +35,7 @@ class ScanState {
     RiskLevel? riskLevel,
     int? score,
     List<String>? reasons,
+    String? statusMessage,
   }) {
     return ScanState(
       status: status ?? this.status,
@@ -30,6 +43,7 @@ class ScanState {
       riskLevel: riskLevel ?? this.riskLevel,
       score: score ?? this.score,
       reasons: reasons ?? this.reasons,
+      statusMessage: statusMessage,
     );
   }
 }

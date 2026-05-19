@@ -8,10 +8,7 @@ class ScanSnapshot {
   /// When this snapshot was captured.
   final DateTime capturedAt;
 
-  const ScanSnapshot({
-    required this.signals,
-    required this.capturedAt,
-  });
+  const ScanSnapshot({required this.signals, required this.capturedAt});
 
   /// True when no signals were detected.
   bool get isEmpty => signals.isEmpty;

@@ -32,11 +32,7 @@ class RiskScoringEngine {
   /// Creates an engine with default rules unless custom [rules] are supplied.
   RiskScoringEngine({List<ScoringRule>? rules})
       : _rules = rules ??
-            [
-              SuspiciousNameRule(),
-              StrongSignalRule(),
-              ConnectableDeviceRule(),
-            ];
+            [SuspiciousNameRule(), StrongSignalRule(), ConnectableDeviceRule()];
 
   /// Score a single [ScanSnapshot] and return a [ScoringResult].
   ScoringResult evaluate(ScanSnapshot snapshot) {

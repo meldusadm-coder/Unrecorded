@@ -7,10 +7,7 @@ import 'features/settings/settings_screen.dart';
 GoRouter buildAppRouter() => GoRouter(
       initialLocation: '/',
       routes: [
-        GoRoute(
-          path: '/',
-          builder: (context, state) => const ScanScreen(),
-        ),
+        GoRoute(path: '/', builder: (context, state) => const ScanScreen()),
         GoRoute(
           path: '/alert-info',
           builder: (context, state) => const AlertExplanationScreen(),

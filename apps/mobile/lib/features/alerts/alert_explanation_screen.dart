@@ -91,10 +91,7 @@ class AlertExplanationScreen extends StatelessWidget {
       children: [
         Text(title, style: theme.textTheme.titleMedium),
         const SizedBox(height: 8),
-        Text(
-          body,
-          style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
-        ),
+        Text(body, style: theme.textTheme.bodyMedium?.copyWith(height: 1.5)),
       ],
     );
   }

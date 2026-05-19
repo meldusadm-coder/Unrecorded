@@ -74,10 +74,11 @@ cd apps/mobile && flutter build apk --debug
 - Do not add ML detection yet.
 - Do not create more AI configuration files.
 
-## Cursor Cloud specific instructions
+## Dev container
 
-- Flutter SDK is installed at `/home/ubuntu/flutter`. The PATH is configured in `~/.bashrc`.
-- Run `flutter pub get` from the repo root to resolve all workspace packages.
+- Use the repo [`.devcontainer/`](.devcontainer/) (Flutter stable at `/sdks/flutter`, Android SDK at `/opt/android-sdk`).
+- Run `flutter pub get` from the repo root (`/workspace`) after the container is created.
+- On Windows, run `scripts/windows/Start-UnrecordedDev.ps1` on the host, then `.devcontainer/scripts/connect-host-emulator.sh` inside the container. See [docs/devcontainer.md](docs/devcontainer.md).
 - The `unrecorded_core` package uses `dart test` (no Flutter dependency). The other packages and the app use `flutter test`.
 - The fake scanner (`FakeRadioScanner`) is the default; real BLE scanning requires a physical device.
 - Android debug APK builds work headless: `cd apps/mobile && flutter build apk --debug`.
