@@ -10,14 +10,12 @@ class ScanStatusCard extends StatelessWidget {
     required this.title,
     this.subtitle,
     this.lastCheckedText,
-    this.iconColor,
   });
 
-  final IconData icon;
+  final Widget icon;
   final String title;
   final String? subtitle;
   final String? lastCheckedText;
-  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +32,7 @@ class ScanStatusCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Icon(icon, size: 40, color: iconColor ?? scheme.primary),
+            icon,
             const SizedBox(height: 12),
             Text(
               title,

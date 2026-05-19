@@ -72,14 +72,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 children: [
-                  const PrivacyNoticeCard(
+                  PrivacyNoticeCard(
                     text: PrivacyDisclaimer.privacyModel,
-                    icon: Icons.lock_outline,
+                    icon: UnrecordedIcon(
+                      asset: UnrecordedIconAsset.privacy,
+                      size: 20,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
                   const SizedBox(height: 20),
                   _tile(
                     theme,
-                    icon: Icons.smartphone_outlined,
+                    leading: UnrecordedIcon(
+                      asset: UnrecordedIconAsset.device,
+                      size: 24,
+                      color: theme.colorScheme.primary,
+                    ),
                     title: 'Local-first',
                     subtitle:
                         'All scanning happens on your device. Nothing is uploaded.',
@@ -93,7 +101,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   _tile(
                     theme,
-                    icon: Icons.cloud_off_outlined,
+                    leading: UnrecordedIcon(
+                      asset: UnrecordedIconAsset.privacy,
+                      size: 24,
+                      color: theme.colorScheme.primary,
+                    ),
                     title: 'No cloud upload',
                     subtitle:
                         'Scan data stays on your device unless you choose otherwise.',
@@ -128,8 +140,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: Icon(
-                      Icons.volunteer_activism_outlined,
+                    leading: UnrecordedIcon(
+                      asset: UnrecordedIconAsset.share,
+                      size: 24,
                       color: theme.colorScheme.primary,
                     ),
                     title: const Text(AppCopy.removeAdsTitle),
@@ -169,12 +182,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Widget _tile(
     ThemeData theme, {
-    required IconData icon,
+    IconData? icon,
+    Widget? leading,
     required String title,
     required String subtitle,
   }) {
+    final iconWidget = leading ??
+        (icon != null
+            ? Icon(icon, color: theme.colorScheme.primary)
+            : null);
     return ListTile(
-      leading: Icon(icon, color: theme.colorScheme.primary),
+      leading: iconWidget,
       title: Text(title),
       subtitle: Text(subtitle),
       contentPadding: EdgeInsets.zero,

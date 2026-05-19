@@ -26,9 +26,10 @@ class _UnrecordedAppState extends State<UnrecordedApp> {
       title: 'Unrecorded',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorSchemeSeed: const Color(0xFF5C6BC0),
+        colorScheme: UnrecordedColorScheme.light(),
         useMaterial3: true,
         brightness: Brightness.light,
+        scaffoldBackgroundColor: UnrecordedColors.surface,
         appBarTheme: const AppBarTheme(centerTitle: false, elevation: 0),
         cardTheme: CardThemeData(
           shape: RoundedRectangleBorder(
@@ -37,9 +38,10 @@ class _UnrecordedAppState extends State<UnrecordedApp> {
         ),
       ),
       darkTheme: ThemeData(
-        colorSchemeSeed: const Color(0xFF5C6BC0),
+        colorScheme: UnrecordedColorScheme.dark(),
         useMaterial3: true,
         brightness: Brightness.dark,
+        scaffoldBackgroundColor: UnrecordedColors.background,
         appBarTheme: const AppBarTheme(centerTitle: false, elevation: 0),
         cardTheme: CardThemeData(
           shape: RoundedRectangleBorder(

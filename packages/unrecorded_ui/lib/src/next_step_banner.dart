@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app_theme.dart';
+import 'unrecorded_icon.dart';
 
 /// Single-line contextual guidance with optional action.
 class NextStepBanner extends StatelessWidget {
@@ -28,7 +29,11 @@ class NextStepBanner extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.lightbulb_outline, size: 20, color: scheme.primary),
+            UnrecordedIcon(
+              asset: UnrecordedIconAsset.info,
+              size: 20,
+              color: scheme.primary,
+            ),
             const SizedBox(width: 10),
             Expanded(
               child: Text(

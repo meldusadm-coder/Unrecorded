@@ -3,6 +3,7 @@ library;
 
 export 'src/app_logo.dart';
 export 'src/app_theme.dart';
+export 'src/unrecorded_icon.dart';
 export 'src/bottom_ad_slot.dart';
 export 'src/helper_text.dart';
 export 'src/next_step_banner.dart';

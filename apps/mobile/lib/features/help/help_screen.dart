@@ -64,7 +64,10 @@ class HelpScreen extends ConsumerWidget {
                   const Divider(height: 32),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.info_outline),
+                    leading: const UnrecordedIcon(
+                      asset: UnrecordedIconAsset.info,
+                      size: 24,
+                    ),
                     title: const Text('How detection works'),
                     subtitle: const Text(
                       'Risk levels, limitations, and what the app can detect',

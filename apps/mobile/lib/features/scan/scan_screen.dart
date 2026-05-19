@@ -45,13 +45,16 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
         title: const Text('Unrecorded'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.help_outline),
+            icon: const UnrecordedIcon(asset: UnrecordedIconAsset.help, size: 24),
             tooltip: 'Help',
             onPressed: () => context.push('/help'),
           ),
           IconButton(
             key: const Key('settings_button'),
-            icon: const Icon(Icons.settings_outlined),
+            icon: const UnrecordedIcon(
+              asset: UnrecordedIconAsset.settings,
+              size: 24,
+            ),
             tooltip: 'Settings',
             onPressed: () => context.push('/settings'),
           ),
@@ -66,8 +69,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 children: [
                   ScanStatusCard(
-                    icon: _iconForStatus(state.status),
-                    iconColor: _iconColorForStatus(context, state.status),
+                    icon: _iconWidgetForStatus(state.status),
                     title: _titleForStatus(state),
                     subtitle: _subtitleForStatus(state),
                     lastCheckedText: _lastCheckedText(state),
@@ -96,10 +98,18 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
                         ? AppCopy.pauseProtection
                         : AppCopy.turnOnProtection,
                     icon: state.isProtectionActive
-                        ? Icons.pause_rounded
-                        : Icons.shield_outlined,
-                    color:
-                        state.isProtectionActive ? Colors.red.shade400 : null,
+                        ? const UnrecordedStatusIcon(
+                            asset: UnrecordedStatusAsset.scanningPaused,
+                            size: 24,
+                          )
+                        : const UnrecordedIcon(
+                            asset: UnrecordedIconAsset.protection,
+                            size: 24,
+                            color: Colors.white,
+                          ),
+                    color: state.isProtectionActive
+                        ? UnrecordedColors.danger
+                        : null,
                     onPressed: () async {
                       if (state.isProtectionActive) {
                         await controller.pauseProtection();
@@ -235,28 +245,45 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
     return 'Last checked: ${diff.inHours} h ago';
   }
 
-  IconData _iconForStatus(ScanStatus status) {
+  Widget _iconWidgetForStatus(ScanStatus status) {
     switch (status) {
       case ScanStatus.scanning:
-        return Icons.radar;
+        return const UnrecordedStatusIcon(
+          asset: UnrecordedStatusAsset.scanningActive,
+          size: 48,
+        );
       case ScanStatus.possibleRiskDetected:
-        return Icons.warning_amber_rounded;
+        return const UnrecordedStatusIcon(
+          asset: UnrecordedStatusAsset.highRisk,
+          size: 48,
+        );
       case ScanStatus.permissionRequired:
-        return Icons.lock_outline;
+        return const UnrecordedStatusIcon(
+          asset: UnrecordedStatusAsset.permissionsNeeded,
+          size: 48,
+        );
       case ScanStatus.error:
-        return Icons.error_outline;
+        return const UnrecordedIcon(
+          asset: UnrecordedIconAsset.alert,
+          size: 48,
+          color: UnrecordedColors.danger,
+        );
       case ScanStatus.paused:
-        return Icons.pause_circle_outline;
+        return const UnrecordedStatusIcon(
+          asset: UnrecordedStatusAsset.scanningPaused,
+          size: 48,
+        );
+      case ScanStatus.starting:
+        return const UnrecordedStatusIcon(
+          asset: UnrecordedStatusAsset.scanningActive,
+          size: 48,
+        );
       default:
-        return Icons.shield_outlined;
+        return const UnrecordedStatusIcon(
+          asset: UnrecordedStatusAsset.protectionOn,
+          size: 48,
+        );
     }
-  }
-
-  Color? _iconColorForStatus(BuildContext context, ScanStatus status) {
-    if (status == ScanStatus.possibleRiskDetected) {
-      return Theme.of(context).colorScheme.error;
-    }
-    return null;
   }
 
   Widget _buildSignalCard(DetectedSignal signal) {

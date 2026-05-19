@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app_theme.dart';
+import 'unrecorded_icon.dart';
 
 /// Cautious alert card for possible recording risk (live or example).
 class RiskAlertCard extends StatelessWidget {
@@ -40,7 +41,11 @@ class RiskAlertCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.info_outline, color: scheme.error, size: 22),
+                UnrecordedIcon(
+                  asset: UnrecordedIconAsset.alert,
+                  size: 22,
+                  color: scheme.error,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(

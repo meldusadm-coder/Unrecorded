@@ -1,19 +1,27 @@
 import 'package:flutter/material.dart';
 
+import 'unrecorded_icon.dart';
+
 /// A calm, informational card for displaying privacy-related notices.
 class PrivacyNoticeCard extends StatelessWidget {
   final String text;
-  final IconData icon;
+  final Widget? icon;
 
   const PrivacyNoticeCard({
     super.key,
     required this.text,
-    this.icon = Icons.info_outline,
+    this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final leading = icon ??
+        UnrecordedIcon(
+          asset: UnrecordedIconAsset.info,
+          size: 20,
+          color: theme.colorScheme.onSurfaceVariant,
+        );
     return Card(
       elevation: 0,
       color: theme.colorScheme.surfaceContainerHighest.withAlpha(80),
@@ -23,7 +31,7 @@ class PrivacyNoticeCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, size: 20, color: theme.colorScheme.onSurfaceVariant),
+            leading,
             const SizedBox(width: 10),
             Expanded(
               child: Text(

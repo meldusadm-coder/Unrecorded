@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app_theme.dart';
+import 'unrecorded_icon.dart';
 
 /// Displays a single detected signal in a compact card format.
 class SignalCard extends StatelessWidget {
@@ -28,6 +29,18 @@ class SignalCard extends StatelessWidget {
         ? AppThemeConstants.suspiciousBorderDark
         : AppThemeConstants.suspiciousBorderLight;
 
+    final leading = isSuspicious
+        ? UnrecordedIcon(
+            asset: UnrecordedIconAsset.glasses,
+            size: 22,
+            color: suspiciousBorder,
+          )
+        : UnrecordedIcon(
+            asset: UnrecordedIconAsset.device,
+            size: 22,
+            color: theme.colorScheme.onSurfaceVariant,
+          );
+
     return Card(
       elevation: 0,
       color: isSuspicious
@@ -38,13 +51,7 @@ class SignalCard extends StatelessWidget {
       ),
       child: ListTile(
         dense: true,
-        leading: Icon(
-          isSuspicious ? Icons.warning_amber_rounded : Icons.bluetooth,
-          color: isSuspicious
-              ? suspiciousBorder
-              : theme.colorScheme.onSurfaceVariant,
-          size: 22,
-        ),
+        leading: leading,
         title: Text(
           name,
           style: TextStyle(

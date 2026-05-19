@@ -143,8 +143,11 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
-                      Icon(Icons.check_circle,
-                          color: theme.colorScheme.primary),
+                      UnrecordedIcon(
+                        asset: UnrecordedIconAsset.protection,
+                        size: 24,
+                        color: theme.colorScheme.primary,
+                      ),
                       const SizedBox(width: 12),
                       const Expanded(
                         child: Text('Ads are removed on this device.'),
