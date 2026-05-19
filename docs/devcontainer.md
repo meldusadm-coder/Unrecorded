@@ -75,6 +75,14 @@ VS Code task **CI: format + analyze + all tests** runs the test subset.
 
 ## Troubleshooting
 
+### Blank workspace (no files in the container)
+
+The repo must be bind-mounted at `/workspace`. If the explorer is empty after reopening:
+
+1. **Dev Containers: Rebuild Container** (picks up `workspaceMount` in `devcontainer.json`).
+2. Confirm you opened the **repository root** (the folder that contains `.devcontainer/`), not a parent or subfolder.
+3. In a container terminal, run `ls /workspace` — you should see `apps/`, `packages/`, `pubspec.yaml`, etc.
+
 ### `connect-host-emulator.sh` fails
 
 - Run `Start-UnrecordedDev.ps1` on the host first.

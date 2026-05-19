@@ -36,13 +36,17 @@ RUN yes | sdkmanager --sdk_root=${ANDROID_SDK_ROOT} --licenses \
       "emulator" \
       "system-images;android-30;google_apis;x86_64"
 
-# Non-root user for devcontainer remoteUser
-RUN useradd -m -s /bin/bash -u 1000 vscode 2>/dev/null || true \
-    && chown -R vscode:vscode ${ANDROID_SDK_ROOT}
+# Flutter/Android bootstrap as root (/sdks/flutter is root-owned in base image)
+RUN flutter config --no-analytics \
+    && flutter precache --android \
+    && (yes | flutter doctor --android-licenses || true)
+
+# Devcontainer remoteUser (avoid fixed uid 1000 — often taken in base image)
+RUN set -eux; \
+    if ! id vscode >/dev/null 2>&1; then useradd -m -s /bin/bash vscode; fi; \
+    chown -R vscode:vscode "${ANDROID_SDK_ROOT}"
 
 USER vscode
 WORKDIR /workspace
 
-RUN flutter config --no-analytics \
-    && flutter precache --android \
-    && yes | flutter doctor --android-licenses 2>/dev/null || true
+RUN git config --global --add safe.directory /sdks/flutter

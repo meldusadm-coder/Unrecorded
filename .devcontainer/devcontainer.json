@@ -5,6 +5,7 @@
     "context": ".."
   },
   "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
   "remoteUser": "vscode",
   "runArgs": ["--add-host=host.docker.internal:host-gateway"],
   "forwardPorts": [5037],
