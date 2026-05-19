@@ -26,6 +26,8 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+. "$PSScriptRoot\Reset-Adb.ps1"
+
 function Write-Step([string] $Message) {
   Write-Host "`n==> $Message" -ForegroundColor Cyan
 }
@@ -36,29 +38,6 @@ function Write-Ok([string] $Message) {
 
 function Write-Warn([string] $Message) {
   Write-Host "    WARNING: $Message" -ForegroundColor Yellow
-}
-
-function Resolve-AndroidSdk {
-  foreach ($name in @('ANDROID_HOME', 'ANDROID_SDK_ROOT')) {
-    foreach ($scope in @('Process', 'User', 'Machine')) {
-      $v = [Environment]::GetEnvironmentVariable($name, $scope)
-      if ($v -and (Test-Path $v)) { return $v.TrimEnd('\') }
-    }
-  }
-
-  $defaults = @(
-    (Join-Path $env:LOCALAPPDATA 'Android\Sdk'),
-    (Join-Path $env:USERPROFILE 'AppData\Local\Android\Sdk')
-  )
-  foreach ($path in $defaults) {
-    if (Test-Path $path) { return $path }
-  }
-
-  throw @"
-Android SDK not found.
-  - Open Android Studio once and finish SDK setup, or
-  - Set ANDROID_HOME to your SDK folder (usually %LOCALAPPDATA%\Android\Sdk).
-"@
 }
 
 function Get-RepoRoot {
@@ -133,37 +112,6 @@ function Stop-AllEmulators {
     & $Adb -s $serial emu kill 2>$null
   }
   Start-Sleep -Seconds 3
-}
-
-function Reset-AdbServer {
-  param([string] $Adb)
-
-  Write-Step 'Resetting adb on host'
-
-  & $Adb kill-server 2>$null | Out-Null
-
-  $procs = @(Get-Process -Name adb -ErrorAction SilentlyContinue)
-  foreach ($proc in $procs) {
-    Write-Host "    stopping adb process (PID $($proc.Id))" -ForegroundColor DarkGray
-    Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
-  }
-
-  if ($procs.Count -gt 0) {
-    Start-Sleep -Seconds 1
-  }
-
-  Write-Host '    starting adb server' -ForegroundColor DarkGray
-  $startOutput = & $Adb start-server 2>&1 | Out-String
-  if ($LASTEXITCODE -ne 0) {
-    throw "adb start-server failed: $($startOutput.Trim())"
-  }
-
-  $versionOutput = & $Adb version 2>&1 | Out-String
-  if ($LASTEXITCODE -ne 0) {
-    throw "adb is not responding after reset: $($versionOutput.Trim())"
-  }
-
-  Write-Ok 'adb server ready.'
 }
 
 function Wait-EmulatorBoot {
