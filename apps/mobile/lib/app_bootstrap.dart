@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'features/scan/scan_state.dart';
 import 'services/protection_prefs.dart';
+import 'services/risk_notification_service.dart';
 import 'services/scanner_provider.dart';
 import 'services/widget_sync_service.dart';
 
@@ -24,6 +25,7 @@ class _AppBootstrapState extends ConsumerState<AppBootstrap> {
   }
 
   Future<void> _init() async {
+    await ref.read(riskNotificationServiceProvider).init();
     ref.read(widgetSyncServiceProvider);
     await ref.read(scannerConfigInitProvider.future);
 

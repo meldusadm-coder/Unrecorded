@@ -9,6 +9,7 @@ import 'package:unrecorded_radio/unrecorded_radio.dart';
 import '../features/scan/scan_state.dart';
 import 'dev_testing_prefs.dart';
 import 'protection_prefs.dart';
+import 'risk_notification_service.dart';
 import 'scan_runtime.dart';
 import 'scanner_config.dart';
 
@@ -54,8 +55,14 @@ final scanControllerProvider =
     scannerModeFactory: () =>
         ref.read(scannerConfigProvider)?.mode ?? ScannerMode.demo,
     scoringEngine: ref.watch(riskScoringEngineProvider),
-    onStateChanged: (state) {
+    onStateChanged: (previous, state) {
       ref.read(widgetSyncTriggerProvider.notifier).state++;
+      if (previous.status != ScanStatus.possibleRiskDetected &&
+          state.status == ScanStatus.possibleRiskDetected) {
+        unawaited(
+          ref.read(riskNotificationServiceProvider).showRiskAlertIfEnabled(),
+        );
+      }
     },
   );
 
@@ -71,7 +78,8 @@ final scanControllerProvider =
 final widgetSyncTriggerProvider = StateProvider<int>((ref) => 0);
 
 /// Debug-only: update scanner mode/scenario and restart scan if needed.
-final scannerConfigControllerProvider = Provider<ScannerConfigController>((ref) {
+final scannerConfigControllerProvider =
+    Provider<ScannerConfigController>((ref) {
   return ScannerConfigController(ref);
 });
 
@@ -85,10 +93,12 @@ class ScannerConfigController {
     final prefs = await DevTestingPrefs.load();
     await prefs.setScannerMode(mode);
     final current = _ref.read(scannerConfigProvider);
-    final next = (current ?? const ScannerConfig(
-      mode: ScannerMode.demo,
-      scenario: FakeDemoScenario.high,
-    )).copyWith(mode: mode);
+    final next = (current ??
+            const ScannerConfig(
+              mode: ScannerMode.demo,
+              scenario: FakeDemoScenario.high,
+            ))
+        .copyWith(mode: mode);
     _ref.read(scannerConfigProvider.notifier).state = next;
   }
 
@@ -97,10 +107,12 @@ class ScannerConfigController {
     final prefs = await DevTestingPrefs.load();
     await prefs.setDemoScenario(scenario);
     final current = _ref.read(scannerConfigProvider);
-    final next = (current ?? const ScannerConfig(
-      mode: ScannerMode.demo,
-      scenario: FakeDemoScenario.high,
-    )).copyWith(scenario: scenario);
+    final next = (current ??
+            const ScannerConfig(
+              mode: ScannerMode.demo,
+              scenario: FakeDemoScenario.high,
+            ))
+        .copyWith(scenario: scenario);
     _ref.read(scannerConfigProvider.notifier).state = next;
   }
 
@@ -122,7 +134,7 @@ class ScanController extends StateNotifier<ScanState> {
     required ScanRuntime runtime,
     required ScannerMode Function() scannerModeFactory,
     required RiskScoringEngine scoringEngine,
-    void Function(ScanState state)? onStateChanged,
+    void Function(ScanState previous, ScanState next)? onStateChanged,
   })  : _scannerFactory = scannerFactory,
         _runtime = runtime,
         _scannerModeFactory = scannerModeFactory,
@@ -134,7 +146,7 @@ class ScanController extends StateNotifier<ScanState> {
   final RiskScoringEngine _scoringEngine;
   final ScanRuntime _runtime;
   final ScannerMode Function() _scannerModeFactory;
-  final void Function(ScanState state)? _onStateChanged;
+  final void Function(ScanState previous, ScanState next)? _onStateChanged;
 
   StreamSubscription<List<RadioScanResult>>? _subscription;
   RadioScanner? _activeScanner;
@@ -145,8 +157,9 @@ class ScanController extends StateNotifier<ScanState> {
   ScannerMode get _scannerMode => _scannerModeFactory();
 
   void _emit(ScanState newState) {
+    final previous = state;
     state = newState;
-    _onStateChanged?.call(newState);
+    _onStateChanged?.call(previous, newState);
   }
 
   Future<ProtectionPrefs> _ensurePrefs() async {
@@ -321,10 +334,10 @@ class ScanController extends StateNotifier<ScanState> {
     final snapshot = ScanSnapshot(signals: signals, capturedAt: now);
     final result = _scoringEngine.evaluate(snapshot);
 
-    final nextStatus = (result.level == RiskLevel.medium ||
-            result.level == RiskLevel.high)
-        ? ScanStatus.possibleRiskDetected
-        : ScanStatus.scanning;
+    final nextStatus =
+        (result.level == RiskLevel.medium || result.level == RiskLevel.high)
+            ? ScanStatus.possibleRiskDetected
+            : ScanStatus.scanning;
 
     _emit(
       state.copyWith(

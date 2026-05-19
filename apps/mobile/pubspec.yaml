@@ -27,6 +27,7 @@ dependencies:
     path: ../../packages/unrecorded_radio
   unrecorded_ui:
     path: ../../packages/unrecorded_ui
+  flutter_local_notifications: ^21.0.0
 
 dev_dependencies:
   flutter_test:

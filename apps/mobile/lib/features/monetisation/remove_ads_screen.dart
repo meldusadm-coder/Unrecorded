@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
@@ -6,14 +7,7 @@ import 'package:unrecorded_core/unrecorded_core.dart';
 import 'package:unrecorded_ui/unrecorded_ui.dart';
 
 import '../../services/entitlement_service.dart';
-
-/// Fixed tier labels — store handles local currency.
-const _tierLabels = <String, String>{
-  'remove_ads_1': '£1',
-  'remove_ads_3': '£3',
-  'remove_ads_5': '£5',
-  'remove_ads_10': '£10',
-};
+import '../../services/remove_ads_pricing.dart';
 
 class RemoveAdsScreen extends ConsumerStatefulWidget {
   const RemoveAdsScreen({super.key});
@@ -23,33 +17,90 @@ class RemoveAdsScreen extends ConsumerStatefulWidget {
 }
 
 class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
-  List<ProductDetails> _products = [];
-  bool _loading = true;
+  final _amountController = TextEditingController(
+    text: RemoveAdsPricing.defaultGbp.toStringAsFixed(2),
+  );
+
+  bool _loading = false;
   String? _message;
+  ProductDetails? _previewProduct;
 
   @override
-  void initState() {
-    super.initState();
-    _loadProducts();
+  void dispose() {
+    _amountController.dispose();
+    super.dispose();
   }
 
-  Future<void> _loadProducts() async {
+  double? get _amountGbp => RemoveAdsPricing.parseGbp(_amountController.text);
+
+  Future<void> _loadPreview() async {
+    final amount = _amountGbp;
+    if (amount == null) {
+      setState(() {
+        _previewProduct = null;
+        _message = null;
+      });
+      return;
+    }
+
+    setState(() {
+      _loading = true;
+      _message = null;
+    });
+
     final service = await ref.read(entitlementServiceProvider.future);
-    final products = await service.loadProducts();
+    final product = await service.loadProductForAmount(amount);
+
     if (!mounted) return;
     setState(() {
-      _products = products;
+      _previewProduct = product;
       _loading = false;
+      if (product == null) {
+        _message = 'This amount is not set up in the app store yet. '
+            'Create product ${RemoveAdsPricing.productIdForGbp(amount)} '
+            'in Play Console / App Store Connect.';
+      }
     });
   }
 
-  Future<void> _purchase(ProductDetails product) async {
-    setState(() => _message = null);
-    final service = await ref.read(entitlementServiceProvider.future);
-    final started = await service.purchase(product);
-    if (!started && mounted) {
-      setState(() => _message = 'Purchase could not be started.');
+  Future<void> _purchase() async {
+    final amount = _amountGbp;
+    if (amount == null) {
+      setState(() => _message = AppCopy.removeAdsInvalidAmount);
+      return;
     }
+
+    setState(() {
+      _loading = true;
+      _message = null;
+    });
+
+    final service = await ref.read(entitlementServiceProvider.future);
+    final product =
+        _previewProduct ?? await service.loadProductForAmount(amount);
+
+    if (!mounted) return;
+
+    if (product == null) {
+      setState(() {
+        _loading = false;
+        _message = 'Could not find a store product for '
+            '${RemoveAdsPricing.formatGbp(amount)}. '
+            'Check store configuration.';
+      });
+      return;
+    }
+
+    final started = await service.purchase(product);
+    if (!mounted) return;
+    setState(() {
+      _loading = false;
+      if (!started) {
+        _message = 'Purchase could not be started.';
+      } else {
+        _message = 'Complete the payment in the store dialog.';
+      }
+    });
   }
 
   Future<void> _restore() async {
@@ -57,7 +108,7 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
     final service = await ref.read(entitlementServiceProvider.future);
     await service.restorePurchases();
     if (mounted) {
-      setState(() => _message = 'Restore requested. If you previously paid, ads will be removed.');
+      setState(() => _message = AppCopy.restorePurchaseHint);
     }
   }
 
@@ -65,6 +116,8 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final adsRemoved = ref.watch(adsRemovedProvider);
+    final amount = _amountGbp;
+    final storePrice = _previewProduct?.price;
 
     return Scaffold(
       appBar: AppBar(
@@ -81,6 +134,8 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
             const HelperText(text: AppCopy.removeAdsBody),
             const SizedBox(height: 8),
             const HelperText(text: AppCopy.removeAdsFreeNote),
+            const SizedBox(height: 8),
+            const HelperText(text: AppCopy.removeAdsAmountHint),
             if (adsRemoved) ...[
               const SizedBox(height: 20),
               Card(
@@ -88,41 +143,63 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
-                      Icon(Icons.check_circle, color: theme.colorScheme.primary),
+                      Icon(Icons.check_circle,
+                          color: theme.colorScheme.primary),
                       const SizedBox(width: 12),
-                      const Expanded(child: Text('Ads are removed on this device.')),
+                      const Expanded(
+                        child: Text('Ads are removed on this device.'),
+                      ),
                     ],
                   ),
                 ),
+              ),
+            ],
+            const SizedBox(height: 24),
+            TextField(
+              controller: _amountController,
+              enabled: !adsRemoved,
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+              ],
+              decoration: InputDecoration(
+                labelText: AppCopy.removeAdsAmountLabel,
+                prefixText: '£ ',
+                helperText:
+                    '${RemoveAdsPricing.formatGbp(RemoveAdsPricing.minGbp)}–'
+                    '${RemoveAdsPricing.formatGbp(RemoveAdsPricing.maxGbp)}',
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.refresh),
+                  tooltip: 'Check store price',
+                  onPressed: adsRemoved || _loading ? null : _loadPreview,
+                ),
+              ),
+              onSubmitted: (_) => _loadPreview(),
+            ),
+            if (storePrice != null && amount != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Store price: $storePrice',
+                style: theme.textTheme.bodySmall,
               ),
             ],
             if (_message != null) ...[
               const SizedBox(height: 12),
               Text(_message!, style: theme.textTheme.bodySmall),
             ],
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             if (_loading)
               const Center(child: CircularProgressIndicator())
-            else if (_products.isEmpty)
-              ...removeAdsProductIds.map(
-                (id) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: OutlinedButton(
-                    onPressed: null,
-                    child: Text(
-                      '${_tierLabels[id] ?? id} (configure in store)',
-                    ),
-                  ),
-                ),
-              )
             else
-              ..._products.map(
-                (p) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: FilledButton(
-                    onPressed: adsRemoved ? null : () => _purchase(p),
-                    child: Text(_tierLabels[p.id] ?? p.price),
-                  ),
+              FilledButton(
+                onPressed: adsRemoved || amount == null ? null : _purchase,
+                child: Text(
+                  adsRemoved
+                      ? 'Ads already removed'
+                      : amount == null
+                          ? AppCopy.removeAdsAmountLabel
+                          : 'Pay ${RemoveAdsPricing.formatGbp(amount)} to remove ads',
                 ),
               ),
             const SizedBox(height: 16),

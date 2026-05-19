@@ -3,7 +3,7 @@
 ## Overview
 
 - **Banner ads:** Google AdMob bottom banners on scan (when no active alert), help, and settings.
-- **Remove ads:** Pay-what-you-want non-consumable IAP tiers via `in_app_purchase`.
+- **Remove ads:** Pay-what-you-want non-consumable IAP — user enters any amount (default **£2.00**, range **£0.50–£100.00**).
 - **Core scanning:** Always free; payment only removes ads.
 
 ## Privacy boundary
@@ -27,18 +27,28 @@
 
 Debug builds use Google’s test banner ID by default.
 
-### In-app purchase
+### In-app purchase (pay what you want)
 
-Create non-consumable products in Play Console / App Store Connect:
+App stores require **one product per price**. The app maps the user’s GBP amount to a product ID:
 
-| Product ID     | Suggested tier |
-|----------------|----------------|
-| `remove_ads_1` | £1             |
-| `remove_ads_3` | £3             |
-| `remove_ads_5` | £5             |
-| `remove_ads_10`| £10            |
+| User amount | Product ID        |
+|-------------|-------------------|
+| £2.00       | `remove_ads_200`  |
+| £5.50       | `remove_ads_550`  |
+| £10.00      | `remove_ads_1000` |
 
-Use license testers for sandbox purchases.
+Pattern: `remove_ads_{pence}` where pence = amount × 100 (rounded).
+
+**Play Console / App Store Connect**
+
+1. Create **non-consumable** products for each price you want to support.
+2. At minimum, create `remove_ads_200` for the default £2 tier.
+3. For full flexibility, bulk-create products for the pence values you expect (e.g. every 50p from 50p to £20, or use store APIs/scripts).
+4. Legacy tier IDs (`remove_ads_1`, `remove_ads_3`, `remove_ads_5`, `remove_ads_10`) still work for restore if you already shipped them.
+
+Use license testers (Play) or Sandbox (Apple) for test purchases.
+
+If a product ID is missing in the store, the app shows which ID to create.
 
 ### Dev bypass
 
@@ -46,6 +56,6 @@ Use license testers for sandbox purchases.
 flutter run --dart-define=UNRECORDED_ADS_REMOVED=true
 ```
 
-## Custom amount
+## Store limitation
 
-Not in MVP — fixed tiers only. Document as a future enhancement if store APIs allow variable pricing in your target regions.
+Apple and Google do not support a single “any amount” SKU. The UI lets users type any value in range; the purchase uses the matching `remove_ads_{pence}` product. Amounts without a store product cannot be purchased until that product exists.

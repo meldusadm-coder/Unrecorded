@@ -6,13 +6,59 @@ import 'package:unrecorded_ui/unrecorded_ui.dart';
 
 import '../../services/ads_service.dart';
 import '../../services/entitlement_service.dart';
+import '../../services/notification_prefs.dart';
+import '../../services/risk_notification_service.dart';
 import 'debug_testing_section.dart';
 
-class SettingsScreen extends ConsumerWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  bool? _riskNotificationsEnabled;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNotificationPref();
+  }
+
+  Future<void> _loadNotificationPref() async {
+    final prefs = await NotificationPrefs.load();
+    if (!mounted) return;
+    setState(() => _riskNotificationsEnabled = prefs.riskNotificationsEnabled);
+  }
+
+  Future<void> _setRiskNotifications(bool enabled) async {
+    if (enabled) {
+      final granted = await ref
+          .read(riskNotificationServiceProvider)
+          .requestPermissionIfNeeded();
+      if (!granted && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Notification permission was denied. Enable it in system settings.',
+            ),
+          ),
+        );
+        return;
+      }
+    } else {
+      await ref.read(riskNotificationServiceProvider).cancelRiskAlert();
+    }
+
+    final prefs = await NotificationPrefs.load();
+    await prefs.setRiskNotificationsEnabled(enabled);
+    if (!mounted) return;
+    setState(() => _riskNotificationsEnabled = enabled);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final adsRemoved = ref.watch(adsRemovedProvider);
 
@@ -68,10 +114,24 @@ class SettingsScreen extends ConsumerWidget {
                         : 'Optional banner ads may appear. Scan data is never sent to ad networks.',
                   ),
                   const DebugTestingSection(),
+                  const Divider(height: 32),
+                  Text('Alerts', style: theme.textTheme.titleMedium),
+                  const SizedBox(height: 4),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text(AppCopy.riskNotificationsTitle),
+                    subtitle: const Text(AppCopy.riskNotificationsSubtitle),
+                    value: _riskNotificationsEnabled ?? false,
+                    onChanged: _riskNotificationsEnabled == null
+                        ? null
+                        : _setRiskNotifications,
+                  ),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: Icon(Icons.volunteer_activism_outlined,
-                        color: theme.colorScheme.primary,),
+                    leading: Icon(
+                      Icons.volunteer_activism_outlined,
+                      color: theme.colorScheme.primary,
+                    ),
                     title: const Text(AppCopy.removeAdsTitle),
                     subtitle: const Text(AppCopy.removeAdsBody),
                     trailing: const Icon(Icons.chevron_right),

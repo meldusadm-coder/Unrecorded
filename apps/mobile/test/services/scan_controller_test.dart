@@ -58,7 +58,8 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  test('startProtection sets permissionRequired when preflight fails', () async {
+  test('startProtection sets permissionRequired when preflight fails',
+      () async {
     final controller = _controller(
       scanner: FakeRadioScanner(),
       runtime: _TestRuntime(

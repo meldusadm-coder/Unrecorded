@@ -26,8 +26,8 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
 
     final state = ref.watch(scanControllerProvider);
     final controller = ref.read(scanControllerProvider.notifier);
-    final showAlert = state.status == ScanStatus.possibleRiskDetected &&
-        !_alertDismissed;
+    final showAlert =
+        state.status == ScanStatus.possibleRiskDetected && !_alertDismissed;
     final hideAds = showAlert ||
         state.status == ScanStatus.permissionRequired ||
         state.status == ScanStatus.error;
@@ -62,7 +62,8 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
           children: [
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 children: [
                   ScanStatusCard(
                     icon: _iconForStatus(state.status),
@@ -97,9 +98,8 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
                     icon: state.isProtectionActive
                         ? Icons.pause_rounded
                         : Icons.shield_outlined,
-                    color: state.isProtectionActive
-                        ? Colors.red.shade400
-                        : null,
+                    color:
+                        state.isProtectionActive ? Colors.red.shade400 : null,
                     onPressed: () async {
                       if (state.isProtectionActive) {
                         await controller.pauseProtection();
@@ -183,7 +183,8 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
       case ScanStatus.idle:
       case ScanStatus.paused:
         return const NextStepBanner(
-          message: 'Turn on protection to keep checking for possible recording risk.',
+          message:
+              'Turn on protection to keep checking for possible recording risk.',
         );
       default:
         return const SizedBox.shrink();

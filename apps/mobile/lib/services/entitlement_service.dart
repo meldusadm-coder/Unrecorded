@@ -5,13 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Product IDs for pay-what-you-want remove-ads tiers (configure in store consoles).
-const removeAdsProductIds = <String>[
-  'remove_ads_1',
-  'remove_ads_3',
-  'remove_ads_5',
-  'remove_ads_10',
-];
+import 'remove_ads_pricing.dart';
 
 const _prefsKeyAdsRemoved = 'ads_removed';
 
@@ -52,10 +46,13 @@ class EntitlementService {
     _purchaseSub = null;
   }
 
-  Future<List<ProductDetails>> loadProducts() async {
-    if (!await _iap.isAvailable()) return [];
-    final response = await _iap.queryProductDetails(removeAdsProductIds.toSet());
-    return response.productDetails;
+  /// Loads the store product for a user-chosen GBP amount.
+  Future<ProductDetails?> loadProductForAmount(double gbp) async {
+    if (!await _iap.isAvailable()) return null;
+    final id = RemoveAdsPricing.productIdForGbp(gbp);
+    final response = await _iap.queryProductDetails({id});
+    if (response.productDetails.isEmpty) return null;
+    return response.productDetails.first;
   }
 
   Future<bool> purchase(ProductDetails product) async {
@@ -69,7 +66,7 @@ class EntitlementService {
 
   void _onPurchaseUpdate(List<PurchaseDetails> purchases) {
     for (final purchase in purchases) {
-      if (removeAdsProductIds.contains(purchase.productID)) {
+      if (RemoveAdsPricing.isRemoveAdsProductId(purchase.productID)) {
         if (purchase.status == PurchaseStatus.purchased ||
             purchase.status == PurchaseStatus.restored) {
           unawaited(_setAdsRemoved(true));
@@ -95,7 +92,8 @@ class EntitlementService {
 
 final entitlementRefreshProvider = StateProvider<int>((ref) => 0);
 
-final entitlementServiceProvider = FutureProvider<EntitlementService>((ref) async {
+final entitlementServiceProvider =
+    FutureProvider<EntitlementService>((ref) async {
   final prefs = await SharedPreferences.getInstance();
   final service = EntitlementService(
     prefs,

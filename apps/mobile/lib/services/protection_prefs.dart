@@ -13,8 +13,7 @@ class ProtectionPrefs {
     return ProtectionPrefs(prefs);
   }
 
-  bool get protectionEnabled =>
-      _prefs.getBool(_keyProtectionEnabled) ?? false;
+  bool get protectionEnabled => _prefs.getBool(_keyProtectionEnabled) ?? false;
 
   Future<void> setProtectionEnabled(bool value) async {
     await _prefs.setBool(_keyProtectionEnabled, value);

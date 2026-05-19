@@ -65,6 +65,21 @@ class AppCopy {
 
   static const String maybeLater = 'Maybe later';
   static const String restorePurchase = 'Restore purchase';
+  static const String restorePurchaseHint =
+      'Restore requested. If you previously paid, ads will be removed.';
+
+  static const String removeAdsAmountLabel = 'Your amount (GBP)';
+  static const String removeAdsAmountHint =
+      'Choose any amount you like. Default is £2. The app store needs a '
+      'matching product for your amount (see docs/monetisation.md).';
+  static const String removeAdsInvalidAmount =
+      'Enter an amount between £0.50 and £100.00.';
+
+  // Notifications
+  static const String riskNotificationsTitle = 'Risk alerts';
+  static const String riskNotificationsSubtitle =
+      'Show a notification when possible recording risk is detected '
+      '(including when the app is in the background).';
 
   // Widget lines
   static const String widgetScanningActive = 'Scanning active';
