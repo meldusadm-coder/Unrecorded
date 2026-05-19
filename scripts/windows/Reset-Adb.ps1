@@ -42,35 +42,114 @@ Android SDK not found.
 "@
 }
 
-function Reset-AdbServer {
-  param([string] $Adb)
+function Invoke-AdbQuiet {
+  param(
+    [string] $Adb,
+    [Parameter(ValueFromRemainingArguments = $true)]
+    [string[]] $AdbArgs
+  )
 
-  Write-Step 'Resetting adb on host'
+  $prevEap = $ErrorActionPreference
+  $prevNative = $null
+  if (Get-Variable -Name PSNativeCommandUseErrorActionPreference -ErrorAction SilentlyContinue) {
+    $prevNative = $PSNativeCommandUseErrorActionPreference
+    $PSNativeCommandUseErrorActionPreference = $false
+  }
 
-  & $Adb kill-server 2>$null | Out-Null
+  $ErrorActionPreference = 'Continue'
+  try {
+    $output = & $Adb @AdbArgs 2>&1 | Out-String
+    return @{
+      ExitCode = $LASTEXITCODE
+      Output   = $output.Trim()
+    }
+  }
+  finally {
+    $ErrorActionPreference = $prevEap
+    if ($null -ne $prevNative) {
+      $PSNativeCommandUseErrorActionPreference = $prevNative
+    }
+  }
+}
 
+function Stop-AdbProcesses {
   $procs = @(Get-Process -Name adb -ErrorAction SilentlyContinue)
   foreach ($proc in $procs) {
     Write-Host "    stopping adb process (PID $($proc.Id))" -ForegroundColor DarkGray
     Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
   }
+  return $procs.Count
+}
 
-  if ($procs.Count -gt 0) {
+function Stop-PortListener {
+  param([int] $Port)
+
+  $lines = netstat -ano | Select-String ":${Port}\s"
+  foreach ($line in $lines) {
+    if ($line.Line -notmatch '\sLISTENING\s+(\d+)\s*$') { continue }
+
+    $processId = [int]$Matches[1]
+    if ($processId -le 0) { continue }
+
+    $proc = Get-Process -Id $processId -ErrorAction SilentlyContinue
+    $name = if ($proc) { $proc.ProcessName } else { 'unknown' }
+    Write-Host "    stopping ${name} on port ${Port} (PID ${processId})" -ForegroundColor DarkGray
+    Stop-Process -Id $processId -Force -ErrorAction SilentlyContinue
+  }
+}
+
+function Reset-AdbServer {
+  param([string] $Adb)
+
+  Write-Step 'Resetting adb on host'
+
+  # Kill processes first — kill-server often fails when the server is wedged.
+  $killed = Stop-AdbProcesses
+  if ($killed -gt 0) {
     Start-Sleep -Seconds 1
   }
 
-  Write-Host '    starting adb server' -ForegroundColor DarkGray
-  $startOutput = & $Adb start-server 2>&1 | Out-String
-  if ($LASTEXITCODE -ne 0) {
-    throw "adb start-server failed: $($startOutput.Trim())"
+  $killResult = Invoke-AdbQuiet -Adb $Adb kill-server
+  if ($killResult.ExitCode -ne 0 -and $killResult.Output) {
+    Write-Host "    kill-server: $($killResult.Output)" -ForegroundColor DarkGray
   }
 
-  $versionOutput = & $Adb version 2>&1 | Out-String
-  if ($LASTEXITCODE -ne 0) {
-    throw "adb is not responding after reset: $($versionOutput.Trim())"
+  Stop-AdbProcesses | Out-Null
+  Stop-PortListener -Port 5037
+  Start-Sleep -Seconds 1
+
+  $maxAttempts = 3
+  $lastOutput = ''
+
+  for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
+    Write-Host "    starting adb server (attempt ${attempt}/${maxAttempts})" -ForegroundColor DarkGray
+
+    $startResult = Invoke-AdbQuiet -Adb $Adb start-server
+    $lastOutput = $startResult.Output
+
+    if ($startResult.ExitCode -eq 0) {
+      $versionResult = Invoke-AdbQuiet -Adb $Adb version
+      if ($versionResult.ExitCode -eq 0) {
+        Write-Ok 'adb server ready.'
+        return
+      }
+      $lastOutput = $versionResult.Output
+    }
+
+    if ($lastOutput) {
+      Write-Host "    $lastOutput" -ForegroundColor DarkGray
+    }
+
+    Stop-AdbProcesses | Out-Null
+    Stop-PortListener -Port 5037
+    Start-Sleep -Seconds 2
   }
 
-  Write-Ok 'adb server ready.'
+  throw @"
+adb could not be restarted after ${maxAttempts} attempts.
+  Last output: $lastOutput
+  Try closing Android Studio, run scripts\windows\reset-adb.cmd again, or reboot Windows.
+"@
 }
 
 if ($MyInvocation.InvocationName -ne '.') {
@@ -84,7 +163,14 @@ if ($MyInvocation.InvocationName -ne '.') {
     }
 
     Reset-AdbServer -Adb $adb
-    & $adb devices -l
+
+    $devices = Invoke-AdbQuiet -Adb $adb devices -l
+    if ($devices.Output) {
+      Write-Host $devices.Output
+    }
+    if ($devices.ExitCode -ne 0) {
+      throw "adb devices failed: $($devices.Output)"
+    }
   }
   catch {
     Write-Host "`n$($_.Exception.Message)" -ForegroundColor Red
