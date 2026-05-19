@@ -65,7 +65,7 @@ Use a [Dev Container](docs/devcontainer.md) for Flutter, Dart, Android SDK, and 
 # or double-click: start-dev.cmd
 ```
 
-Then open the repo in Cursor → **Dev Containers: Reopen in Container**. See [docs/devcontainer.md](docs/devcontainer.md) for emulator bridge and troubleshooting.
+Then open the repo in Cursor → **Dev Containers: Reopen in Container**, then run `./scripts/dev-run.sh` inside the container. See [docs/devcontainer.md](docs/devcontainer.md) for details.
 
 ## Running tests
 

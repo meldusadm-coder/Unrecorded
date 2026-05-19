@@ -28,6 +28,6 @@ for ((i = 1; i <= MAX_ATTEMPTS; i++)); do
 done
 
 echo "ERROR: Could not connect to ${HOST}:${PORT}." >&2
-echo "On Windows, run: scripts\\windows\\Start-UnrecordedDev.ps1" >&2
-echo "Ensure the emulator is booted and adb on the host shows emulator-5554." >&2
+echo "On Windows, run: start-dev.cmd" >&2
+echo "Then in the container: ./scripts/dev-run.sh" >&2
 exit 1

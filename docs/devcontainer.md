@@ -12,33 +12,36 @@ Develop Unrecorded inside a reproducible Linux container with Flutter, Dart, Jav
 
 ## Quick start (Windows)
 
-1. **Host bootstrap** (once per session)—from repo root in PowerShell or double-click:
-
-   ```powershell
-   .\scripts\windows\Start-UnrecordedDev.ps1
-   ```
-
-   Or double-click / run from cmd:
+1. **Host bootstrap** (once per session)—double-click or run from repo root:
 
    ```cmd
    start-dev.cmd
-   scripts\windows\start-unrecorded-dev.cmd
    ```
 
-   List installed AVDs: `.\scripts\windows\Start-UnrecordedDev.ps1 -ListAvds`
+   This starts Docker Desktop (if needed), resets adb, launches an AVD, and waits for the emulator to boot.
 
-   This starts Docker Desktop (if needed), launches an AVD, and waits for the emulator to boot.
+   PowerShell alternatives:
+
+   ```powershell
+   .\scripts\windows\Start-UnrecordedDev.ps1
+   .\scripts\windows\Start-UnrecordedDev.ps1 -ListAvds
+   ```
 
 2. **Reopen in container** — Command Palette → **Dev Containers: Reopen in Container** (first build may take several minutes).
 
-3. **Connect emulator** — in the container terminal:
+3. **Run the app** — in the container terminal:
 
    ```bash
-   .devcontainer/scripts/connect-host-emulator.sh
-   cd apps/mobile && flutter run
+   ./scripts/dev-run.sh
    ```
 
-   Or use the VS Code task **Android: connect host emulator**, then **Run → Start Debugging** (configuration **Unrecorded (mobile)**).
+   Or press **F5** → **Unrecorded (mobile)** (connects to the host emulator automatically).
+
+   Build a debug APK instead:
+
+   ```bash
+   ./scripts/dev-run.sh --build
+   ```
 
 ## Host script options
 

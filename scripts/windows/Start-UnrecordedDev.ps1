@@ -272,8 +272,9 @@ try {
     1. Open this folder in Cursor / VS Code
     2. Command Palette -> Dev Containers: Reopen in Container
     3. In the container terminal:
-         .devcontainer/scripts/connect-host-emulator.sh
-         cd apps/mobile && flutter run
+         ./scripts/dev-run.sh
+
+    Or press F5 -> Unrecorded (mobile)
 
   Local Flutter (if installed on Windows):
     cd apps/mobile

@@ -10,5 +10,6 @@ echo "==> flutter doctor"
 flutter doctor -v
 
 echo "==> Dev container ready."
-echo "    Windows: run scripts/windows/Start-UnrecordedDev.ps1 on the host first."
-echo "    Then: .devcontainer/scripts/connect-host-emulator.sh"
+echo "    Windows host (once per session): start-dev.cmd"
+echo "    Then in this container: ./scripts/dev-run.sh"
+echo "    Or press F5 -> Unrecorded (mobile)"
