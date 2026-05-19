@@ -28,19 +28,13 @@ class _UnrecordedAppState extends State<UnrecordedApp> {
         colorSchemeSeed: const Color(0xFF5C6BC0),
         useMaterial3: true,
         brightness: Brightness.light,
-        appBarTheme: const AppBarTheme(
-          centerTitle: false,
-          elevation: 0,
-        ),
+        appBarTheme: const AppBarTheme(centerTitle: false, elevation: 0),
       ),
       darkTheme: ThemeData(
         colorSchemeSeed: const Color(0xFF5C6BC0),
         useMaterial3: true,
         brightness: Brightness.dark,
-        appBarTheme: const AppBarTheme(
-          centerTitle: false,
-          elevation: 0,
-        ),
+        appBarTheme: const AppBarTheme(centerTitle: false, elevation: 0),
       ),
       routerConfig: _router,
     );

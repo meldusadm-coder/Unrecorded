@@ -31,15 +31,16 @@ final riskScoringEngineProvider = Provider<RiskScoringEngine>((ref) {
 });
 
 /// Manages the scan lifecycle and scoring.
-final scanControllerProvider =
-    StateNotifierProvider<ScanController, ScanState>((ref) {
-  return ScanController(
-    scanner: ref.watch(radioScannerProvider),
-    runtime: ref.watch(scanRuntimeProvider),
-    scannerMode: ref.watch(scannerModeProvider),
-    scoringEngine: ref.watch(riskScoringEngineProvider),
-  );
-});
+final scanControllerProvider = StateNotifierProvider<ScanController, ScanState>(
+  (ref) {
+    return ScanController(
+      scanner: ref.watch(radioScannerProvider),
+      runtime: ref.watch(scanRuntimeProvider),
+      scannerMode: ref.watch(scannerModeProvider),
+      scoringEngine: ref.watch(riskScoringEngineProvider),
+    );
+  },
+);
 
 class ScanController extends StateNotifier<ScanState> {
   final RadioScanner _scanner;
@@ -54,11 +55,11 @@ class ScanController extends StateNotifier<ScanState> {
     required ScanRuntime runtime,
     required ScannerMode scannerMode,
     required RiskScoringEngine scoringEngine,
-  })  : _scanner = scanner,
-        _runtime = runtime,
-        _scannerMode = scannerMode,
-        _scoringEngine = scoringEngine,
-        super(const ScanState());
+  }) : _scanner = scanner,
+       _runtime = runtime,
+       _scannerMode = scannerMode,
+       _scoringEngine = scoringEngine,
+       super(const ScanState());
 
   Future<void> startScan() async {
     if (_startInFlight ||

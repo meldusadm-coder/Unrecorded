@@ -5,9 +5,7 @@ import 'package:unrecorded_mobile/app.dart';
 
 void main() {
   testWidgets('app renders scan screen with title', (tester) async {
-    await tester.pumpWidget(
-      const ProviderScope(child: UnrecordedApp()),
-    );
+    await tester.pumpWidget(const ProviderScope(child: UnrecordedApp()));
     await tester.pumpAndSettle();
 
     expect(find.text('Unrecorded'), findsOneWidget);
@@ -15,9 +13,7 @@ void main() {
   });
 
   testWidgets('start scanning button toggles to stop', (tester) async {
-    await tester.pumpWidget(
-      const ProviderScope(child: UnrecordedApp()),
-    );
+    await tester.pumpWidget(const ProviderScope(child: UnrecordedApp()));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Start scanning'));
@@ -27,9 +23,7 @@ void main() {
   });
 
   testWidgets('navigates to alert explanation screen', (tester) async {
-    await tester.pumpWidget(
-      const ProviderScope(child: UnrecordedApp()),
-    );
+    await tester.pumpWidget(const ProviderScope(child: UnrecordedApp()));
     await tester.pumpAndSettle();
 
     final infoButton = find.byWidgetPredicate(
@@ -47,9 +41,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(
-      const ProviderScope(child: UnrecordedApp()),
-    );
+    await tester.pumpWidget(const ProviderScope(child: UnrecordedApp()));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('settings_button')));
