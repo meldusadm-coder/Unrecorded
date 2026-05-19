@@ -10,6 +10,8 @@ Unrecorded detects **possible** nearby smart-glass-style BLE signals. It does no
 | Physical Android + real BLE | `./scripts/dev-run.sh` or F5 → **Unrecorded (real BLE)** |
 | Instant alert in debug app | Settings → **Developer testing** → **Simulate alert now** |
 | Risk notification toggle | Settings → **Alerts** → **Risk alerts** |
+| Notification risk level | Settings → **Alerts** → **Notify me for** (when alerts on) |
+| Developer testing UI | **Debug/profile builds only** — hidden in release (`kReleaseMode`) |
 | Automated regression | `cd packages/unrecorded_core && dart test` (and radio + mobile tests) |
 
 ## Demo mode (scripted BLE)

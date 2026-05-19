@@ -60,7 +60,9 @@ final scanControllerProvider =
       if (previous.status != ScanStatus.possibleRiskDetected &&
           state.status == ScanStatus.possibleRiskDetected) {
         unawaited(
-          ref.read(riskNotificationServiceProvider).showRiskAlertIfEnabled(),
+          ref.read(riskNotificationServiceProvider).showRiskAlertIfEnabled(
+                riskLevel: state.riskLevel,
+              ),
         );
       }
     },

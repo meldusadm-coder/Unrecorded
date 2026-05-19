@@ -1,45 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
+import 'unrecorded_assets.dart';
 
 /// Line-style icons from the Unrecorded brand kit.
 enum UnrecordedIconAsset {
-  scan('scan'),
-  protection('protection'),
-  alert('alert'),
-  riskHigh('risk_high'),
-  riskMedium('risk_medium'),
-  riskLow('risk_low'),
-  device('device'),
-  glasses('glasses'),
-  camera('camera'),
-  signal('signal'),
-  info('info'),
-  settings('settings'),
-  help('help'),
-  privacy('privacy'),
-  history('history'),
-  widget('widget'),
-  share('share'),
-  more('more');
+  scan(UnrecordedAssetPaths.scan),
+  protection(UnrecordedAssetPaths.protection),
+  alert(UnrecordedAssetPaths.alert),
+  riskHigh(UnrecordedAssetPaths.riskHigh),
+  riskMedium(UnrecordedAssetPaths.riskMedium),
+  riskLow(UnrecordedAssetPaths.riskLow),
+  device(UnrecordedAssetPaths.device),
+  glasses(UnrecordedAssetPaths.glasses),
+  camera(UnrecordedAssetPaths.camera),
+  signal(UnrecordedAssetPaths.signal),
+  info(UnrecordedAssetPaths.info),
+  settings(UnrecordedAssetPaths.settings),
+  help(UnrecordedAssetPaths.help),
+  privacy(UnrecordedAssetPaths.privacy),
+  history(UnrecordedAssetPaths.history),
+  widgetIcon(UnrecordedAssetPaths.widget),
+  share(UnrecordedAssetPaths.share),
+  more(UnrecordedAssetPaths.more);
 
-  const UnrecordedIconAsset(this.fileName);
-  final String fileName;
-
-  String get assetPath => 'packages/unrecorded_ui/assets/icons/$fileName.png';
+  const UnrecordedIconAsset(this.assetPath);
+  final String assetPath;
 }
 
-/// Pre-rendered circular status badges (backgrounds baked in).
+/// Pre-rendered circular status badges (colours baked into SVG).
 enum UnrecordedStatusAsset {
-  protectionOn('protection_on'),
-  scanningActive('scanning_active'),
-  scanningPaused('scanning_paused'),
-  highRisk('high_risk'),
-  bluetoothOff('bluetooth_off'),
-  permissionsNeeded('permissions_needed');
+  protectionOn(UnrecordedAssetPaths.statusProtectionOn),
+  scanningActive(UnrecordedAssetPaths.statusScanningActive),
+  scanningPaused(UnrecordedAssetPaths.statusScanningPaused),
+  highRisk(UnrecordedAssetPaths.statusHighRisk),
+  bluetoothOff(UnrecordedAssetPaths.statusBluetoothOff),
+  permissionsNeeded(UnrecordedAssetPaths.statusPermissionsNeeded);
 
-  const UnrecordedStatusAsset(this.fileName);
-  final String fileName;
-
-  String get assetPath => 'packages/unrecorded_ui/assets/status/$fileName.png';
+  const UnrecordedStatusAsset(this.assetPath);
+  final String assetPath;
 }
 
 /// Brand line icon with optional tint for light/dark themes.
@@ -62,21 +61,15 @@ class UnrecordedIcon extends StatelessWidget {
             ? Colors.white
             : null);
 
-    Widget image = Image.asset(
+    return SvgPicture.asset(
       asset.assetPath,
       width: size,
       height: size,
       fit: BoxFit.contain,
+      colorFilter: effectiveColor != null
+          ? ColorFilter.mode(effectiveColor, BlendMode.srcIn)
+          : null,
     );
-
-    if (effectiveColor != null) {
-      image = ColorFiltered(
-        colorFilter: ColorFilter.mode(effectiveColor, BlendMode.srcIn),
-        child: image,
-      );
-    }
-
-    return image;
   }
 }
 
@@ -93,7 +86,7 @@ class UnrecordedStatusIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Image.asset(
+    return SvgPicture.asset(
       asset.assetPath,
       width: size,
       height: size,

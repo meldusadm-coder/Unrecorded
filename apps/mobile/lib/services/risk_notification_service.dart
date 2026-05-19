@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:unrecorded_core/unrecorded_core.dart';
 
 import 'notification_prefs.dart';
+import 'notification_risk_threshold.dart';
 
 const _channelId = 'possible_recording_risk';
 const _notificationId = 1;
@@ -77,11 +78,17 @@ class RiskNotificationService {
     return iosGranted ?? true;
   }
 
-  Future<void> showRiskAlertIfEnabled() async {
+  Future<void> showRiskAlertIfEnabled({required RiskLevel riskLevel}) async {
     if (!_platformSupported) return;
 
     final prefs = await NotificationPrefs.load();
     if (!prefs.riskNotificationsEnabled) return;
+    if (!notificationThresholdMet(
+      riskLevel,
+      prefs.notificationRiskThreshold,
+    )) {
+      return;
+    }
 
     await init();
     if (!_initialized) return;

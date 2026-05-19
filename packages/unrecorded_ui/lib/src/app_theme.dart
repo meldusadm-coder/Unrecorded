@@ -10,8 +10,11 @@ abstract final class UnrecordedColors {
   static const Color danger = Color(0xFFEF4444);
   static const Color info = Color(0xFF3B82F6);
   static const Color surface = Color(0xFFF6F6FA);
+  static const Color surfaceAlt = Color(0xFFECEBFF);
   static const Color background = Color(0xFF0F1117);
   static const Color onSurface = Color(0xFF2B2D42);
+  static const Color muted = Color(0xFF6B7280);
+  static const Color line = Color(0xFFD8D7E6);
 }
 
 /// Material [ColorScheme] built from [UnrecordedColors].

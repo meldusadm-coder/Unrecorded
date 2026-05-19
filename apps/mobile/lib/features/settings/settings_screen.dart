@@ -7,6 +7,7 @@ import 'package:unrecorded_ui/unrecorded_ui.dart';
 import '../../services/ads_service.dart';
 import '../../services/entitlement_service.dart';
 import '../../services/notification_prefs.dart';
+import '../../services/notification_risk_threshold.dart';
 import '../../services/risk_notification_service.dart';
 import 'debug_testing_section.dart';
 
@@ -19,17 +20,21 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool? _riskNotificationsEnabled;
+  NotificationRiskThreshold? _notificationRiskThreshold;
 
   @override
   void initState() {
     super.initState();
-    _loadNotificationPref();
+    _loadNotificationPrefs();
   }
 
-  Future<void> _loadNotificationPref() async {
+  Future<void> _loadNotificationPrefs() async {
     final prefs = await NotificationPrefs.load();
     if (!mounted) return;
-    setState(() => _riskNotificationsEnabled = prefs.riskNotificationsEnabled);
+    setState(() {
+      _riskNotificationsEnabled = prefs.riskNotificationsEnabled;
+      _notificationRiskThreshold = prefs.notificationRiskThreshold;
+    });
   }
 
   Future<void> _setRiskNotifications(bool enabled) async {
@@ -55,6 +60,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     await prefs.setRiskNotificationsEnabled(enabled);
     if (!mounted) return;
     setState(() => _riskNotificationsEnabled = enabled);
+  }
+
+  Future<void> _setNotificationRiskThreshold(
+    NotificationRiskThreshold? threshold,
+  ) async {
+    if (threshold == null) return;
+    final prefs = await NotificationPrefs.load();
+    await prefs.setNotificationRiskThreshold(threshold);
+    if (!mounted) return;
+    setState(() => _notificationRiskThreshold = threshold);
   }
 
   @override
@@ -138,6 +153,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ? null
                         : _setRiskNotifications,
                   ),
+                  if (_riskNotificationsEnabled == true) ...[
+                    const SizedBox(height: 8),
+                    DropdownMenu<NotificationRiskThreshold>(
+                      key: ValueKey(_notificationRiskThreshold),
+                      label: const Text(AppCopy.riskNotificationLevelTitle),
+                      helperText: AppCopy.riskNotificationLevelSubtitle,
+                      initialSelection: _notificationRiskThreshold,
+                      enabled: _notificationRiskThreshold != null,
+                      dropdownMenuEntries: NotificationRiskThreshold.values
+                          .map(
+                            (t) => DropdownMenuEntry(
+                              value: t,
+                              label: t.label,
+                            ),
+                          )
+                          .toList(),
+                      onSelected: _setNotificationRiskThreshold,
+                    ),
+                  ],
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: UnrecordedIcon(

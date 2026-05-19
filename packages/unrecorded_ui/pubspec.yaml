@@ -12,6 +12,7 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
+  flutter_svg: ^2.0.17
   unrecorded_core:
     path: ../unrecorded_core
 
@@ -22,6 +23,7 @@ dev_dependencies:
 
 flutter:
   assets:
+    - assets/brand/
     - assets/icons/
     - assets/status/
-    - assets/brand/
+    - assets/navigation/

@@ -81,6 +81,11 @@ class AppCopy {
       'Show a notification when possible recording risk is detected '
       '(including when the app is in the background).';
 
+  static const String riskNotificationLevelTitle = 'Notify me for';
+  static const String riskNotificationLevelSubtitle =
+      'Choose the minimum risk level before a notification is sent. '
+      'The in-app alert on the scan screen is unchanged.';
+
   // Widget lines
   static const String widgetScanningActive = 'Scanning active';
   static const String widgetNoObviousRisk = 'No obvious risk';
