@@ -22,6 +22,7 @@
         "Dart-Code.flutter"
       ],
       "settings": {
+        "files.eol": "\n",
         "dart.flutterSdkPath": "/sdks/flutter",
         "editor.formatOnSave": true,
         "[dart]": {
