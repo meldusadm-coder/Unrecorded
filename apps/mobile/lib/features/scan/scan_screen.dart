@@ -138,8 +138,8 @@ class _StatusSection extends StatelessWidget {
         Text(
           _statusText,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
           textAlign: TextAlign.center,
         ),
       ],
@@ -147,21 +147,21 @@ class _StatusSection extends StatelessWidget {
   }
 
   String get _statusText => switch (state.status) {
-    ScanStatus.idle => 'Tap the button below to start scanning.',
-    ScanStatus.requestingPermission =>
-      state.statusMessage ?? 'Checking Bluetooth permissions…',
-    ScanStatus.permissionDenied =>
-      state.statusMessage ?? 'Permission is required to scan.',
-    ScanStatus.bluetoothUnsupported =>
-      state.statusMessage ?? 'Bluetooth scanning is unsupported.',
-    ScanStatus.bluetoothOff =>
-      state.statusMessage ?? 'Bluetooth is off. Turn it on and retry.',
-    ScanStatus.scanning =>
-      '${state.signals.length} signal${state.signals.length == 1 ? '' : 's'} detected nearby.',
-    ScanStatus.timedOut =>
-      state.statusMessage ?? 'Scan timed out. Start again when ready.',
-    ScanStatus.paused => 'Scanning is paused.',
-    ScanStatus.error =>
-      state.statusMessage ?? 'An error occurred. Try scanning again.',
-  };
+        ScanStatus.idle => 'Tap the button below to start scanning.',
+        ScanStatus.requestingPermission =>
+          state.statusMessage ?? 'Checking Bluetooth permissions…',
+        ScanStatus.permissionDenied =>
+          state.statusMessage ?? 'Permission is required to scan.',
+        ScanStatus.bluetoothUnsupported =>
+          state.statusMessage ?? 'Bluetooth scanning is unsupported.',
+        ScanStatus.bluetoothOff =>
+          state.statusMessage ?? 'Bluetooth is off. Turn it on and retry.',
+        ScanStatus.scanning =>
+          '${state.signals.length} signal${state.signals.length == 1 ? '' : 's'} detected nearby.',
+        ScanStatus.timedOut =>
+          state.statusMessage ?? 'Scan timed out. Start again when ready.',
+        ScanStatus.paused => 'Scanning is paused.',
+        ScanStatus.error =>
+          state.statusMessage ?? 'An error occurred. Try scanning again.',
+      };
 }

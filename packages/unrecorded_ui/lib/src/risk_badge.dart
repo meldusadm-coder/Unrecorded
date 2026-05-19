@@ -35,14 +35,14 @@ class RiskBadge extends StatelessWidget {
   }
 
   Color get _color => switch (level) {
-    RiskLevel.low => const Color(0xFF4CAF50),
-    RiskLevel.medium => const Color(0xFFFFA726),
-    RiskLevel.high => const Color(0xFFEF5350),
-  };
+        RiskLevel.low => const Color(0xFF4CAF50),
+        RiskLevel.medium => const Color(0xFFFFA726),
+        RiskLevel.high => const Color(0xFFEF5350),
+      };
 
   String get _label => switch (level) {
-    RiskLevel.low => 'Low risk',
-    RiskLevel.medium => 'Medium risk',
-    RiskLevel.high => 'High risk',
-  };
+        RiskLevel.low => 'Low risk',
+        RiskLevel.medium => 'Medium risk',
+        RiskLevel.high => 'High risk',
+      };
 }

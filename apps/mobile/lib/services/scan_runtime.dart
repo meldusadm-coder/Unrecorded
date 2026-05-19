@@ -6,7 +6,11 @@ import 'package:permission_handler/permission_handler.dart';
 
 enum ScannerMode { auto, demo }
 
-enum ScanPreflightFailure { permissionDenied, bluetoothUnsupported, bluetoothOff }
+enum ScanPreflightFailure {
+  permissionDenied,
+  bluetoothUnsupported,
+  bluetoothOff
+}
 
 class ScanPreflightResult {
   const ScanPreflightResult._(this.failure);
@@ -19,6 +23,7 @@ class ScanPreflightResult {
 
   bool get isOk => failure == null;
 }
+
 class ScanRuntime {
   const ScanRuntime();
 
@@ -58,7 +63,7 @@ class ScanRuntime {
 
     final hasBluetoothRuntime =
         (statuses[Permission.bluetoothScan]?.isGranted ?? false) &&
-        (statuses[Permission.bluetoothConnect]?.isGranted ?? false);
+            (statuses[Permission.bluetoothConnect]?.isGranted ?? false);
     final hasLegacyLocation =
         statuses[Permission.locationWhenInUse]?.isGranted ?? false;
 

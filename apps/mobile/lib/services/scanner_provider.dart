@@ -55,11 +55,11 @@ class ScanController extends StateNotifier<ScanState> {
     required ScanRuntime runtime,
     required ScannerMode scannerMode,
     required RiskScoringEngine scoringEngine,
-  }) : _scanner = scanner,
-       _runtime = runtime,
-       _scannerMode = scannerMode,
-       _scoringEngine = scoringEngine,
-       super(const ScanState());
+  })  : _scanner = scanner,
+        _runtime = runtime,
+        _scannerMode = scannerMode,
+        _scoringEngine = scoringEngine,
+        super(const ScanState());
 
   Future<void> startScan() async {
     if (_startInFlight ||
