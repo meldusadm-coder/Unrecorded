@@ -44,7 +44,9 @@ RUN flutter config --no-analytics \
 # Devcontainer remoteUser (avoid fixed uid 1000 — often taken in base image)
 RUN set -eux; \
     if ! id vscode >/dev/null 2>&1; then useradd -m -s /bin/bash vscode; fi; \
-    chown -R vscode:vscode "${ANDROID_SDK_ROOT}"
+    chown -R vscode:vscode "${ANDROID_SDK_ROOT}" /sdks/flutter; \
+    echo "vscode ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/vscode; \
+    chmod 0440 /etc/sudoers.d/vscode
 
 USER vscode
 WORKDIR /workspace

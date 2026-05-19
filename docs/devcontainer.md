@@ -103,6 +103,18 @@ The repo must be bind-mounted at `/workspace`. If the explorer is empty after re
   start-dev.cmd -SkipEmulator
   ```
 
+### `Permission denied` on `/sdks/flutter/bin/cache`
+
+The Flutter SDK cache was root-owned. **Rebuild the dev container**:
+
+**Dev Containers: Rebuild Container**
+
+Or run once in a container terminal:
+
+```bash
+sudo chown -R "$(id -u):$(id -g)" /sdks/flutter
+```
+
 ### `connect-host-emulator.sh` fails
 
 - Run `Start-UnrecordedDev.ps1` on the host first.
