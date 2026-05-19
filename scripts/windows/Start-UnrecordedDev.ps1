@@ -135,6 +135,37 @@ function Stop-AllEmulators {
   Start-Sleep -Seconds 3
 }
 
+function Reset-AdbServer {
+  param([string] $Adb)
+
+  Write-Step 'Resetting adb on host'
+
+  & $Adb kill-server 2>$null | Out-Null
+
+  $procs = @(Get-Process -Name adb -ErrorAction SilentlyContinue)
+  foreach ($proc in $procs) {
+    Write-Host "    stopping adb process (PID $($proc.Id))" -ForegroundColor DarkGray
+    Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
+  }
+
+  if ($procs.Count -gt 0) {
+    Start-Sleep -Seconds 1
+  }
+
+  Write-Host '    starting adb server' -ForegroundColor DarkGray
+  $startOutput = & $Adb start-server 2>&1 | Out-String
+  if ($LASTEXITCODE -ne 0) {
+    throw "adb start-server failed: $($startOutput.Trim())"
+  }
+
+  $versionOutput = & $Adb version 2>&1 | Out-String
+  if ($LASTEXITCODE -ne 0) {
+    throw "adb is not responding after reset: $($versionOutput.Trim())"
+  }
+
+  Write-Ok 'adb server ready.'
+}
+
 function Wait-EmulatorBoot {
   param(
     [string] $Adb,
@@ -190,8 +221,7 @@ function Start-HostEmulator {
     throw "adb.exe not found. In Android Studio: SDK Manager -> install Android SDK Platform-Tools."
   }
 
-  Write-Step 'Starting adb on host'
-  & $adb start-server | Out-Null
+  Reset-AdbServer -Adb $adb
 
   if ($RestartEmulator) {
     Write-Step 'Stopping existing emulators'
@@ -273,7 +303,7 @@ try {
   } else {
     Write-Warn 'Skipping emulator (-SkipEmulator).'
     $adb = Join-Path $sdk 'platform-tools\adb.exe'
-    if (Test-Path $adb) { & $adb start-server | Out-Null }
+    if (Test-Path $adb) { Reset-AdbServer -Adb $adb }
   }
 
   if ($OpenCursor) {

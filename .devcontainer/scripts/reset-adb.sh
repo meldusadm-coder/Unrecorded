@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Kill stale adb server/processes and start a fresh server.
+set -euo pipefail
+
+reset_adb() {
+  echo "Resetting adb ..."
+  adb kill-server 2>/dev/null || true
+  if command -v pkill >/dev/null 2>&1; then
+    pkill -x adb 2>/dev/null || true
+  fi
+  sleep 0.5
+  if ! adb start-server >/dev/null 2>&1; then
+    echo "ERROR: adb start-server failed." >&2
+    return 1
+  fi
+  if ! adb version >/dev/null 2>&1; then
+    echo "ERROR: adb is not responding after reset." >&2
+    return 1
+  fi
+  echo "adb server ready."
+}
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  reset_adb
+fi

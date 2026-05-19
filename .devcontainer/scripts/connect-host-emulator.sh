@@ -2,10 +2,16 @@
 # Connect container adb to Android emulator running on the Windows host.
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=reset-adb.sh
+source "${SCRIPT_DIR}/reset-adb.sh"
+
 HOST="${ADB_HOST:-host.docker.internal}"
 PORT="${ADB_PORT:-5555}"
 MAX_ATTEMPTS="${ADB_CONNECT_ATTEMPTS:-30}"
 SLEEP_SECS="${ADB_CONNECT_SLEEP:-2}"
+
+reset_adb
 
 echo "Connecting adb to ${HOST}:${PORT} ..."
 
