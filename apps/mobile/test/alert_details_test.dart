@@ -33,7 +33,8 @@ void main() {
         child: const AppBootstrap(child: UnrecordedApp()),
       );
 
-  testWidgets('view details opens alert details with device name', (tester) async {
+  testWidgets('view details opens alert details with device name',
+      (tester) async {
     tester.view.physicalSize = const Size(1080, 1920);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);

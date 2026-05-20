@@ -50,7 +50,8 @@ class AlertDetailsScreen extends ConsumerWidget {
                             ? AppCopy.possibleRiskBody
                             : 'This is the most recent risk level from your last '
                                 'protection scan. It is not proof of recording.',
-                        style: theme.textTheme.bodyMedium?.copyWith(height: 1.4),
+                        style:
+                            theme.textTheme.bodyMedium?.copyWith(height: 1.4),
                       ),
                     ],
                   ),
@@ -134,8 +135,7 @@ class AlertDetailsScreen extends ConsumerWidget {
   Widget _deviceTile(ThemeData theme, ClassifiedSignal classified) {
     final signal = classified.signal;
     final name = signal.displayName ?? 'Unknown device';
-    final idLine =
-        '${DeviceSignalClassifier.idLabel(signal.id)}: '
+    final idLine = '${DeviceSignalClassifier.idLabel(signal.id)}: '
         '${DeviceSignalClassifier.formatId(signal.id)}';
 
     return Card(

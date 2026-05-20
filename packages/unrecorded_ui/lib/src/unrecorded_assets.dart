@@ -41,8 +41,10 @@ abstract final class UnrecordedAssetPaths {
 
   // Status badges
   static const String statusProtectionOn = 'assets/status/protection-on.svg';
-  static const String statusScanningActive = 'assets/status/scanning-active.svg';
-  static const String statusScanningPaused = 'assets/status/scanning-paused.svg';
+  static const String statusScanningActive =
+      'assets/status/scanning-active.svg';
+  static const String statusScanningPaused =
+      'assets/status/scanning-paused.svg';
   static const String statusHighRisk = 'assets/status/high-risk.svg';
   static const String statusBluetoothOff = 'assets/status/bluetooth-off.svg';
   static const String statusPermissionsNeeded =

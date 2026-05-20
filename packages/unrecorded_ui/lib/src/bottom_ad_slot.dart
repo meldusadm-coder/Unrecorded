@@ -64,8 +64,7 @@ class BottomAdSlot extends StatelessWidget {
           child: SizedBox(
             height: AppThemeConstants.bottomAdHeight,
             width: double.infinity,
-            child: child ??
-                const SizedBox.shrink(),
+            child: child ?? const SizedBox.shrink(),
           ),
         ),
       ],

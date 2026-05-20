@@ -100,9 +100,7 @@ class UnrecordedIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final effectiveColor = color ??
-        (Theme.of(context).brightness == Brightness.dark
-            ? Colors.white
-            : null);
+        (Theme.of(context).brightness == Brightness.dark ? Colors.white : null);
 
     return _buildSvg(
       assetPath: asset.assetPath,

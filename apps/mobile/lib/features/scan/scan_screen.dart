@@ -251,7 +251,6 @@ class ScanScreen extends ConsumerWidget {
         );
     }
   }
-
 }
 
 final _signalClassifier = DeviceSignalClassifier();
