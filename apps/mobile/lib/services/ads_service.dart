@@ -22,13 +22,21 @@ String get _bannerAdUnitId {
   return kDebugMode ? _testBannerId : _testBannerId;
 }
 
+/// Bumped when banner load state changes so [bannerAdWidgetProvider] rebuilds.
+final bannerAdRevisionProvider = StateProvider<int>((ref) => 0);
+
 class AdsService {
-  AdsService();
+  AdsService({VoidCallback? onBannerStateChanged})
+      : _onBannerStateChanged = onBannerStateChanged;
+
+  final VoidCallback? _onBannerStateChanged;
 
   BannerAd? _bannerAd;
   bool _loaded = false;
 
   BannerAd? get bannerAd => _loaded ? _bannerAd : null;
+
+  void _notifyBannerStateChanged() => _onBannerStateChanged?.call();
 
   Future<void> init() async {
     await MobileAds.instance.initialize();
@@ -46,11 +54,13 @@ class AdsService {
       listener: BannerAdListener(
         onAdLoaded: (ad) {
           _loaded = true;
+          _notifyBannerStateChanged();
         },
         onAdFailedToLoad: (ad, error) {
           ad.dispose();
           _bannerAd = null;
           _loaded = false;
+          _notifyBannerStateChanged();
         },
       ),
     );
@@ -74,7 +84,11 @@ final adsServiceProvider = FutureProvider<AdsService>((ref) async {
   final consent = ref.read(adConsentServiceProvider);
   await consent.requestConsentIfNeeded();
 
-  final service = AdsService();
+  final service = AdsService(
+    onBannerStateChanged: () {
+      ref.read(bannerAdRevisionProvider.notifier).update((n) => n + 1);
+    },
+  );
   await service.init();
   await service.loadBanner();
   ref.onDispose(service.dispose);
@@ -84,6 +98,7 @@ final adsServiceProvider = FutureProvider<AdsService>((ref) async {
 /// Banner widget for [BottomAdSlot], or null when ads removed / not loaded.
 final bannerAdWidgetProvider = Provider<Widget?>((ref) {
   if (ref.watch(adsRemovedProvider)) return null;
+  ref.watch(bannerAdRevisionProvider);
 
   final async = ref.watch(adsServiceProvider);
   return async.maybeWhen(
