@@ -4,8 +4,9 @@ import 'package:unrecorded_mobile/router.dart';
 import 'package:unrecorded_ui/unrecorded_ui.dart';
 
 void main() {
-  test('notification payload matches alert route', () {
-    expect(notificationAlertPayload, 'alert-info');
+  test('notification payload matches alert details route', () {
+    expect(notificationAlertPayload, 'alert-details');
+    expect(alertDetailsRoute, '/alert-details');
     expect(alertInfoRoute, '/alert-info');
   });
 

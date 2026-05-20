@@ -68,7 +68,7 @@ class ScanScreen extends ConsumerWidget {
                 title: AppCopy.alertCardTitle,
                 body: AppCopy.alertCardBody,
                 level: state.riskLevel,
-                onViewDetails: () => context.push('/alert-info'),
+                onViewDetails: () => context.push('/alert-details'),
                 onDismiss: () => controller.dismissRiskAlert(),
               ),
               const SizedBox(height: 8),
@@ -84,7 +84,10 @@ class ScanScreen extends ConsumerWidget {
                       asset: UnrecordedStatusAsset.scanningPaused,
                       size: 24,
                     )
-                  : const AppLogo(size: 24),
+                  : const UnrecordedStatusIcon(
+                      asset: UnrecordedStatusAsset.protectionOn,
+                      size: 24,
+                    ),
               color: state.isProtectionActive ? UnrecordedColors.danger : null,
               onPressed: () async {
                 if (state.isProtectionActive) {
@@ -96,12 +99,7 @@ class ScanScreen extends ConsumerWidget {
             ),
             if (state.signals.isNotEmpty) ...[
               const SizedBox(height: 20),
-              Text(
-                'Nearby signals (${state.signals.length})',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const SizedBox(height: 8),
-              ...state.signals.map(_buildSignalCard),
+              _NearbySignalsSection(signals: state.signals),
             ],
             if (state.reasons.isNotEmpty && state.isProtectionActive) ...[
               const SizedBox(height: 16),
@@ -257,27 +255,78 @@ class ScanScreen extends ConsumerWidget {
     }
   }
 
-  Widget _buildSignalCard(DetectedSignal signal) {
-    final name = signal.displayName ?? 'Unknown device';
-    return SignalCard(
-      name: name,
-      subtitle: signal.id,
-      rssi: signal.rssi,
-      isSuspicious: _isSuspiciousName(signal.displayName),
+}
+
+final _signalClassifier = DeviceSignalClassifier();
+
+class _NearbySignalsSection extends StatefulWidget {
+  const _NearbySignalsSection({required this.signals});
+
+  final List<DetectedSignal> signals;
+
+  @override
+  State<_NearbySignalsSection> createState() => _NearbySignalsSectionState();
+}
+
+class _NearbySignalsSectionState extends State<_NearbySignalsSection> {
+  var _benignExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final classified = _signalClassifier.classifyAll(widget.signals);
+    final primary = classified
+        .where((c) => c.category != DeviceSignalCategory.likelyBenign)
+        .toList();
+    final benign = classified
+        .where((c) => c.category == DeviceSignalCategory.likelyBenign)
+        .toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Nearby signals (${primary.length})',
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
+        const SizedBox(height: 8),
+        if (primary.isEmpty)
+          Text(
+            'Only devices unlikely to be recording wearables were detected. '
+            'See other nearby devices below.',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(height: 1.4),
+          ),
+        ...primary.map(_signalCard),
+        if (benign.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          ExpansionTile(
+            tilePadding: EdgeInsets.zero,
+            initiallyExpanded: _benignExpanded,
+            onExpansionChanged: (v) => setState(() => _benignExpanded = v),
+            title: Text(
+              'Other nearby devices (${benign.length})',
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            subtitle: Text(
+              'Unlikely to be recording wearables',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            children: benign.map(_signalCard).toList(),
+          ),
+        ],
+      ],
     );
   }
 
-  bool _isSuspiciousName(String? name) {
-    if (name == null) return false;
-    final lower = name.toLowerCase();
-    const keywords = [
-      'ray-ban',
-      'meta',
-      'smart glasses',
-      'spectacles',
-      'camera',
-      'glasses',
-    ];
-    return keywords.any(lower.contains);
+  Widget _signalCard(ClassifiedSignal classified) {
+    final signal = classified.signal;
+    final name = signal.displayName ?? 'Unknown device';
+    return SignalCard(
+      name: name,
+      typeLabel: classified.typeLabel,
+      subtitle: DeviceSignalClassifier.formatId(signal.id),
+      rssi: signal.rssi,
+      isSuspicious:
+          classified.category == DeviceSignalCategory.possibleRecordingWearable,
+    );
   }
 }

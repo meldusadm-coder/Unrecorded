@@ -4,6 +4,8 @@
 /// No Flutter dependency — this package is testable with plain `dart test`.
 library;
 
+export 'src/classification/device_signal_category.dart';
+export 'src/classification/device_signal_classifier.dart';
 export 'src/models/detected_signal.dart';
 export 'src/models/risk_level.dart';
 export 'src/models/scan_snapshot.dart';

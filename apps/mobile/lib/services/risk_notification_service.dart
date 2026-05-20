@@ -63,7 +63,7 @@ class RiskNotificationService {
 
   void _onNotificationResponse(NotificationResponse response) {
     if (response.payload == notificationAlertPayload) {
-      navigateToAlertInfo();
+      navigateToAlertDetails();
     }
   }
 
@@ -79,7 +79,7 @@ class RiskNotificationService {
       if (details?.didNotificationLaunchApp != true) return;
       final payload = details?.notificationResponse?.payload;
       if (payload == notificationAlertPayload) {
-        navigateToAlertInfo();
+        navigateToAlertDetails();
       }
     } catch (_) {}
   }

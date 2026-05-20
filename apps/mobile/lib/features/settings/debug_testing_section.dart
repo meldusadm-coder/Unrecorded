@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:unrecorded_radio/unrecorded_radio.dart';
 import 'package:unrecorded_ui/unrecorded_ui.dart';
 
+import '../../services/risk_notification_service.dart';
 import '../../services/scan_runtime.dart';
 import '../../services/scanner_provider.dart';
+import '../scan/scan_state.dart';
 
 /// Debug-only controls for local UAT and BLE vs demo scanning.
 class DebugTestingSection extends ConsumerWidget {
@@ -78,15 +80,24 @@ class DebugTestingSection extends ConsumerWidget {
         ),
         const SizedBox(height: 12),
         FilledButton.tonal(
-          onPressed: () {
+          onPressed: () async {
             ref.read(scanControllerProvider.notifier).simulateHighRiskAlert();
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'Injected a sample high-risk scan batch.',
+            final scanState = ref.read(scanControllerProvider);
+            if (scanState.status == ScanStatus.possibleRiskDetected) {
+              await ref
+                  .read(riskNotificationServiceProvider)
+                  .showRiskAlertIfEnabled(riskLevel: scanState.riskLevel);
+            }
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Sample alert shown on the scan screen. Use Demo → '
+                    'Low risk only to avoid repeated emulator alerts.',
+                  ),
                 ),
-              ),
-            );
+              );
+            }
           },
           child: const Row(
             mainAxisSize: MainAxisSize.min,

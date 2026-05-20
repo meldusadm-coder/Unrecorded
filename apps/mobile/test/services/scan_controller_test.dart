@@ -177,6 +177,22 @@ void main() {
 
     expect(controller.state.status, ScanStatus.possibleRiskDetected);
     expect(controller.state.riskLevel, anyOf(RiskLevel.medium, RiskLevel.high));
+    expect(controller.state.alertDismissed, isFalse);
+  });
+
+  test('simulateHighRiskAlert re-shows alert after dismiss', () {
+    final controller = _controller(
+      scanner: FakeRadioScanner(),
+      runtime: _TestRuntime(const ScanPreflightResult.ok()),
+    );
+
+    controller.simulateHighRiskAlert();
+    controller.dismissRiskAlert();
+    expect(controller.state.alertDismissed, isTrue);
+
+    controller.simulateHighRiskAlert();
+    expect(controller.state.alertDismissed, isFalse);
+    expect(controller.state.status, ScanStatus.possibleRiskDetected);
   });
 
   test('pauseProtection sets paused state', () async {

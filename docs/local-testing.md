@@ -8,11 +8,12 @@ Unrecorded detects **possible** nearby smart-glass-style BLE signals. It does no
 |------|------------------|
 | Emulator or fast UAT | `./scripts/dev-run-demo.sh` or F5 → **Unrecorded (demo UAT)** |
 | Physical Android + real BLE | `./scripts/dev-run.sh` or F5 → **Unrecorded (real BLE)** |
-| Instant alert in debug app | Settings → **Developer testing** → **Simulate alert now** |
+| Instant alert in debug app | Settings → **Developer testing** → **Simulate alert now** (re-shows card after dismiss) |
+| Calmer emulator UAT | Developer testing → **Demo scenario** → **Low risk only** |
 | Risk notification toggle | Settings → **Alerts** → **Risk alerts** |
 | Notification risk level | Settings → **Alerts** → **Notify me for** (when alerts on) |
 | Developer testing UI | **Debug/profile builds only** — hidden in release (`kReleaseMode`) |
-| Automated regression | `cd packages/unrecorded_core && dart test` (and radio + mobile tests) |
+| Automated regression | `cd packages/unrecorded_core && flutter test` (and radio + mobile tests) |
 
 ## Demo mode (scripted BLE)
 
@@ -41,10 +42,12 @@ Open **Settings & Privacy** → **Developer testing**:
 
 - **Demo** vs **Real BLE** — persisted on device; switching restarts an active scan.
 - **Demo scenario** — low / medium / high / random.
-- **Simulate alert now** — injects one high-risk batch without waiting for a scan tick.
+- **Simulate alert now** — injects one high-risk batch and re-shows the on-screen alert (even if you dismissed it). May also fire a local notification if alerts are enabled.
 - **Reset scanner defaults** — clears overrides; emulators default back to demo + high scenario.
 
-On first launch in debug, **Android emulators and iOS simulators** default to demo + high so UAT works without flags.
+On first launch in debug, **Android emulators and iOS simulators** default to demo + high, so you may see alerts without pressing simulate. Choose **Low risk only** for a quieter session.
+
+**Nearby signals** on the scan screen hide headphones/speakers under **Other nearby devices**; alert details show the top possible recording wearables only.
 
 ## Real Bluetooth testing
 
@@ -95,7 +98,9 @@ You do **not** need to wipe the emulator for these errors — they are build-pat
 
 - **Settings** opens with **Alerts** at the top (risk notifications toggle and threshold).
 - **Developer testing** appears at the bottom of Settings in debug/profile builds only (hidden in release).
-- Tapping a **risk notification** opens **How detection works** (`/alert-info`).
+- Tapping a **risk notification** or **View details** on an alert opens **Alert details** (`/alert-details`) — risk level, possible device names/types, and reasons. **How detection works** (`/alert-info`) remains linked from there and from Help.
+- **Notify me for** uses brand icons; the app bundles Material Design icons (`uses-material-design: true`) for dropdown affordances.
+- Bluetooth **address prefix hints** (local map only) may appear on alert details when the scan ID looks like a MAC — not proof of vendor or recording.
 - **Remove ads** above the banner uses a full-width tap row — use that link, not the ad itself.
 
 ## Brand icons missing after pulling UI changes
@@ -112,7 +117,7 @@ In **debug**, a failed SVG shows a small broken-image icon and logs `Unrecorded 
 
 ```bash
 flutter pub get
-cd packages/unrecorded_core && dart test
+cd packages/unrecorded_core && flutter test
 cd packages/unrecorded_radio && flutter test
 cd apps/mobile && flutter test
 ```

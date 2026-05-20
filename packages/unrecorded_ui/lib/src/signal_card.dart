@@ -7,6 +7,7 @@ import 'unrecorded_icon.dart';
 class SignalCard extends StatelessWidget {
   final String name;
   final String subtitle;
+  final String? typeLabel;
   final int? rssi;
   final bool isSuspicious;
 
@@ -14,6 +15,7 @@ class SignalCard extends StatelessWidget {
     super.key,
     required this.name,
     required this.subtitle,
+    this.typeLabel,
     this.rssi,
     this.isSuspicious = false,
   });
@@ -59,7 +61,16 @@ class SignalCard extends StatelessWidget {
             fontSize: 14,
           ),
         ),
-        subtitle: Text(subtitle, style: theme.textTheme.bodySmall),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (typeLabel != null) ...[
+              Text(typeLabel!, style: theme.textTheme.bodySmall),
+              const SizedBox(height: 2),
+            ],
+            Text(subtitle, style: theme.textTheme.bodySmall),
+          ],
+        ),
         trailing: rssi != null
             ? Text(
                 '$rssi dBm',

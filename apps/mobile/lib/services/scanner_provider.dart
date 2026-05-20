@@ -172,6 +172,9 @@ class ScanController extends StateNotifier<ScanState> {
   /// Injects a high-risk batch for debug UAT (no BLE required).
   void simulateHighRiskAlert() {
     _onResults(FakeRadioScanner.highRiskBatch());
+    if (state.status == ScanStatus.possibleRiskDetected) {
+      _emit(state.copyWith(alertDismissed: false));
+    }
   }
 
   void dismissRiskAlert() {

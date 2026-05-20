@@ -101,22 +101,33 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             if (_riskNotificationsEnabled == true) ...[
               const SizedBox(height: 8),
-              DropdownMenu<NotificationRiskThreshold>(
-                key: ValueKey(_notificationRiskThreshold),
-                label: const Text(AppCopy.riskNotificationLevelTitle),
-                helperText: AppCopy.riskNotificationLevelSubtitle,
-                initialSelection: _notificationRiskThreshold,
-                enabled: _notificationRiskThreshold != null,
-                dropdownMenuEntries: NotificationRiskThreshold.values
-                    .map(
-                      (t) => DropdownMenuEntry(
-                        value: t,
-                        label: t.label,
+                    DropdownMenu<NotificationRiskThreshold>(
+                      key: ValueKey(_notificationRiskThreshold),
+                      label: const Text(AppCopy.riskNotificationLevelTitle),
+                      helperText: AppCopy.riskNotificationLevelSubtitle,
+                      initialSelection: _notificationRiskThreshold,
+                      enabled: _notificationRiskThreshold != null,
+                      trailingIcon: UnrecordedIcon(
+                        asset: UnrecordedIconAsset.more,
+                        size: 24,
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
-                    )
-                    .toList(),
-                onSelected: _setNotificationRiskThreshold,
-              ),
+                      dropdownMenuEntries: NotificationRiskThreshold.values
+                          .map(
+                            (t) => DropdownMenuEntry(
+                              value: t,
+                              label: t.label,
+                              leadingIcon: UnrecordedIcon(
+                                asset: t == NotificationRiskThreshold.highOnly
+                                    ? UnrecordedIconAsset.riskHigh
+                                    : UnrecordedIconAsset.riskMedium,
+                                size: 22,
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      onSelected: _setNotificationRiskThreshold,
+                    ),
             ],
             const SizedBox(height: 24),
             PrivacyNoticeCard(

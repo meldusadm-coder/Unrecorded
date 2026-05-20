@@ -59,4 +59,25 @@ void main() {
     expect(find.byType(UnrecordedIcon), findsWidgets);
     expect(find.byType(AppLogo), findsWidgets);
   });
+
+  testWidgets('notify threshold dropdown uses brand icons', (tester) async {
+    tester.view.physicalSize = const Size(1080, 1920);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    SharedPreferences.setMockInitialValues({
+      'risk_notifications_enabled': true,
+      'notification_risk_threshold': 'highOnly',
+    });
+
+    await tester.pumpWidget(testApp());
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('settings_button')));
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+
+    expect(find.text(AppCopy.riskNotificationLevelTitle), findsWidgets);
+    expect(find.byIcon(Icons.broken_image_outlined), findsNothing);
+    expect(find.byType(UnrecordedIcon), findsWidgets);
+  });
 }
