@@ -8,6 +8,8 @@ cd "${REPO_ROOT}"
 export GRADLE_USER_HOME="${GRADLE_USER_HOME:-${HOME}/.gradle}"
 mkdir -p "${GRADLE_USER_HOME}"
 
+bash "${REPO_ROOT}/scripts/prepare-android-build.sh"
+
 echo "==> flutter pub get"
 flutter pub get
 

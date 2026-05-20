@@ -63,6 +63,9 @@ done
 echo "==> Preparing host emulator"
 bash .devcontainer/scripts/prepare-emulator.sh
 
+echo "==> Preparing Android build directories"
+bash scripts/prepare-android-build.sh
+
 if [[ "${CONNECT_ONLY}" == true ]]; then
   echo "Ready. Run: ./scripts/dev-run.sh"
   exit 0

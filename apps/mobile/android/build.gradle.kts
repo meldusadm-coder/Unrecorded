@@ -5,10 +5,15 @@ allprojects {
     }
 }
 
+// Dev container (Windows Docker): keep Gradle outputs off the bind mount so chmod/755
+// and the build cache work. Override with UNRECORDED_ANDROID_BUILD_DIR (absolute path).
 val newBuildDir: Directory =
-    rootProject.layout.buildDirectory
-        .dir("../../build")
-        .get()
+    System.getenv("UNRECORDED_ANDROID_BUILD_DIR")?.takeIf { it.isNotBlank() }?.let { path ->
+        rootProject.objects.directoryProperty().apply {
+            set(rootProject.file(path))
+        }.get()
+    }
+        ?: rootProject.layout.buildDirectory.dir("../../build").get()
 rootProject.layout.buildDirectory.value(newBuildDir)
 
 subprojects {

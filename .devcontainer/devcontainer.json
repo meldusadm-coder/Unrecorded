@@ -13,7 +13,8 @@
     "ANDROID_HOME": "/opt/android-sdk",
     "ANDROID_SDK_ROOT": "/opt/android-sdk",
     "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk-amd64",
-    "GRADLE_USER_HOME": "/home/vscode/.gradle"
+    "GRADLE_USER_HOME": "/home/vscode/.gradle",
+    "UNRECORDED_ANDROID_BUILD_DIR": "/home/vscode/.cache/unrecorded-android-build"
   },
   "postCreateCommand": "bash .devcontainer/post-create.sh",
   "customizations": {

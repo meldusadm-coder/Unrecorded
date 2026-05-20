@@ -26,6 +26,7 @@ flutter pub get
 
 echo "==> Gradle wrapper (downloads once; cache lives in ~/.gradle, not the bind mount)"
 mkdir -p "${HOME}/.gradle"
+mkdir -p "${UNRECORDED_ANDROID_BUILD_DIR:-${HOME}/.cache/unrecorded-android-build}"
 if [ -f /workspace/apps/mobile/android/gradlew ]; then
   (cd /workspace/apps/mobile/android && ./gradlew --version) || true
 fi

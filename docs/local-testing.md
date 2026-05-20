@@ -65,6 +65,26 @@ On Windows with Docker, the first `assembleDebug` can take **10–20+ minutes** 
 
 See [devcontainer.md](devcontainer.md) → **assembleDebug very slow or appears stuck**.
 
+## Gradle: `Could not set file mode 755` on `build/…`
+
+On **Windows + dev container**, Android plugin outputs under `apps/mobile/build` sit on a bind mount. Gradle may fail with `generateDebugResValues` / `Could not set file mode 755` if some paths are **root-owned** (often after an interrupted build).
+
+**Fix (container terminal):**
+
+```bash
+./scripts/prepare-android-build.sh
+cd apps/mobile && flutter clean
+./scripts/dev-run-demo.sh
+```
+
+The dev container keeps Gradle outputs under `~/.cache/unrecorded-android-build` (`UNRECORDED_ANDROID_BUILD_DIR`) so chmod and caching work. After pulling this change, **reopen or rebuild** the dev container once so that env var is set, or export it manually:
+
+```bash
+export UNRECORDED_ANDROID_BUILD_DIR=/home/vscode/.cache/unrecorded-android-build
+```
+
+You do **not** need to wipe the emulator for this error — it is a host build failure, not an install issue.
+
 ## CI and unit tests
 
 ```bash
