@@ -6,15 +6,27 @@ import 'unrecorded_assets.dart';
 
 /// Brand shield mark from the Unrecorded design kit.
 class AppLogo extends StatelessWidget {
-  const AppLogo({super.key, this.size = 28});
+  const AppLogo({
+    super.key,
+    this.size = 28,
+    this.forColoredBackground = false,
+  });
 
   final double size;
+
+  /// Light mark for primary/danger buttons (same logo as the app bar, inverted).
+  final bool forColoredBackground;
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final assetPath =
-        isDark ? UnrecordedAssetPaths.logoMarkMono : UnrecordedAssetPaths.logoMark;
+    final assetPath = forColoredBackground || isDark
+        ? UnrecordedAssetPaths.logoMarkMono
+        : UnrecordedAssetPaths.logoMark;
+
+    final colorFilter = forColoredBackground
+        ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
+        : null;
 
     return SvgPicture.asset(
       assetPath,
@@ -22,6 +34,7 @@ class AppLogo extends StatelessWidget {
       width: size,
       height: size,
       fit: BoxFit.contain,
+      colorFilter: colorFilter,
       errorBuilder: (context, error, stackTrace) {
         if (kDebugMode) {
           debugPrint('AppLogo SVG failed: $assetPath — $error');

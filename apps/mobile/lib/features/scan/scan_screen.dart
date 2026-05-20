@@ -84,10 +84,7 @@ class ScanScreen extends ConsumerWidget {
                       asset: UnrecordedStatusAsset.scanningPaused,
                       size: 24,
                     )
-                  : const UnrecordedStatusIcon(
-                      asset: UnrecordedStatusAsset.protectionOn,
-                      size: 24,
-                    ),
+                  : const AppLogo(size: 24, forColoredBackground: true),
               color: state.isProtectionActive ? UnrecordedColors.danger : null,
               onPressed: () async {
                 if (state.isProtectionActive) {
