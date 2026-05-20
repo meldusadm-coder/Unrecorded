@@ -1,3 +1,4 @@
+import '../models/detected_signal.dart';
 import '../models/risk_level.dart';
 import '../models/scan_snapshot.dart';
 import 'scoring_rule.dart';
@@ -14,10 +15,14 @@ class ScoringResult {
   /// Plain-English reasons explaining why this risk level was assigned.
   final List<String> reasons;
 
+  /// Signals that contributed at least one scoring rule (for alert details).
+  final List<DetectedSignal> contributingSignals;
+
   const ScoringResult({
     required this.level,
     required this.totalScore,
     required this.reasons,
+    this.contributingSignals = const [],
   });
 }
 
@@ -34,6 +39,8 @@ class RiskScoringEngine {
       : _rules = rules ??
             [SuspiciousNameRule(), StrongSignalRule(), ConnectableDeviceRule()];
 
+  List<ScoringRule> get rules => List.unmodifiable(_rules);
+
   /// Score a single [ScanSnapshot] and return a [ScoringResult].
   ScoringResult evaluate(ScanSnapshot snapshot) {
     if (snapshot.isEmpty) {
@@ -46,16 +53,20 @@ class RiskScoringEngine {
 
     var total = 0;
     final reasons = <String>{};
+    final contributing = <DetectedSignal>[];
 
     for (final signal in snapshot.signals) {
+      var signalScored = false;
       for (final rule in _rules) {
         final pts = rule.score(signal);
         if (pts > 0) {
           total += pts;
+          signalScored = true;
           final r = rule.reason(signal);
           if (r != null) reasons.add(r);
         }
       }
+      if (signalScored) contributing.add(signal);
     }
 
     final level = _levelFromScore(total);
@@ -71,6 +82,7 @@ class RiskScoringEngine {
       level: level,
       totalScore: total,
       reasons: reasons.toList(),
+      contributingSignals: contributing,
     );
   }
 

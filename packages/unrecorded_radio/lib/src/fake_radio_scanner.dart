@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'fake_demo_scenario.dart';
 import 'radio_scan_result.dart';
 import 'radio_scanner.dart';
 
@@ -8,6 +9,10 @@ import 'radio_scanner.dart';
 ///
 /// Use this when BLE hardware is unavailable (emulator, tests, demo mode).
 class FakeRadioScanner implements RadioScanner {
+  FakeRadioScanner({this.scenario = FakeDemoScenario.random});
+
+  final FakeDemoScenario scenario;
+
   StreamController<List<RadioScanResult>>? _controller;
   Timer? _timer;
   final _random = Random();
@@ -38,7 +43,6 @@ class FakeRadioScanner implements RadioScanner {
       _controller!.add(_generateBatch());
     });
 
-    // Emit an initial batch immediately.
     if (_controller != null && !_controller!.isClosed) {
       _controller!.add(_generateBatch());
     }
@@ -46,7 +50,41 @@ class FakeRadioScanner implements RadioScanner {
 
   List<RadioScanResult> _generateBatch() {
     final now = DateTime.now();
-    final results = <RadioScanResult>[
+
+    switch (scenario) {
+      case FakeDemoScenario.low:
+        return _benignBatch(now);
+      case FakeDemoScenario.medium:
+        return _mediumRiskBatch(now);
+      case FakeDemoScenario.high:
+        return highRiskBatch(observedAt: now);
+      case FakeDemoScenario.random:
+        return _randomBatch(now);
+    }
+  }
+
+  List<RadioScanResult> _randomBatch(DateTime now) {
+    final results = _benignBatch(now);
+
+    if (_random.nextInt(3) == 0) {
+      results.add(_suspiciousDevice(now));
+    }
+
+    if (_random.nextBool()) {
+      results.add(
+        RadioScanResult(
+          id: 'fake:11:22:33:04',
+          rssi: -80 + _random.nextInt(15),
+          observedAt: now,
+        ),
+      );
+    }
+
+    return results;
+  }
+
+  List<RadioScanResult> _benignBatch(DateTime now) {
+    return [
       RadioScanResult(
         id: 'fake:aa:bb:cc:01',
         name: 'JBL Flip 6',
@@ -62,31 +100,43 @@ class FakeRadioScanner implements RadioScanner {
         observedAt: now,
       ),
     ];
+  }
 
-    // Occasionally include a suspicious device.
-    if (_random.nextInt(3) == 0) {
-      results.add(
-        RadioScanResult(
-          id: 'fake:dd:ee:ff:03',
-          name: 'Ray-Ban Meta',
-          rssi: -40 + _random.nextInt(20) - 10,
-          isConnectable: true,
-          observedAt: now,
-        ),
-      );
-    }
+  List<RadioScanResult> _mediumRiskBatch(DateTime now) {
+    return [
+      ..._benignBatch(now),
+      RadioScanResult(
+        id: 'fake:medium:01',
+        name: 'Unknown BLE',
+        rssi: -48,
+        isConnectable: false,
+        observedAt: now,
+      ),
+    ];
+  }
 
-    // Sometimes add an unnamed device.
-    if (_random.nextBool()) {
-      results.add(
-        RadioScanResult(
-          id: 'fake:11:22:33:04',
-          rssi: -80 + _random.nextInt(15),
-          observedAt: now,
-        ),
-      );
-    }
+  static RadioScanResult _suspiciousDevice(DateTime now) {
+    return RadioScanResult(
+      id: 'fake:dd:ee:ff:03',
+      name: 'Ray-Ban Meta',
+      rssi: -40,
+      isConnectable: true,
+      observedAt: now,
+    );
+  }
 
-    return results;
+  /// One batch that should score medium or high (UAT / debug inject).
+  static List<RadioScanResult> highRiskBatch({DateTime? observedAt}) {
+    final now = observedAt ?? DateTime.now();
+    return [
+      RadioScanResult(
+        id: 'fake:aa:bb:cc:01',
+        name: 'JBL Flip 6',
+        rssi: -65,
+        isConnectable: false,
+        observedAt: now,
+      ),
+      _suspiciousDevice(now),
+    ];
   }
 }

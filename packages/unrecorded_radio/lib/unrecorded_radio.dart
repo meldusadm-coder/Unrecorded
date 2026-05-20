@@ -6,6 +6,7 @@ library;
 
 export 'src/radio_scanner.dart';
 export 'src/radio_scan_result.dart';
+export 'src/fake_demo_scenario.dart';
 export 'src/fake_radio_scanner.dart';
 export 'src/ble_radio_scanner.dart';
 export 'src/radio_scanner_exception.dart';

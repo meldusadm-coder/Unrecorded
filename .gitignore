@@ -1,6 +1,8 @@
 # Dart/Flutter
 .dart_tool/
 build/
+# Dev container may symlink this path; never commit (breaks CI flutter test).
+apps/mobile/build
 .flutter-plugins
 .flutter-plugins-dependencies
 .packages
@@ -60,9 +62,11 @@ coverage/
 # IDE
 .idea/
 .vscode/
+!.vscode/launch.json
 *.iml
 *.swp
 *.swo
+.devcontainer/gitconfig
 
 # OS
 .DS_Store

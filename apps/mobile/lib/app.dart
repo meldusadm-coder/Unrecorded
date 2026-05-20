@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:unrecorded_ui/unrecorded_ui.dart';
 
 import 'router.dart';
 
@@ -25,16 +26,28 @@ class _UnrecordedAppState extends State<UnrecordedApp> {
       title: 'Unrecorded',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorSchemeSeed: const Color(0xFF5C6BC0),
+        colorScheme: UnrecordedColorScheme.light(),
         useMaterial3: true,
         brightness: Brightness.light,
+        scaffoldBackgroundColor: UnrecordedColors.surface,
         appBarTheme: const AppBarTheme(centerTitle: false, elevation: 0),
+        cardTheme: CardThemeData(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppThemeConstants.cardRadius),
+          ),
+        ),
       ),
       darkTheme: ThemeData(
-        colorSchemeSeed: const Color(0xFF5C6BC0),
+        colorScheme: UnrecordedColorScheme.dark(),
         useMaterial3: true,
         brightness: Brightness.dark,
+        scaffoldBackgroundColor: UnrecordedColors.background,
         appBarTheme: const AppBarTheme(centerTitle: false, elevation: 0),
+        cardTheme: CardThemeData(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppThemeConstants.cardRadius),
+          ),
+        ),
       ),
       routerConfig: _router,
     );

@@ -14,6 +14,11 @@ class AlertExplanationScreen extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           children: [
+            const HelperText(
+              text: AppCopy.riskResultHelper,
+              expandableDetail: PrivacyDisclaimer.detectionDisclaimer,
+            ),
+            const SizedBox(height: 20),
             _section(
               theme,
               'Why you may see a warning',

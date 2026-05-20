@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:unrecorded_core/unrecorded_core.dart';
 
+import 'app_theme.dart';
+import 'unrecorded_icon.dart';
+
 /// Displays the current [RiskLevel] as a compact coloured badge.
 class RiskBadge extends StatelessWidget {
   final RiskLevel level;
@@ -19,7 +22,7 @@ class RiskBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.shield_outlined, size: 16, color: _color),
+          UnrecordedIcon(asset: _iconAsset, size: 16, color: _color),
           const SizedBox(width: 6),
           Text(
             _label,
@@ -34,13 +37,22 @@ class RiskBadge extends StatelessWidget {
     );
   }
 
-  Color get _color => switch (level) {
-        RiskLevel.low => const Color(0xFF4CAF50),
-        RiskLevel.medium => const Color(0xFFFFA726),
-        RiskLevel.high => const Color(0xFFEF5350),
+  UnrecordedIconAsset get _iconAsset => switch (level) {
+        RiskLevel.low => UnrecordedIconAsset.riskLow,
+        RiskLevel.medium => UnrecordedIconAsset.riskMedium,
+        RiskLevel.high => UnrecordedIconAsset.riskHigh,
       };
 
-  String get _label => switch (level) {
+  Color get _color => switch (level) {
+        RiskLevel.low => UnrecordedColors.success,
+        RiskLevel.medium => UnrecordedColors.warning,
+        RiskLevel.high => UnrecordedColors.danger,
+      };
+
+  String get _label => labelFor(level);
+
+  /// Short user-facing label for a [RiskLevel] (notifications, copy).
+  static String labelFor(RiskLevel level) => switch (level) {
         RiskLevel.low => 'Low risk',
         RiskLevel.medium => 'Medium risk',
         RiskLevel.high => 'High risk',

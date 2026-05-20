@@ -50,9 +50,15 @@ flutter pub get
 # Run the app (in apps/mobile)
 cd apps/mobile && flutter run
 
+# Demo / UAT on emulator (scripted BLE, deterministic alerts)
+./scripts/dev-run-demo.sh
+# or: flutter run --dart-define=UNRECORDED_DEMO_MODE=true --dart-define=UNRECORDED_DEMO_SCENARIO=high
+
 # Or build a debug APK
 cd apps/mobile && flutter build apk --debug
 ```
+
+See [docs/local-testing.md](docs/local-testing.md) for BLE vs demo mode, debug settings, and UAT checklists.
 
 ### Dev container (recommended on Windows)
 
@@ -114,6 +120,10 @@ Optional external setup (still free tiers available):
 ## Privacy model
 
 All scanning is local. No account, no cloud, no analytics. See [docs/privacy-model.md](docs/privacy-model.md).
+
+## Monetisation and widget
+
+Optional bottom banner ads and pay-what-you-want remove-ads IAP are documented in [docs/monetisation.md](docs/monetisation.md). Android home screen widget notes: [docs/widget.md](docs/widget.md).
 
 ## Funding
 

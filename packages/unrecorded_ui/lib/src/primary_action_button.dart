@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 /// A large, prominent call-to-action button.
 class PrimaryActionButton extends StatelessWidget {
   final String label;
-  final IconData icon;
+  final Widget icon;
   final VoidCallback? onPressed;
   final Color? color;
 
@@ -21,16 +21,22 @@ class PrimaryActionButton extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       height: 52,
-      child: FilledButton.icon(
+      child: FilledButton(
         onPressed: onPressed,
-        icon: Icon(icon),
-        label: Text(label),
         style: FilledButton.styleFrom(
           backgroundColor: color ?? theme.colorScheme.primary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
           textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            icon,
+            const SizedBox(width: 8),
+            Text(label),
+          ],
         ),
       ),
     );

@@ -45,6 +45,23 @@ void main() {
       await sub.cancel();
     });
 
+    test('high scenario always includes suspicious device', () async {
+      final highScanner = FakeRadioScanner(scenario: FakeDemoScenario.high);
+      final completer = Completer<List<RadioScanResult>>();
+      final sub = highScanner.scan().listen((batch) {
+        if (!completer.isCompleted) completer.complete(batch);
+      });
+
+      final batch = await completer.future.timeout(const Duration(seconds: 10));
+      expect(
+        batch.any((r) => r.name?.toLowerCase().contains('ray-ban') ?? false),
+        isTrue,
+      );
+
+      await sub.cancel();
+      await highScanner.stop();
+    });
+
     test('isScanning is true while scanning', () async {
       expect(scanner.isScanning, isFalse);
 

@@ -1,38 +1,67 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:unrecorded_core/unrecorded_core.dart';
+import 'package:unrecorded_ui/unrecorded_ui.dart';
 import 'package:unrecorded_mobile/app.dart';
+import 'package:unrecorded_mobile/app_bootstrap.dart';
+import 'package:unrecorded_mobile/services/ads_service.dart';
+import 'package:unrecorded_mobile/services/scan_runtime.dart';
+import 'package:unrecorded_mobile/services/scanner_config.dart';
+import 'package:unrecorded_mobile/services/scanner_provider.dart';
+import 'package:unrecorded_radio/unrecorded_radio.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
+  Widget testApp() => ProviderScope(
+        overrides: [
+          adsServiceProvider.overrideWith((ref) async => AdsService()),
+          scannerConfigProvider.overrideWith(
+            (ref) => const ScannerConfig(
+              mode: ScannerMode.demo,
+              scenario: FakeDemoScenario.low,
+            ),
+          ),
+          scannerConfigInitProvider.overrideWith((ref) async {}),
+        ],
+        child: const AppBootstrap(child: UnrecordedApp()),
+      );
+
   testWidgets('app renders scan screen with title', (tester) async {
-    await tester.pumpWidget(const ProviderScope(child: UnrecordedApp()));
-    await tester.pumpAndSettle();
+    await tester.pumpWidget(testApp());
+    await tester.pump();
 
     expect(find.text('Unrecorded'), findsOneWidget);
-    expect(find.text('Start scanning'), findsOneWidget);
+    expect(find.text(AppCopy.turnOnProtection), findsOneWidget);
   });
 
-  testWidgets('start scanning button toggles to stop', (tester) async {
-    await tester.pumpWidget(const ProviderScope(child: UnrecordedApp()));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Start scanning'));
+  testWidgets('protection button toggles to pause', (tester) async {
+    await tester.pumpWidget(testApp());
+    await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(find.text('Stop scanning'), findsOneWidget);
+    await tester.tap(find.text(AppCopy.turnOnProtection));
+    await tester.pump();
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+
+    expect(find.text(AppCopy.pauseProtection), findsOneWidget);
   });
 
-  testWidgets('navigates to alert explanation screen', (tester) async {
-    await tester.pumpWidget(const ProviderScope(child: UnrecordedApp()));
-    await tester.pumpAndSettle();
+  testWidgets('navigates to help screen with example alert', (tester) async {
+    await tester.pumpWidget(testApp());
+    await tester.pump();
 
-    final infoButton = find.byWidgetPredicate(
-      (w) => w is IconButton && w.tooltip == 'How detection works',
-    );
-    await tester.tap(infoButton);
-    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Help'));
+    await tester.pumpAndSettle(const Duration(seconds: 2));
 
-    expect(find.text('Why you may see a warning'), findsOneWidget);
+    expect(find.text('Example alert'), findsOneWidget);
+    expect(find.text(AppCopy.alertCardTitle), findsOneWidget);
   });
 
   testWidgets('navigates to settings screen', (tester) async {
@@ -41,13 +70,30 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(const ProviderScope(child: UnrecordedApp()));
-    await tester.pumpAndSettle();
+    await tester.pumpWidget(testApp());
+    await tester.pump();
 
     await tester.tap(find.byKey(const Key('settings_button')));
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(const Duration(seconds: 2));
 
     expect(find.text('Settings & Privacy'), findsOneWidget);
+    expect(find.text(AppCopy.riskNotificationsTitle), findsOneWidget);
     expect(find.text('Local-first'), findsOneWidget);
+
+    final alertsY =
+        tester.getTopLeft(find.text(AppCopy.riskNotificationsTitle)).dy;
+    final localFirstY = tester.getTopLeft(find.text('Local-first')).dy;
+    expect(alertsY, lessThan(localFirstY));
+  });
+
+  testWidgets('shows a single bottom ad slot when navigating to help',
+      (tester) async {
+    await tester.pumpWidget(testApp());
+    await tester.pump();
+
+    await tester.tap(find.byTooltip('Help'));
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+
+    expect(find.byType(BottomAdSlot), findsOneWidget);
   });
 }

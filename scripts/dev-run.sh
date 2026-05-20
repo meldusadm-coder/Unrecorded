@@ -63,6 +63,9 @@ done
 echo "==> Preparing host emulator"
 bash .devcontainer/scripts/prepare-emulator.sh
 
+echo "==> Preparing Android build directories"
+bash scripts/prepare-android-build.sh
+
 if [[ "${CONNECT_ONLY}" == true ]]; then
   echo "Ready. Run: ./scripts/dev-run.sh"
   exit 0
@@ -77,6 +80,9 @@ if [[ "${BUILD_APK}" == true ]]; then
   flutter build apk --debug
 else
   echo "==> flutter run"
+  echo "    Note: first assembleDebug in a dev container can take 10–20+ min (Windows Docker I/O)."
+  echo "    If it seems stuck, open another terminal and run: ./scripts/warm-android-build.sh"
+  echo "    Or: cd apps/mobile/android && ./gradlew :app:assembleDebug --info"
   cd apps/mobile
   if [[ ${#FLUTTER_ARGS[@]} -gt 0 ]]; then
     flutter run "${FLUTTER_ARGS[@]}"

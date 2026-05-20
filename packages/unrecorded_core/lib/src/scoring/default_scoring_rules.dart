@@ -4,7 +4,8 @@ import 'scoring_rule.dart';
 /// Matches device names commonly associated with smart glasses or
 /// wearable recording devices.
 class SuspiciousNameRule extends ScoringRule {
-  static const _keywords = [
+  /// Keywords shared with [DeviceSignalClassifier] for wearable-like names.
+  static const keywords = [
     'ray-ban',
     'meta',
     'smart glasses',
@@ -28,7 +29,7 @@ class SuspiciousNameRule extends ScoringRule {
   int score(DetectedSignal signal) {
     final name = signal.displayName?.toLowerCase();
     if (name == null) return 0;
-    for (final kw in _keywords) {
+    for (final kw in keywords) {
       if (name.contains(kw)) return 40;
     }
     return 0;
