@@ -95,6 +95,39 @@ function Get-AvdList {
   return @($raw | Where-Object { $_ -and $_.Trim() } | ForEach-Object { $_.Trim() })
 }
 
+function Get-EmulatorAdbPort {
+  param([string] $Serial)
+
+  if ($Serial -match '^emulator-(\d+)$') {
+    return [int]$Matches[1] + 1
+  }
+  return 5555
+}
+
+function Setup-ContainerAdbBridge {
+  param(
+    [string] $Adb,
+    [string] $Serial,
+    [int] $ListenPort = 5555
+  )
+
+  $adbPort = Get-EmulatorAdbPort -Serial $Serial
+  Write-Step "Exposing emulator to dev container (port ${ListenPort})"
+
+  # adb -a is also applied in Reset-Adb; ensure server accepts remote clients.
+  $null = Invoke-AdbQuiet -Adb $Adb -a start-server
+
+  # Forward 0.0.0.0:ListenPort -> 127.0.0.1:adbPort for adb connect host.docker.internal:ListenPort
+  $delete = netsh interface portproxy delete v4tov4 listenport=$ListenPort listenaddress=0.0.0.0 2>&1
+  $add = netsh interface portproxy add v4tov4 listenport=$ListenPort listenaddress=0.0.0.0 connectport=$adbPort connectaddress=127.0.0.1 2>&1
+  if ($LASTEXITCODE -ne 0) {
+    Write-Warn "portproxy failed (run PowerShell as Administrator?). Container may still work via ADB_SERVER_SOCKET on port 5037."
+    if ($add) { Write-Host "    $add" -ForegroundColor DarkGray }
+    return
+  }
+  Write-Ok "portproxy 0.0.0.0:${ListenPort} -> 127.0.0.1:${adbPort}"
+}
+
 function Get-RunningEmulatorSerials {
   param([string] $Adb)
 
@@ -230,6 +263,7 @@ function Start-HostEmulator {
     $serial = $running[0]
     Write-Ok "Reusing running emulator: $serial"
     Wait-EmulatorBoot -Adb $adb -ExpectedSerial $serial
+    Setup-ContainerAdbBridge -Adb $adb -Serial $serial
     return @{ Adb = $adb; Serial = $serial; Port = 5555 }
   }
 
@@ -248,6 +282,7 @@ function Start-HostEmulator {
   Write-Ok 'adb devices:'
   & $adb devices -l
 
+  Setup-ContainerAdbBridge -Adb $adb -Serial $serial
   return @{ Adb = $adb; Serial = $serial; Port = 5555 }
 }
 

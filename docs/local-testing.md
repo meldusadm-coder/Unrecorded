@@ -33,6 +33,8 @@ From the dev container (host emulator connected):
 ./scripts/dev-run-demo.sh
 ```
 
+**Windows + dev container:** start `start-dev.cmd` on the host first, then run the script above from `/workspace` in the container. Plain `flutter run` without `dev-run.sh` will not see the host emulator.
+
 ## Debug settings (debug builds only)
 
 Open **Settings & Privacy** → **Developer testing**:

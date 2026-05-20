@@ -123,11 +123,34 @@ Or run once in a container terminal:
 sudo chown -R "$(id -u):$(id -g)" /sdks/flutter
 ```
 
+### Flutter only sees Linux desktop (no Android emulator)
+
+The emulator runs on **Windows**, not inside the container. Flutter in the container only sees it after the host bridge is up.
+
+1. On **Windows** (repo root): `start-dev.cmd` — wait until the emulator window is booted.
+2. On **Windows**, confirm: `%LOCALAPPDATA%\Android\Sdk\platform-tools\adb.exe devices` shows `emulator-5554` as `device`.
+3. In the **container** terminal (repo root `/workspace`):
+
+   ```bash
+   ./scripts/dev-run-demo.sh
+   ```
+
+   Do **not** run bare `flutter run` from `apps/mobile` without `./scripts/dev-run.sh` first — that skips host adb setup.
+
+4. If still no device, reconnect manually:
+
+   ```bash
+   bash .devcontainer/scripts/prepare-emulator.sh
+   flutter devices
+   ```
+
+The dev container uses `ADB_SERVER_SOCKET=tcp:host.docker.internal:5037` (host adb must listen on all interfaces; `start-dev.cmd` runs `adb -a start-server`). Rebuild the dev container after pulling changes that touch `devcontainer.json`.
+
 ### `connect-host-emulator.sh` fails
 
 - Run `Start-UnrecordedDev.ps1` on the host first.
 - Confirm host adb sees the device: `%LOCALAPPDATA%\Android\Sdk\platform-tools\adb.exe devices`
-- Emulator should show as `emulator-5554`; the container connects to port **5555** on `host.docker.internal`.
+- Emulator should show as `emulator-5554`. The container uses host adb on port **5037**, with optional `adb connect` to **5555** on `host.docker.internal`.
 
 ### Docker never becomes ready
 

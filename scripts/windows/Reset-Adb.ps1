@@ -122,9 +122,10 @@ function Reset-AdbServer {
   $lastOutput = ''
 
   for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
-    Write-Host "    starting adb server (attempt ${attempt}/${maxAttempts})" -ForegroundColor DarkGray
+    Write-Host "    starting adb server (attempt ${attempt}/${maxAttempts}, all interfaces)" -ForegroundColor DarkGray
 
-    $startResult = Invoke-AdbQuiet -Adb $Adb start-server
+    # -a: listen on 0.0.0.0 so the dev container can use ADB_SERVER_SOCKET=tcp:host.docker.internal:5037
+    $startResult = Invoke-AdbQuiet -Adb $Adb -a start-server
     $lastOutput = $startResult.Output
 
     if ($startResult.ExitCode -eq 0) {

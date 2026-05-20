@@ -1,9 +1,19 @@
 #!/usr/bin/env bash
-# Kill stale adb server/processes and start a fresh server.
+# Kill stale adb server/processes and start a fresh server (or use host adb via ADB_SERVER_SOCKET).
 set -euo pipefail
 
 reset_adb() {
-  echo "Resetting adb ..."
+  if [[ -n "${ADB_SERVER_SOCKET:-}" ]]; then
+    echo "Using host adb server (${ADB_SERVER_SOCKET}) ..."
+    if ! adb devices >/dev/null 2>&1; then
+      echo "ERROR: Cannot reach host adb. On Windows run start-dev.cmd, then retry." >&2
+      return 1
+    fi
+    echo "Host adb reachable."
+    return 0
+  fi
+
+  echo "Resetting local adb ..."
   adb kill-server 2>/dev/null || true
   if command -v pkill >/dev/null 2>&1; then
     pkill -x adb 2>/dev/null || true
