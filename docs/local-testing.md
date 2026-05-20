@@ -77,13 +77,27 @@ cd apps/mobile && flutter clean
 ./scripts/dev-run-demo.sh
 ```
 
-The dev container keeps Gradle outputs under `~/.cache/unrecorded-android-build` (`UNRECORDED_ANDROID_BUILD_DIR`) so chmod and caching work. After pulling this change, **reopen or rebuild** the dev container once so that env var is set, or export it manually:
+The dev container symlinks `apps/mobile/build` → `~/.cache/unrecorded-android-build` (via `UNRECORDED_ANDROID_BUILD_DIR`) so Gradle and Flutter share the same path off the bind mount. **Reopen or rebuild** the dev container once, or:
 
 ```bash
+cd /workspace
 export UNRECORDED_ANDROID_BUILD_DIR=/home/vscode/.cache/unrecorded-android-build
+./scripts/prepare-android-build.sh
 ```
 
-You do **not** need to wipe the emulator for this error — it is a host build failure, not an install issue.
+If Gradle succeeded but Flutter says it **could not find the .apk**, the symlink was missing — run `prepare-android-build.sh` from `/workspace`, then `./scripts/dev-run-demo.sh` (no full rebuild needed if the APK already exists under `~/.cache/unrecorded-android-build`).
+
+You do **not** need to wipe the emulator for these errors — they are build-path issues, not install issues.
+
+## Brand icons missing after pulling UI changes
+
+SVG icons live in `packages/unrecorded_ui/assets/`. If the app shows empty gaps where icons should be:
+
+1. From repo root: `flutter pub get`
+2. Full restart (not hot reload): `cd apps/mobile && flutter clean && flutter run …`
+3. Confirm `packages/unrecorded_ui/assets/icons/scan.svg` exists on disk.
+
+In **debug**, a failed SVG shows a small broken-image icon and logs `Unrecorded SVG failed:` in the console.
 
 ## CI and unit tests
 

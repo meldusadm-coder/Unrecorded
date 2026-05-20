@@ -161,7 +161,7 @@ The **first** Android debug build inside a dev container on **Windows + Docker**
 
 4. Keep Gradle’s cache **off** the Windows bind mount (default in this repo): `GRADLE_USER_HOME=/home/vscode/.gradle` in `devcontainer.json`.
 
-5. Android **plugin build outputs** also live off the bind mount: `UNRECORDED_ANDROID_BUILD_DIR=/home/vscode/.cache/unrecorded-android-build` in `devcontainer.json`. That avoids `Could not set file mode 755` on paths under `apps/mobile/build`.
+5. `apps/mobile/build` is symlinked to `~/.cache/unrecorded-android-build` (`UNRECORDED_ANDROID_BUILD_DIR` in `devcontainer.json`) so Gradle and Flutter use the same path off the Windows bind mount.
 
 6. After a successful build, `flutter run` / hot reload is much faster than the first assemble.
 
@@ -175,11 +175,15 @@ cd apps/mobile && flutter clean
 ./scripts/dev-run-demo.sh
 ```
 
-If the env var is missing (container opened before this change), export it or **Dev Containers: Rebuild Container**:
+If Gradle finished but Flutter reports **could not find the .apk**, recreate the symlink from `/workspace`:
 
 ```bash
 export UNRECORDED_ANDROID_BUILD_DIR=/home/vscode/.cache/unrecorded-android-build
+./scripts/prepare-android-build.sh
+./scripts/dev-run-demo.sh
 ```
+
+If the env var is missing (container opened before this change), export it or **Dev Containers: Rebuild Container**.
 
 If it still never finishes after 30+ minutes, check Docker memory and disk space, then rebuild the dev container (**Dev Containers: Rebuild Container**).
 

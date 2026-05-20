@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -41,6 +42,31 @@ enum UnrecordedStatusAsset {
   final String assetPath;
 }
 
+Widget _buildSvg({
+  required String assetPath,
+  required double size,
+  ColorFilter? colorFilter,
+}) {
+  return SvgPicture.asset(
+    assetPath,
+    package: UnrecordedAssetPaths.package,
+    width: size,
+    height: size,
+    fit: BoxFit.contain,
+    colorFilter: colorFilter,
+    errorBuilder: (context, error, stackTrace) {
+      if (kDebugMode) {
+        debugPrint('Unrecorded SVG failed: $assetPath — $error');
+      }
+      return Icon(
+        Icons.broken_image_outlined,
+        size: size,
+        color: colorFilter != null ? null : Colors.grey,
+      );
+    },
+  );
+}
+
 /// Brand line icon with optional tint for light/dark themes.
 class UnrecordedIcon extends StatelessWidget {
   const UnrecordedIcon({
@@ -61,11 +87,9 @@ class UnrecordedIcon extends StatelessWidget {
             ? Colors.white
             : null);
 
-    return SvgPicture.asset(
-      asset.assetPath,
-      width: size,
-      height: size,
-      fit: BoxFit.contain,
+    return _buildSvg(
+      assetPath: asset.assetPath,
+      size: size,
       colorFilter: effectiveColor != null
           ? ColorFilter.mode(effectiveColor, BlendMode.srcIn)
           : null,
@@ -86,11 +110,9 @@ class UnrecordedStatusIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SvgPicture.asset(
-      asset.assetPath,
-      width: size,
-      height: size,
-      fit: BoxFit.contain,
+    return _buildSvg(
+      assetPath: asset.assetPath,
+      size: size,
     );
   }
 }

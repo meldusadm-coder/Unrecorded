@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -17,9 +18,16 @@ class AppLogo extends StatelessWidget {
 
     return SvgPicture.asset(
       assetPath,
+      package: UnrecordedAssetPaths.package,
       width: size,
       height: size,
       fit: BoxFit.contain,
+      errorBuilder: (context, error, stackTrace) {
+        if (kDebugMode) {
+          debugPrint('AppLogo SVG failed: $assetPath — $error');
+        }
+        return Icon(Icons.shield_outlined, size: size);
+      },
     );
   }
 }
