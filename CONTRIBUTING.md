@@ -50,6 +50,10 @@ cd apps/mobile && flutter build apk --debug
 - Use language like "possible", "may indicate", "potential risk".
 - Keep risk explanations understandable to non-technical users.
 
+### Releases
+
+Maintainers shipping app versions: see [docs/release.md](docs/release.md) for versioning and the Android release workflow.
+
 ### Keep changes focused
 
 - One concern per PR.

@@ -1,0 +1,3 @@
+See CHANGELOG.md for version-specific notes.
+
+Unrecorded surfaces possible privacy risk indicators from nearby Bluetooth signals. It cannot prove that anyone is recording.

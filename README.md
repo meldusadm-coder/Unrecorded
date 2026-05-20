@@ -117,6 +117,10 @@ Optional external setup (still free tiers available):
 - GitHub Actions + Android emulator runner (open source action).
 - Firebase Test Lab free quota for occasional physical-device smoke tests.
 
+## Releases
+
+Maintainers: see [docs/release.md](docs/release.md) for versioning, signed Android App Bundle builds, GitHub Releases, and optional Google Play upload.
+
 ## Privacy model
 
 All scanning is local. No account, no cloud, no analytics. See [docs/privacy-model.md](docs/privacy-model.md).

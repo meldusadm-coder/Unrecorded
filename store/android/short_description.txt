@@ -1,0 +1,1 @@
+Privacy awareness for possible nearby smart-glass-style Bluetooth signals.
