@@ -19,11 +19,13 @@ Dart constants: `UnrecordedAssetPaths` in `packages/unrecorded_ui/lib/src/unreco
 
 - In-app icons use `flutter_svg` via `UnrecordedIcon` and `UnrecordedStatusIcon`.
 - `AppLogo` uses `unrecorded-logo-mark.svg` (monochrome variant in dark mode).
-- Platform launcher icons are generated from `unrecorded-app-icon-accent.svg`:
+- Platform launcher icons are generated from brand SVGs (shield mark, not a generic camera glyph):
 
 ```bash
-cd apps/mobile && dart run flutter_launcher_icons
+./scripts/refresh-launcher-icons.sh
 ```
+
+Uses `unrecorded-app-icon-accent.svg` for the legacy icon and `unrecorded-logo-mark-white.svg` on `#5B4DFF` for Android adaptive foreground. **Reinstall the app** after regenerating — the emulator launcher caches the old icon.
 
 ## Theme
 

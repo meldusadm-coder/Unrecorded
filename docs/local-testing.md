@@ -103,6 +103,17 @@ You do **not** need to wipe the emulator for these errors — they are build-pat
 - Bluetooth **address prefix hints** (local map only) may appear on alert details when the scan ID looks like a MAC — not proof of vendor or recording.
 - **Remove ads** above the banner uses a full-width tap row — use that link, not the ad itself.
 
+## Launcher icon still wrong on the emulator
+
+The home-screen icon is **not** the in-app SVG — it is baked into the APK from `apps/mobile/assets/brand/` and `android/app/src/main/res/`. Regenerate and reinstall:
+
+```bash
+./scripts/refresh-launcher-icons.sh
+cd apps/mobile && flutter clean && flutter run …
+```
+
+On the emulator: uninstall the old app or cold-boot if the launcher still shows a purple circle with a lens (stale cache).
+
 ## Brand icons missing after pulling UI changes
 
 SVG icons live in `packages/unrecorded_ui/assets/`. If the app shows empty gaps where icons should be:
