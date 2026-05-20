@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:unrecorded_core/unrecorded_core.dart';
 import 'package:unrecorded_ui/unrecorded_ui.dart';
 
-import '../../services/ads_service.dart';
 import '../../services/entitlement_service.dart';
 import '../../services/notification_prefs.dart';
 import '../../services/notification_risk_threshold.dart';
@@ -86,144 +85,131 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         title: const Text('Settings & Privacy'),
       ),
       body: SafeArea(
-        child: Column(
+        child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           children: [
-            Expanded(
-              child: ListView(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                children: [
-                  Text('Alerts', style: theme.textTheme.titleMedium),
-                  const SizedBox(height: 4),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text(AppCopy.riskNotificationsTitle),
-                    subtitle: const Text(AppCopy.riskNotificationsSubtitle),
-                    value: _riskNotificationsEnabled ?? false,
-                    onChanged: _riskNotificationsEnabled == null
-                        ? null
-                        : _setRiskNotifications,
-                  ),
-                  if (_riskNotificationsEnabled == true) ...[
-                    const SizedBox(height: 8),
-                    DropdownMenu<NotificationRiskThreshold>(
-                      key: ValueKey(_notificationRiskThreshold),
-                      label: const Text(AppCopy.riskNotificationLevelTitle),
-                      helperText: AppCopy.riskNotificationLevelSubtitle,
-                      initialSelection: _notificationRiskThreshold,
-                      enabled: _notificationRiskThreshold != null,
-                      dropdownMenuEntries: NotificationRiskThreshold.values
-                          .map(
-                            (t) => DropdownMenuEntry(
-                              value: t,
-                              label: t.label,
-                            ),
-                          )
-                          .toList(),
-                      onSelected: _setNotificationRiskThreshold,
-                    ),
-                  ],
-                  const SizedBox(height: 24),
-                  PrivacyNoticeCard(
-                    text: PrivacyDisclaimer.privacyModel,
-                    icon: UnrecordedIcon(
-                      asset: UnrecordedIconAsset.privacy,
-                      size: 20,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  _tile(
-                    theme,
-                    leading: UnrecordedIcon(
-                      asset: UnrecordedIconAsset.device,
-                      size: 24,
-                      color: theme.colorScheme.primary,
-                    ),
-                    title: 'Local-first',
-                    subtitle:
-                        'All scanning happens on your device. Nothing is uploaded.',
-                  ),
-                  _tile(
-                    theme,
-                    leading: UnrecordedIcon(
-                      asset: UnrecordedIconAsset.protection,
-                      size: 24,
-                      color: theme.colorScheme.primary,
-                    ),
-                    title: 'No account required',
-                    subtitle:
-                        'Unrecorded works without sign-up, login, or any account.',
-                  ),
-                  _tile(
-                    theme,
-                    leading: UnrecordedIcon(
-                      asset: UnrecordedIconAsset.privacy,
-                      size: 24,
-                      color: theme.colorScheme.primary,
-                    ),
-                    title: 'No cloud upload',
-                    subtitle:
-                        'Scan data stays on your device unless you choose otherwise.',
-                  ),
-                  _tile(
-                    theme,
-                    leading: UnrecordedIcon(
-                      asset: UnrecordedIconAsset.info,
-                      size: 24,
-                      color: theme.colorScheme.primary,
-                    ),
-                    title: 'No analytics or tracking',
-                    subtitle:
-                        'The app does not include analytics or telemetry.',
-                  ),
-                  _tile(
-                    theme,
-                    leading: UnrecordedIcon(
-                      asset: UnrecordedIconAsset.widgetIcon,
-                      size: 24,
-                      color: theme.colorScheme.primary,
-                    ),
-                    title: 'Small bottom ads',
-                    subtitle: adsRemoved
-                        ? 'Ads are removed on this device. Thank you for your support.'
-                        : 'Optional banner ads may appear. Scan data is never sent to ad networks.',
-                  ),
-                  const SizedBox(height: 16),
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const AppLogo(size: 24),
-                    title: const Text(AppCopy.removeAdsTitle),
-                    subtitle: const Text(AppCopy.removeAdsBody),
-                    trailing: const UnrecordedListTrailing(),
-                    onTap: () => context.push('/remove-ads'),
-                  ),
-                  const Divider(height: 32),
-                  Text('Funding', style: theme.textTheme.titleMedium),
-                  const SizedBox(height: 8),
-                  Text(
-                    PrivacyDisclaimer.fundingNote,
-                    style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
-                  ),
-                  const SizedBox(height: 32),
-                  const DebugTestingSection(),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Unrecorded v0.1.0',
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
+            Text('Alerts', style: theme.textTheme.titleMedium),
+            const SizedBox(height: 4),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text(AppCopy.riskNotificationsTitle),
+              subtitle: const Text(AppCopy.riskNotificationsSubtitle),
+              value: _riskNotificationsEnabled ?? false,
+              onChanged: _riskNotificationsEnabled == null
+                  ? null
+                  : _setRiskNotifications,
+            ),
+            if (_riskNotificationsEnabled == true) ...[
+              const SizedBox(height: 8),
+              DropdownMenu<NotificationRiskThreshold>(
+                key: ValueKey(_notificationRiskThreshold),
+                label: const Text(AppCopy.riskNotificationLevelTitle),
+                helperText: AppCopy.riskNotificationLevelSubtitle,
+                initialSelection: _notificationRiskThreshold,
+                enabled: _notificationRiskThreshold != null,
+                dropdownMenuEntries: NotificationRiskThreshold.values
+                    .map(
+                      (t) => DropdownMenuEntry(
+                        value: t,
+                        label: t.label,
+                      ),
+                    )
+                    .toList(),
+                onSelected: _setNotificationRiskThreshold,
+              ),
+            ],
+            const SizedBox(height: 24),
+            PrivacyNoticeCard(
+              text: PrivacyDisclaimer.privacyModel,
+              icon: UnrecordedIcon(
+                asset: UnrecordedIconAsset.privacy,
+                size: 20,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-            BottomAdSlot(
-              showSlot: !adsRemoved,
-              onRemoveAdsTap: () => context.push('/remove-ads'),
-              child: ref.watch(bannerAdWidgetProvider),
+            const SizedBox(height: 20),
+            _tile(
+              theme,
+              leading: UnrecordedIcon(
+                asset: UnrecordedIconAsset.device,
+                size: 24,
+                color: theme.colorScheme.primary,
+              ),
+              title: 'Local-first',
+              subtitle:
+                  'All scanning happens on your device. Nothing is uploaded.',
             ),
+            _tile(
+              theme,
+              leading: UnrecordedIcon(
+                asset: UnrecordedIconAsset.protection,
+                size: 24,
+                color: theme.colorScheme.primary,
+              ),
+              title: 'No account required',
+              subtitle:
+                  'Unrecorded works without sign-up, login, or any account.',
+            ),
+            _tile(
+              theme,
+              leading: UnrecordedIcon(
+                asset: UnrecordedIconAsset.privacy,
+                size: 24,
+                color: theme.colorScheme.primary,
+              ),
+              title: 'No cloud upload',
+              subtitle:
+                  'Scan data stays on your device unless you choose otherwise.',
+            ),
+            _tile(
+              theme,
+              leading: UnrecordedIcon(
+                asset: UnrecordedIconAsset.info,
+                size: 24,
+                color: theme.colorScheme.primary,
+              ),
+              title: 'No analytics or tracking',
+              subtitle: 'The app does not include analytics or telemetry.',
+            ),
+            _tile(
+              theme,
+              leading: UnrecordedIcon(
+                asset: UnrecordedIconAsset.widgetIcon,
+                size: 24,
+                color: theme.colorScheme.primary,
+              ),
+              title: 'Small bottom ads',
+              subtitle: adsRemoved
+                  ? 'Ads are removed on this device. Thank you for your support.'
+                  : 'Optional banner ads may appear. Scan data is never sent to ad networks.',
+            ),
+            const SizedBox(height: 16),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const AppLogo(size: 24),
+              title: const Text(AppCopy.removeAdsTitle),
+              subtitle: const Text(AppCopy.removeAdsBody),
+              trailing: const UnrecordedListTrailing(),
+              onTap: () => context.push('/remove-ads'),
+            ),
+            const Divider(height: 32),
+            Text('Funding', style: theme.textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Text(
+              PrivacyDisclaimer.fundingNote,
+              style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
+            ),
+            const SizedBox(height: 32),
+            const DebugTestingSection(),
+            const SizedBox(height: 16),
+            Text(
+              'Unrecorded v0.1.0',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 16),
           ],
         ),
       ),

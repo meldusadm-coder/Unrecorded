@@ -20,6 +20,7 @@ class ScanState {
   final String? statusMessage;
   final DateTime? lastCheckedAt;
   final bool protectionEnabled;
+  final bool alertDismissed;
 
   const ScanState({
     this.status = ScanStatus.idle,
@@ -30,6 +31,7 @@ class ScanState {
     this.statusMessage,
     this.lastCheckedAt,
     this.protectionEnabled = false,
+    this.alertDismissed = false,
   });
 
   bool get isProtectionActive =>
@@ -50,6 +52,7 @@ class ScanState {
     String? statusMessage,
     DateTime? lastCheckedAt,
     bool? protectionEnabled,
+    bool? alertDismissed,
     bool clearStatusMessage = false,
   }) {
     return ScanState(
@@ -62,6 +65,7 @@ class ScanState {
           clearStatusMessage ? null : (statusMessage ?? this.statusMessage),
       lastCheckedAt: lastCheckedAt ?? this.lastCheckedAt,
       protectionEnabled: protectionEnabled ?? this.protectionEnabled,
+      alertDismissed: alertDismissed ?? this.alertDismissed,
     );
   }
 }

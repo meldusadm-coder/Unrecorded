@@ -174,6 +174,11 @@ class ScanController extends StateNotifier<ScanState> {
     _onResults(FakeRadioScanner.highRiskBatch());
   }
 
+  void dismissRiskAlert() {
+    if (state.status != ScanStatus.possibleRiskDetected) return;
+    _emit(state.copyWith(alertDismissed: true));
+  }
+
   /// Restarts the scan stream after scanner config changes.
   Future<void> onScannerConfigChanged() async {
     if (!state.protectionEnabled ||
@@ -349,6 +354,9 @@ class ScanController extends StateNotifier<ScanState> {
         score: result.totalScore,
         reasons: result.reasons,
         lastCheckedAt: now,
+        alertDismissed: nextStatus == ScanStatus.possibleRiskDetected
+            ? state.alertDismissed
+            : false,
       ),
     );
   }

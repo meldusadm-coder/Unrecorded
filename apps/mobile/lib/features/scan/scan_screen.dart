@@ -5,40 +5,21 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:unrecorded_core/unrecorded_core.dart';
 import 'package:unrecorded_ui/unrecorded_ui.dart';
 
-import '../../services/ads_service.dart';
-import '../../services/entitlement_service.dart';
 import '../../services/scanner_provider.dart';
 import '../../services/widget_sync_service.dart';
 import 'scan_state.dart';
 
-class ScanScreen extends ConsumerStatefulWidget {
+class ScanScreen extends ConsumerWidget {
   const ScanScreen({super.key});
 
   @override
-  ConsumerState<ScanScreen> createState() => _ScanScreenState();
-}
-
-class _ScanScreenState extends ConsumerState<ScanScreen> {
-  bool _alertDismissed = false;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(widgetSyncServiceProvider);
 
     final state = ref.watch(scanControllerProvider);
     final controller = ref.read(scanControllerProvider.notifier);
-    final showAlert =
-        state.status == ScanStatus.possibleRiskDetected && !_alertDismissed;
-    final adsRemoved = ref.watch(adsRemovedProvider);
-    final hideAds = adsRemoved ||
-        showAlert ||
-        state.status == ScanStatus.permissionRequired ||
-        state.status == ScanStatus.error;
-
-    if (state.status != ScanStatus.possibleRiskDetected) {
-      _alertDismissed = false;
-    }
-
+    final showAlert = state.status == ScanStatus.possibleRiskDetected &&
+        !state.alertDismissed;
     return Scaffold(
       appBar: AppBar(
         leading: const Padding(
@@ -48,7 +29,8 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
         title: const Text('Unrecorded'),
         actions: [
           IconButton(
-            icon: const UnrecordedIcon(asset: UnrecordedIconAsset.help, size: 24),
+            icon:
+                const UnrecordedIcon(asset: UnrecordedIconAsset.help, size: 24),
             tooltip: 'Help',
             onPressed: () => context.push('/help'),
           ),
@@ -64,105 +46,95 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
         ],
       ),
       body: SafeArea(
-        child: Column(
+        child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           children: [
-            Expanded(
-              child: ListView(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                children: [
-                  ScanStatusCard(
-                    icon: _iconWidgetForStatus(state.status),
-                    title: _titleForStatus(state),
-                    subtitle: _subtitleForStatus(state),
-                    lastCheckedText: _lastCheckedText(state),
-                  ),
-                  const SizedBox(height: 12),
-                  const HelperText(
-                    text: AppCopy.scanHelper,
-                    expandableDetail: PrivacyDisclaimer.detectionDisclaimer,
-                  ),
-                  const SizedBox(height: 12),
-                  _buildNextStep(context, state),
-                  if (showAlert) ...[
-                    const SizedBox(height: 16),
-                    RiskAlertCard(
-                      title: AppCopy.alertCardTitle,
-                      body: AppCopy.alertCardBody,
-                      level: state.riskLevel,
-                      onViewDetails: () => context.push('/alert-info'),
-                      onDismiss: () => setState(() => _alertDismissed = true),
-                    ),
-                    const SizedBox(height: 8),
-                    const HelperText(text: AppCopy.riskResultHelper),
-                  ],
-                  const SizedBox(height: 16),
-                  PrimaryActionButton(
-                    label: state.isProtectionActive
-                        ? AppCopy.pauseProtection
-                        : AppCopy.turnOnProtection,
-                    icon: state.isProtectionActive
-                        ? const UnrecordedStatusIcon(
-                            asset: UnrecordedStatusAsset.scanningPaused,
-                            size: 24,
-                          )
-                        : const AppLogo(size: 24),
-                    color: state.isProtectionActive
-                        ? UnrecordedColors.danger
-                        : null,
-                    onPressed: () async {
-                      if (state.isProtectionActive) {
-                        await controller.pauseProtection();
-                      } else {
-                        await controller.startProtection();
-                      }
-                    },
-                  ),
-                  if (state.signals.isNotEmpty) ...[
-                    const SizedBox(height: 20),
-                    Text(
-                      'Nearby signals (${state.signals.length})',
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    const SizedBox(height: 8),
-                    ...state.signals.map(_buildSignalCard),
-                  ],
-                  if (state.reasons.isNotEmpty && state.isProtectionActive) ...[
-                    const SizedBox(height: 16),
-                    Text(
-                      'Why this risk level?',
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    const SizedBox(height: 8),
-                    ...state.reasons.map(
-                      (r) => Padding(
-                        padding: const EdgeInsets.only(bottom: 6),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('•  '),
-                            Expanded(child: Text(r)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 16),
-                ],
-              ),
+            ScanStatusCard(
+              icon: _iconWidgetForStatus(state.status),
+              title: _titleForStatus(state),
+              subtitle: _subtitleForStatus(state),
+              lastCheckedText: _lastCheckedText(state),
             ),
-            if (!hideAds)
-              BottomAdSlot(
-                onRemoveAdsTap: () => context.push('/remove-ads'),
-                child: ref.watch(bannerAdWidgetProvider),
+            const SizedBox(height: 12),
+            const HelperText(
+              text: AppCopy.scanHelper,
+              expandableDetail: PrivacyDisclaimer.detectionDisclaimer,
+            ),
+            const SizedBox(height: 12),
+            _buildNextStep(context, state, controller),
+            if (showAlert) ...[
+              const SizedBox(height: 16),
+              RiskAlertCard(
+                title: AppCopy.alertCardTitle,
+                body: AppCopy.alertCardBody,
+                level: state.riskLevel,
+                onViewDetails: () => context.push('/alert-info'),
+                onDismiss: () => controller.dismissRiskAlert(),
               ),
+              const SizedBox(height: 8),
+              const HelperText(text: AppCopy.riskResultHelper),
+            ],
+            const SizedBox(height: 16),
+            PrimaryActionButton(
+              label: state.isProtectionActive
+                  ? AppCopy.pauseProtection
+                  : AppCopy.turnOnProtection,
+              icon: state.isProtectionActive
+                  ? const UnrecordedStatusIcon(
+                      asset: UnrecordedStatusAsset.scanningPaused,
+                      size: 24,
+                    )
+                  : const AppLogo(size: 24),
+              color: state.isProtectionActive ? UnrecordedColors.danger : null,
+              onPressed: () async {
+                if (state.isProtectionActive) {
+                  await controller.pauseProtection();
+                } else {
+                  await controller.startProtection();
+                }
+              },
+            ),
+            if (state.signals.isNotEmpty) ...[
+              const SizedBox(height: 20),
+              Text(
+                'Nearby signals (${state.signals.length})',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              const SizedBox(height: 8),
+              ...state.signals.map(_buildSignalCard),
+            ],
+            if (state.reasons.isNotEmpty && state.isProtectionActive) ...[
+              const SizedBox(height: 16),
+              Text(
+                'Why this risk level?',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              const SizedBox(height: 8),
+              ...state.reasons.map(
+                (r) => Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('•  '),
+                      Expanded(child: Text(r)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+            const SizedBox(height: 16),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildNextStep(BuildContext context, ScanState state) {
+  Widget _buildNextStep(
+    BuildContext context,
+    ScanState state,
+    ScanController controller,
+  ) {
     switch (state.status) {
       case ScanStatus.permissionRequired:
         return const NextStepBanner(
@@ -187,8 +159,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
         return NextStepBanner(
           message: state.statusMessage ?? 'Something went wrong.',
           actionLabel: 'Try again',
-          onAction: () =>
-              ref.read(scanControllerProvider.notifier).startProtection(),
+          onAction: controller.startProtection,
         );
       case ScanStatus.idle:
       case ScanStatus.paused:

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unrecorded_core/unrecorded_core.dart';
+import 'package:unrecorded_ui/unrecorded_ui.dart';
 import 'package:unrecorded_mobile/app.dart';
 import 'package:unrecorded_mobile/app_bootstrap.dart';
 import 'package:unrecorded_mobile/services/ads_service.dart';
@@ -83,5 +84,16 @@ void main() {
         tester.getTopLeft(find.text(AppCopy.riskNotificationsTitle)).dy;
     final localFirstY = tester.getTopLeft(find.text('Local-first')).dy;
     expect(alertsY, lessThan(localFirstY));
+  });
+
+  testWidgets('shows a single bottom ad slot when navigating to help',
+      (tester) async {
+    await tester.pumpWidget(testApp());
+    await tester.pump();
+
+    await tester.tap(find.byTooltip('Help'));
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+
+    expect(find.byType(BottomAdSlot), findsOneWidget);
   });
 }
