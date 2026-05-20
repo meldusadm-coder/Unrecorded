@@ -91,6 +91,13 @@ If Gradle succeeded but Flutter says it **could not find the .apk**, the symlink
 
 You do **not** need to wipe the emulator for these errors — they are build-path issues, not install issues.
 
+## Settings and notifications
+
+- **Settings** opens with **Alerts** at the top (risk notifications toggle and threshold).
+- **Developer testing** appears at the bottom of Settings in debug/profile builds only (hidden in release).
+- Tapping a **risk notification** opens **How detection works** (`/alert-info`).
+- **Remove ads** above the banner uses a full-width tap row — use that link, not the ad itself.
+
 ## Brand icons missing after pulling UI changes
 
 SVG icons live in `packages/unrecorded_ui/assets/`. If the app shows empty gaps where icons should be:

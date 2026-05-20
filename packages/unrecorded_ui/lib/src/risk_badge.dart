@@ -49,7 +49,10 @@ class RiskBadge extends StatelessWidget {
         RiskLevel.high => UnrecordedColors.danger,
       };
 
-  String get _label => switch (level) {
+  String get _label => labelFor(level);
+
+  /// Short user-facing label for a [RiskLevel] (notifications, copy).
+  static String labelFor(RiskLevel level) => switch (level) {
         RiskLevel.low => 'Low risk',
         RiskLevel.medium => 'Medium risk',
         RiskLevel.high => 'High risk',

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:unrecorded_radio/unrecorded_radio.dart';
+import 'package:unrecorded_ui/unrecorded_ui.dart';
 
 import '../../services/scan_runtime.dart';
 import '../../services/scanner_provider.dart';
@@ -28,6 +29,7 @@ class DebugTestingSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const Divider(height: 32),
         Text('Developer testing', style: theme.textTheme.titleMedium),
         const SizedBox(height: 4),
         Text(
@@ -41,12 +43,12 @@ class DebugTestingSection extends ConsumerWidget {
             ButtonSegment(
               value: ScannerMode.demo,
               label: Text('Demo'),
-              icon: Icon(Icons.science_outlined),
+              icon: UnrecordedIcon(asset: UnrecordedIconAsset.scan, size: 18),
             ),
             ButtonSegment(
               value: ScannerMode.auto,
               label: Text('Real BLE'),
-              icon: Icon(Icons.bluetooth_searching),
+              icon: UnrecordedIcon(asset: UnrecordedIconAsset.device, size: 18),
             ),
           ],
           selected: {config.mode},
@@ -75,7 +77,7 @@ class DebugTestingSection extends ConsumerWidget {
           },
         ),
         const SizedBox(height: 12),
-        FilledButton.tonalIcon(
+        FilledButton.tonal(
           onPressed: () {
             ref.read(scanControllerProvider.notifier).simulateHighRiskAlert();
             ScaffoldMessenger.of(context).showSnackBar(
@@ -86,8 +88,14 @@ class DebugTestingSection extends ConsumerWidget {
               ),
             );
           },
-          icon: const Icon(Icons.warning_amber_outlined),
-          label: const Text('Simulate alert now'),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              UnrecordedIcon(asset: UnrecordedIconAsset.alert, size: 20),
+              SizedBox(width: 8),
+              Text('Simulate alert now'),
+            ],
+          ),
         ),
         const SizedBox(height: 8),
         TextButton(
@@ -103,7 +111,6 @@ class DebugTestingSection extends ConsumerWidget {
           },
           child: const Text('Reset scanner defaults'),
         ),
-        const Divider(height: 32),
       ],
     );
   }

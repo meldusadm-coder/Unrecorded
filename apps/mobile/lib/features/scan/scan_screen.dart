@@ -6,6 +6,7 @@ import 'package:unrecorded_core/unrecorded_core.dart';
 import 'package:unrecorded_ui/unrecorded_ui.dart';
 
 import '../../services/ads_service.dart';
+import '../../services/entitlement_service.dart';
 import '../../services/scanner_provider.dart';
 import '../../services/widget_sync_service.dart';
 import 'scan_state.dart';
@@ -28,7 +29,9 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
     final controller = ref.read(scanControllerProvider.notifier);
     final showAlert =
         state.status == ScanStatus.possibleRiskDetected && !_alertDismissed;
-    final hideAds = showAlert ||
+    final adsRemoved = ref.watch(adsRemovedProvider);
+    final hideAds = adsRemoved ||
+        showAlert ||
         state.status == ScanStatus.permissionRequired ||
         state.status == ScanStatus.error;
 
@@ -86,6 +89,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
                     RiskAlertCard(
                       title: AppCopy.alertCardTitle,
                       body: AppCopy.alertCardBody,
+                      level: state.riskLevel,
                       onViewDetails: () => context.push('/alert-info'),
                       onDismiss: () => setState(() => _alertDismissed = true),
                     ),
@@ -102,11 +106,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
                             asset: UnrecordedStatusAsset.scanningPaused,
                             size: 24,
                           )
-                        : const UnrecordedIcon(
-                            asset: UnrecordedIconAsset.protection,
-                            size: 24,
-                            color: Colors.white,
-                          ),
+                        : const AppLogo(size: 24),
                     color: state.isProtectionActive
                         ? UnrecordedColors.danger
                         : null,

@@ -173,7 +173,10 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
                     '${RemoveAdsPricing.formatGbp(RemoveAdsPricing.minGbp)}–'
                     '${RemoveAdsPricing.formatGbp(RemoveAdsPricing.maxGbp)}',
                 suffixIcon: IconButton(
-                  icon: const Icon(Icons.refresh),
+                  icon: const UnrecordedIcon(
+                    asset: UnrecordedIconAsset.signal,
+                    size: 22,
+                  ),
                   tooltip: 'Check store price',
                   onPressed: adsRemoved || _loading ? null : _loadPreview,
                 ),

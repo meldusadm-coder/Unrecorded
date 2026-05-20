@@ -26,7 +26,19 @@ class AppLogo extends StatelessWidget {
         if (kDebugMode) {
           debugPrint('AppLogo SVG failed: $assetPath — $error');
         }
-        return Icon(Icons.shield_outlined, size: size);
+        return SizedBox(
+          width: size,
+          height: size,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: Theme.of(context).colorScheme.primary,
+                width: 2,
+              ),
+            ),
+          ),
+        );
       },
     );
   }

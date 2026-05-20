@@ -5,6 +5,7 @@ import 'package:unrecorded_core/unrecorded_core.dart';
 import 'package:unrecorded_ui/unrecorded_ui.dart';
 
 import '../../services/ads_service.dart';
+import '../../services/entitlement_service.dart';
 
 class HelpScreen extends ConsumerWidget {
   const HelpScreen({super.key});
@@ -43,6 +44,7 @@ class HelpScreen extends ConsumerWidget {
                   RiskAlertCard(
                     title: AppCopy.alertCardTitle,
                     body: AppCopy.alertCardBody,
+                    level: RiskLevel.high,
                     isExample: true,
                     onViewDetails: () {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -72,7 +74,7 @@ class HelpScreen extends ConsumerWidget {
                     subtitle: const Text(
                       'Risk levels, limitations, and what the app can detect',
                     ),
-                    trailing: const Icon(Icons.chevron_right),
+                    trailing: const UnrecordedListTrailing(),
                     onTap: () => context.push('/alert-info'),
                   ),
                   const Divider(height: 32),
@@ -83,6 +85,7 @@ class HelpScreen extends ConsumerWidget {
               ),
             ),
             BottomAdSlot(
+              showSlot: !ref.watch(adsRemovedProvider),
               onRemoveAdsTap: () => context.push('/remove-ads'),
               child: ref.watch(bannerAdWidgetProvider),
             ),

@@ -2,7 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:unrecorded_core/unrecorded_core.dart';
+import 'package:unrecorded_ui/unrecorded_ui.dart';
 
+import '../router.dart';
 import 'notification_prefs.dart';
 import 'notification_risk_threshold.dart';
 
@@ -37,7 +39,7 @@ class RiskNotificationService {
 
       await _plugin.initialize(
         settings: const InitializationSettings(android: android, iOS: ios),
-        onDidReceiveNotificationResponse: (_) {},
+        onDidReceiveNotificationResponse: _onNotificationResponse,
       );
 
       await _plugin
@@ -57,6 +59,29 @@ class RiskNotificationService {
     } catch (_) {
       // Plugin unavailable (e.g. widget tests without platform channels).
     }
+  }
+
+  void _onNotificationResponse(NotificationResponse response) {
+    if (response.payload == notificationAlertPayload) {
+      navigateToAlertInfo();
+    }
+  }
+
+  /// Opens alert details if the app was launched from a risk notification.
+  Future<void> handleNotificationLaunch() async {
+    if (!_platformSupported) return;
+
+    await init();
+    if (!_initialized) return;
+
+    try {
+      final details = await _plugin.getNotificationAppLaunchDetails();
+      if (details?.didNotificationLaunchApp != true) return;
+      final payload = details?.notificationResponse?.payload;
+      if (payload == notificationAlertPayload) {
+        navigateToAlertInfo();
+      }
+    } catch (_) {}
   }
 
   /// Requests OS permission when the user enables notifications.
@@ -96,6 +121,9 @@ class RiskNotificationService {
     final allowed = await requestPermissionIfNeeded();
     if (!allowed) return;
 
+    final levelLabel = RiskBadge.labelFor(riskLevel);
+    final title = '$levelLabel — ${AppCopy.possibleRiskTitle}';
+
     const details = NotificationDetails(
       android: AndroidNotificationDetails(
         _channelId,
@@ -115,9 +143,10 @@ class RiskNotificationService {
     try {
       await _plugin.show(
         id: _notificationId,
-        title: AppCopy.possibleRiskTitle,
+        title: title,
         body: AppCopy.possibleRiskBody,
         notificationDetails: details,
+        payload: notificationAlertPayload,
       );
     } catch (_) {}
   }

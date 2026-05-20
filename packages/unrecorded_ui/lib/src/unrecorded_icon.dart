@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import 'app_logo.dart';
 import 'unrecorded_assets.dart';
 
 /// Line-style icons from the Unrecorded brand kit.
@@ -42,6 +43,8 @@ enum UnrecordedStatusAsset {
   final String assetPath;
 }
 
+Widget _svgFallback({required double size}) => AppLogo(size: size);
+
 Widget _buildSvg({
   required String assetPath,
   required double size,
@@ -58,13 +61,27 @@ Widget _buildSvg({
       if (kDebugMode) {
         debugPrint('Unrecorded SVG failed: $assetPath — $error');
       }
-      return Icon(
-        Icons.broken_image_outlined,
-        size: size,
-        color: colorFilter != null ? null : Colors.grey,
-      );
+      return _svgFallback(size: size);
     },
   );
+}
+
+/// Disclosure chevron for list tiles (uses brand more icon).
+class UnrecordedListTrailing extends StatelessWidget {
+  const UnrecordedListTrailing({super.key, this.size = 20, this.color});
+
+  final double size;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return UnrecordedIcon(
+      asset: UnrecordedIconAsset.more,
+      size: size,
+      color: color ?? scheme.onSurfaceVariant,
+    );
+  }
 }
 
 /// Brand line icon with optional tint for light/dark themes.

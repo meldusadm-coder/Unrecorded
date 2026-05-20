@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:unrecorded_core/unrecorded_core.dart';
 
 import 'app_theme.dart';
+import 'risk_badge.dart';
 import 'unrecorded_icon.dart';
 
 /// Cautious alert card for possible recording risk (live or example).
@@ -9,6 +11,7 @@ class RiskAlertCard extends StatelessWidget {
     super.key,
     required this.title,
     required this.body,
+    this.level,
     this.onViewDetails,
     this.onDismiss,
     this.isExample = false,
@@ -16,6 +19,7 @@ class RiskAlertCard extends StatelessWidget {
 
   final String title;
   final String body;
+  final RiskLevel? level;
   final VoidCallback? onViewDetails;
   final VoidCallback? onDismiss;
   final bool isExample;
@@ -40,6 +44,7 @@ class RiskAlertCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 UnrecordedIcon(
                   asset: UnrecordedIconAsset.alert,
@@ -48,11 +53,20 @@ class RiskAlertCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
-                    title,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (level != null) ...[
+                        RiskBadge(level: level!),
+                        const SizedBox(height: 8),
+                      ],
+                      Text(
+                        title,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],

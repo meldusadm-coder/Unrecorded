@@ -25,7 +25,9 @@ class _AppBootstrapState extends ConsumerState<AppBootstrap> {
   }
 
   Future<void> _init() async {
-    await ref.read(riskNotificationServiceProvider).init();
+    final notifications = ref.read(riskNotificationServiceProvider);
+    await notifications.init();
+    await notifications.handleNotificationLaunch();
     ref.read(widgetSyncServiceProvider);
     await ref.read(scannerConfigInitProvider.future);
 

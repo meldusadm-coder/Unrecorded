@@ -6,6 +6,10 @@ import 'package:unrecorded_core/unrecorded_core.dart';
 import 'package:unrecorded_mobile/app.dart';
 import 'package:unrecorded_mobile/app_bootstrap.dart';
 import 'package:unrecorded_mobile/services/ads_service.dart';
+import 'package:unrecorded_mobile/services/scan_runtime.dart';
+import 'package:unrecorded_mobile/services/scanner_config.dart';
+import 'package:unrecorded_mobile/services/scanner_provider.dart';
+import 'package:unrecorded_radio/unrecorded_radio.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -17,6 +21,13 @@ void main() {
   Widget testApp() => ProviderScope(
         overrides: [
           adsServiceProvider.overrideWith((ref) async => AdsService()),
+          scannerConfigProvider.overrideWith(
+            (ref) => const ScannerConfig(
+              mode: ScannerMode.demo,
+              scenario: FakeDemoScenario.low,
+            ),
+          ),
+          scannerConfigInitProvider.overrideWith((ref) async {}),
         ],
         child: const AppBootstrap(child: UnrecordedApp()),
       );
@@ -32,12 +43,11 @@ void main() {
   testWidgets('protection button toggles to pause', (tester) async {
     await tester.pumpWidget(testApp());
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
 
     await tester.tap(find.text(AppCopy.turnOnProtection));
-    for (var i = 0; i < 30; i++) {
-      await tester.pump(const Duration(milliseconds: 100));
-      if (find.text(AppCopy.pauseProtection).evaluate().isNotEmpty) break;
-    }
+    await tester.pump();
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
 
     expect(find.text(AppCopy.pauseProtection), findsOneWidget);
   });
@@ -66,6 +76,12 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
     expect(find.text('Settings & Privacy'), findsOneWidget);
+    expect(find.text(AppCopy.riskNotificationsTitle), findsOneWidget);
     expect(find.text('Local-first'), findsOneWidget);
+
+    final alertsY =
+        tester.getTopLeft(find.text(AppCopy.riskNotificationsTitle)).dy;
+    final localFirstY = tester.getTopLeft(find.text('Local-first')).dy;
+    expect(alertsY, lessThan(localFirstY));
   });
 }

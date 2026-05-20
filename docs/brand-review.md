@@ -31,7 +31,7 @@ Purple palette via `UnrecordedColors` / `UnrecordedColorScheme` in `packages/unr
 
 ## Consistency checklist
 
-- AppBar leading logo on scan, help, and remove-ads screens
+- AppBar leading logo on scan, help, settings, and remove-ads screens
 - Scan status uses circular status badge SVGs
 - Alert cards use brand `alert` icon
 - Cards use 12px corner radius via `AppThemeConstants`

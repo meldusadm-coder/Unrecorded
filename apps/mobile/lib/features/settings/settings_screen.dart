@@ -78,7 +78,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final adsRemoved = ref.watch(adsRemovedProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings & Privacy')),
+      appBar: AppBar(
+        leading: const Padding(
+          padding: EdgeInsets.only(left: 12),
+          child: AppLogo(size: 26),
+        ),
+        title: const Text('Settings & Privacy'),
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -87,61 +93,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 children: [
-                  PrivacyNoticeCard(
-                    text: PrivacyDisclaimer.privacyModel,
-                    icon: UnrecordedIcon(
-                      asset: UnrecordedIconAsset.privacy,
-                      size: 20,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  _tile(
-                    theme,
-                    leading: UnrecordedIcon(
-                      asset: UnrecordedIconAsset.device,
-                      size: 24,
-                      color: theme.colorScheme.primary,
-                    ),
-                    title: 'Local-first',
-                    subtitle:
-                        'All scanning happens on your device. Nothing is uploaded.',
-                  ),
-                  _tile(
-                    theme,
-                    icon: Icons.person_off_outlined,
-                    title: 'No account required',
-                    subtitle:
-                        'Unrecorded works without sign-up, login, or any account.',
-                  ),
-                  _tile(
-                    theme,
-                    leading: UnrecordedIcon(
-                      asset: UnrecordedIconAsset.privacy,
-                      size: 24,
-                      color: theme.colorScheme.primary,
-                    ),
-                    title: 'No cloud upload',
-                    subtitle:
-                        'Scan data stays on your device unless you choose otherwise.',
-                  ),
-                  _tile(
-                    theme,
-                    icon: Icons.analytics_outlined,
-                    title: 'No analytics or tracking',
-                    subtitle:
-                        'The app does not include analytics or telemetry.',
-                  ),
-                  _tile(
-                    theme,
-                    icon: Icons.ads_click_outlined,
-                    title: 'Small bottom ads',
-                    subtitle: adsRemoved
-                        ? 'Ads are removed on this device. Thank you for your support.'
-                        : 'Optional banner ads may appear. Scan data is never sent to ad networks.',
-                  ),
-                  const DebugTestingSection(),
-                  const Divider(height: 32),
                   Text('Alerts', style: theme.textTheme.titleMedium),
                   const SizedBox(height: 4),
                   SwitchListTile(
@@ -172,16 +123,79 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       onSelected: _setNotificationRiskThreshold,
                     ),
                   ],
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
+                  const SizedBox(height: 24),
+                  PrivacyNoticeCard(
+                    text: PrivacyDisclaimer.privacyModel,
+                    icon: UnrecordedIcon(
+                      asset: UnrecordedIconAsset.privacy,
+                      size: 20,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  _tile(
+                    theme,
                     leading: UnrecordedIcon(
-                      asset: UnrecordedIconAsset.share,
+                      asset: UnrecordedIconAsset.device,
                       size: 24,
                       color: theme.colorScheme.primary,
                     ),
+                    title: 'Local-first',
+                    subtitle:
+                        'All scanning happens on your device. Nothing is uploaded.',
+                  ),
+                  _tile(
+                    theme,
+                    leading: UnrecordedIcon(
+                      asset: UnrecordedIconAsset.protection,
+                      size: 24,
+                      color: theme.colorScheme.primary,
+                    ),
+                    title: 'No account required',
+                    subtitle:
+                        'Unrecorded works without sign-up, login, or any account.',
+                  ),
+                  _tile(
+                    theme,
+                    leading: UnrecordedIcon(
+                      asset: UnrecordedIconAsset.privacy,
+                      size: 24,
+                      color: theme.colorScheme.primary,
+                    ),
+                    title: 'No cloud upload',
+                    subtitle:
+                        'Scan data stays on your device unless you choose otherwise.',
+                  ),
+                  _tile(
+                    theme,
+                    leading: UnrecordedIcon(
+                      asset: UnrecordedIconAsset.info,
+                      size: 24,
+                      color: theme.colorScheme.primary,
+                    ),
+                    title: 'No analytics or tracking',
+                    subtitle:
+                        'The app does not include analytics or telemetry.',
+                  ),
+                  _tile(
+                    theme,
+                    leading: UnrecordedIcon(
+                      asset: UnrecordedIconAsset.widgetIcon,
+                      size: 24,
+                      color: theme.colorScheme.primary,
+                    ),
+                    title: 'Small bottom ads',
+                    subtitle: adsRemoved
+                        ? 'Ads are removed on this device. Thank you for your support.'
+                        : 'Optional banner ads may appear. Scan data is never sent to ad networks.',
+                  ),
+                  const SizedBox(height: 16),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const AppLogo(size: 24),
                     title: const Text(AppCopy.removeAdsTitle),
                     subtitle: const Text(AppCopy.removeAdsBody),
-                    trailing: const Icon(Icons.chevron_right),
+                    trailing: const UnrecordedListTrailing(),
                     onTap: () => context.push('/remove-ads'),
                   ),
                   const Divider(height: 32),
@@ -192,6 +206,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
                   ),
                   const SizedBox(height: 32),
+                  const DebugTestingSection(),
+                  const SizedBox(height: 16),
                   Text(
                     'Unrecorded v0.1.0',
                     textAlign: TextAlign.center,
@@ -203,11 +219,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ],
               ),
             ),
-            if (!adsRemoved)
-              BottomAdSlot(
-                onRemoveAdsTap: () => context.push('/remove-ads'),
-                child: ref.watch(bannerAdWidgetProvider),
-              ),
+            BottomAdSlot(
+              showSlot: !adsRemoved,
+              onRemoveAdsTap: () => context.push('/remove-ads'),
+              child: ref.watch(bannerAdWidgetProvider),
+            ),
           ],
         ),
       ),
@@ -216,17 +232,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Widget _tile(
     ThemeData theme, {
-    IconData? icon,
-    Widget? leading,
+    required Widget leading,
     required String title,
     required String subtitle,
   }) {
-    final iconWidget = leading ??
-        (icon != null
-            ? Icon(icon, color: theme.colorScheme.primary)
-            : null);
     return ListTile(
-      leading: iconWidget,
+      leading: leading,
       title: Text(title),
       subtitle: Text(subtitle),
       contentPadding: EdgeInsets.zero,
