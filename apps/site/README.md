@@ -40,15 +40,65 @@ Optional checks before deploy:
 html5validator --also-check-css index.html privacy.html
 ```
 
-## Suggested hosting
+## Host on Cloudflare Pages
 
-Any static host works, for example:
+Use **Cloudflare Pages** (not a Worker) for this folder — there is no build step.
 
-- **Cloudflare Pages** — connect repo, publish directory `apps/site`, custom domain `unrecorded.app`
+### Option A — Git deploy (recommended)
+
+1. Sign in to the [Cloudflare dashboard](https://dash.cloudflare.com/) → **Workers & Pages** → **Create** → **Pages** → **Connect to Git**.
+2. Select the Unrecorded repository.
+3. Build settings:
+
+   | Setting | Value |
+   |---------|--------|
+   | Production branch | `main` (or your default) |
+   | Framework preset | **None** |
+   | Build command | *(leave empty)* |
+   | Build output directory | `apps/site` |
+
+4. **Save and deploy**. Each push to the production branch updates the site.
+5. **Custom domains** → **Set up a custom domain** → add `unrecorded.app` (and optionally `www.unrecorded.app`).
+6. If `unrecorded.app` uses Cloudflare DNS, accept the suggested records. Otherwise add the CNAME/TXT records Pages shows you at your registrar.
+7. **Redirect `www` → apex** (optional): **Rules** → **Redirect Rules**, or a single `www` CNAME with “Redirect to `https://unrecorded.app`”.
+
+Verify after deploy:
+
+- `https://unrecorded.app/`
+- `https://unrecorded.app/privacy.html` (required for Play / AdMob)
+
+### Option B — Direct upload with Wrangler
+
+One-off or CI deploy without Git integration:
+
+```bash
+# From repo root (install wrangler once: npm i -g wrangler)
+wrangler login
+wrangler pages project create unrecorded --production-branch main
+wrangler pages deploy apps/site --project-name=unrecorded --branch=main
+```
+
+Preview locally:
+
+```bash
+npx wrangler pages dev apps/site
+```
+
+### DNS checklist
+
+- Domain `unrecorded.app` on Cloudflare (or nameservers pointed to Cloudflare).
+- Pages custom domain shows **Active** with SSL.
+- Policy URL must be public worldwide (no Access / geo block on these paths).
+
+### What not to use
+
+- **Workers-only** deploy — unnecessary; Pages serves static files from the edge.
+- **Build command** — leave empty; a fake build step will fail.
+
+## Other hosting
+
 - **GitHub Pages** — publish from `/apps/site` via Actions or branch docs
 - **Netlify / Vercel** — static publish root `apps/site`
-
-Configure HTTPS and the apex domain (`unrecorded.app` + `www` redirect as you prefer). No server-side code is required.
 
 ## Branding assets
 
