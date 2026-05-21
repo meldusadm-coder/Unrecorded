@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unrecorded_core/unrecorded_core.dart';
 import 'package:unrecorded_mobile/app.dart';
 import 'package:unrecorded_mobile/app_bootstrap.dart';
+import 'package:unrecorded_mobile/services/ad_consent_service.dart';
 import 'package:unrecorded_mobile/services/ads_service.dart';
 import 'package:unrecorded_ui/unrecorded_ui.dart';
 
@@ -79,5 +80,30 @@ void main() {
     expect(find.text(AppCopy.riskNotificationLevelTitle), findsWidgets);
     expect(find.byIcon(Icons.broken_image_outlined), findsNothing);
     expect(find.byType(UnrecordedIcon), findsWidgets);
+  });
+
+  testWidgets('settings shows ad privacy choices when UMP requires it',
+      (tester) async {
+    tester.view.physicalSize = const Size(1080, 1920);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          adsServiceProvider.overrideWith((ref) async => AdsService()),
+          adPrivacyOptionsRequiredProvider.overrideWith((ref) async => true),
+        ],
+        child: const AppBootstrap(child: UnrecordedApp()),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.byKey(const Key('settings_button')));
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+
+    expect(find.byKey(const Key('ad_privacy_choices_tile')), findsOneWidget);
+    expect(find.text(AppCopy.adPrivacyChoicesTitle), findsOneWidget);
   });
 }

@@ -63,6 +63,10 @@ class AppCopy {
   static const String removeAdsFreeNote =
       'Core scanning stays free. Payment only removes ads.';
 
+  static const String adPrivacyChoicesTitle = 'Ad privacy choices';
+  static const String adPrivacyChoicesSubtitle =
+      'Change or withdraw consent for advertising cookies and data use.';
+
   static const String maybeLater = 'Maybe later';
   static const String restorePurchase = 'Restore purchase';
   static const String restorePurchaseHint =

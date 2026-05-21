@@ -25,6 +25,8 @@
    ```
    For CI release builds, set GitHub Actions variable (or secret) `ADMOB_BANNER_ID` — see [release.md](release.md).
 4. Configure UMP consent in AdMob for UK/GDPR.
+5. Publish the European regulations message with **Ad unit deployment off** (the app uses UMP SDK).
+6. Users change or withdraw ad consent via **Settings & Privacy → Ad privacy choices** (required revocation entry point).
 
 Debug builds use Google’s test banner ID by default.
 
