@@ -33,6 +33,7 @@ A Dart pub workspace monorepo:
 | Path | Description |
 |---|---|
 | `apps/mobile` | Flutter app (Android & iOS) |
+| `apps/site` | Static marketing and privacy policy site for [unrecorded.app](https://unrecorded.app) |
 | `packages/unrecorded_core` | Pure Dart: models, risk scoring, privacy text |
 | `packages/unrecorded_radio` | Scanner abstraction: fake + BLE implementations |
 | `packages/unrecorded_ui` | Shared Flutter widgets |

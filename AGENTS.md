@@ -13,6 +13,7 @@ Unrecorded alerts users to possible recording risk. It must never claim to prove
 | Path | Description |
 |---|---|
 | `apps/mobile` | Flutter app (Android & iOS) — Riverpod + GoRouter |
+| `apps/site` | Static site for [unrecorded.app](https://unrecorded.app) (landing + privacy policy) |
 | `packages/unrecorded_core` | Pure Dart: models, risk scoring engine, privacy disclaimers |
 | `packages/unrecorded_radio` | Scanner abstraction: `FakeRadioScanner`, `BleRadioScanner` |
 | `packages/unrecorded_ui` | Shared Flutter UI widgets |

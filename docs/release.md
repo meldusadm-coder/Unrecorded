@@ -126,6 +126,23 @@ Scaffolding (paste into Play Console / App Store Connect):
 
 Use cautious language: **possible** risk, **not proof of recording**, scan data stays on device.
 
+### Privacy policy URL (required)
+
+Google Play and **Google AdMob** require a **public, non-geofenced** privacy policy URL before publication.
+
+| Field | Value |
+|-------|--------|
+| Privacy policy URL | `https://unrecorded.app/privacy.html` |
+
+Source of truth: [`apps/site/privacy.html`](../apps/site/privacy.html) (deploy `apps/site` to `unrecorded.app`). The policy must cover, at minimum:
+
+- BLE scanning processed on-device; scan data not uploaded by default
+- Google AdMob banner ads and optional remove-ads IAP (scan data not passed to ads)
+- No accounts; no third-party analytics in core scanning
+- Possible privacy risk indicators — not proof of recording
+
+Privacy contact in the policy: **privacy@unrecorded.app** (operator: **Meldlife Ltd**). In AdMob, link the same policy URL to your app.
+
 ## iOS (manual / future automation)
 
 No iOS release workflow yet. For local builds on macOS:

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ECEBFF"/>
+      <stop offset="0.5" stop-color="#F6F6FA"/>
+      <stop offset="1" stop-color="#FFFFFF"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7C3AED"/>
+      <stop offset="1" stop-color="#5B4DFF"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="980" cy="120" r="180" fill="#5B4DFF" opacity="0.08"/>
+  <circle cx="200" cy="520" r="220" fill="#7C3AED" opacity="0.06"/>
+  <g transform="translate(120 200) scale(2.2)">
+    <path d="M64 16c-18 0-34 7-45 19" stroke="#5B4DFF" stroke-width="7" stroke-linecap="round" fill="none"/>
+    <path d="M109 35C98 23 82 16 64 16" stroke="#5B4DFF" stroke-width="7" stroke-linecap="round" fill="none"/>
+    <path d="M38 50c7-8 16-12 26-12s19 4 26 12" stroke="#5B4DFF" stroke-width="7" stroke-linecap="round" fill="none"/>
+    <path d="M32 52v25c0 19 13 32 32 42 19-10 32-23 32-42V52" stroke="#5B4DFF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <circle cx="64" cy="72" r="17" fill="#2B2D42"/>
+    <circle cx="70" cy="66" r="5" fill="#FFFFFF" opacity=".95"/>
+  </g>
+  <text x="120" y="420" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="64" font-weight="700" fill="#2B2D42">Unrecorded</text>
+  <text x="120" y="490" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="32" font-weight="500" fill="#3F36C9">Privacy awareness for nearby smart glasses</text>
+  <text x="120" y="545" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="24" font-weight="400" fill="#6B7280">Local-first. Honest limits. No proof of recording.</text>
+</svg>
