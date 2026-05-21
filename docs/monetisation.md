@@ -23,6 +23,7 @@
    ```bash
    flutter run --dart-define=ADMOB_BANNER_ID=ca-app-pub-XXXX/YYYY
    ```
+   For CI release builds, set GitHub Actions variable (or secret) `ADMOB_BANNER_ID` — see [release.md](release.md).
 4. Configure UMP consent in AdMob for UK/GDPR.
 
 Debug builds use Google’s test banner ID by default.

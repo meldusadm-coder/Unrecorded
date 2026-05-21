@@ -45,6 +45,8 @@ jobs:
       VERSION_CODE: ${{ inputs.version_code }}
       FULL_VERSION: ${{ inputs.version_name }}+${{ inputs.version_code }}
       TAG_NAME: mobile-v${{ inputs.version_name }}+${{ inputs.version_code }}
+      # Repository variable or secret; optional — omit to use in-app test banner ID.
+      ADMOB_BANNER_ID: ${{ vars.ADMOB_BANNER_ID || secrets.ADMOB_BANNER_ID }}
     steps:
       - uses: actions/checkout@v4
 
@@ -110,11 +112,26 @@ EOF
 
       - name: Build App Bundle (store artifact)
         working-directory: apps/mobile
-        run: flutter build appbundle --release
+        run: |
+          set -euo pipefail
+          args=(--release)
+          if [[ -n "${ADMOB_BANNER_ID:-}" ]]; then
+            echo "Using ADMOB_BANNER_ID from GitHub configuration."
+            args+=(--dart-define=ADMOB_BANNER_ID="${ADMOB_BANNER_ID}")
+          else
+            echo "ADMOB_BANNER_ID not set; release build uses in-app test banner ID."
+          fi
+          flutter build appbundle "${args[@]}"
 
       - name: Build release APK (convenience)
         working-directory: apps/mobile
-        run: flutter build apk --release
+        run: |
+          set -euo pipefail
+          args=(--release)
+          if [[ -n "${ADMOB_BANNER_ID:-}" ]]; then
+            args+=(--dart-define=ADMOB_BANNER_ID="${ADMOB_BANNER_ID}")
+          fi
+          flutter build apk "${args[@]}"
 
       - name: Stage release artifacts
         run: |

@@ -94,6 +94,14 @@ base64 -w0 upload-keystore.jks   # Linux
 
 Never commit keystores or `key.properties`.
 
+### Optional: AdMob banner unit (release builds)
+
+Set **`ADMOB_BANNER_ID`** as a repository **variable** (recommended) or **secret**:
+
+**Settings → Secrets and variables → Actions → Variables** → `ADMOB_BANNER_ID` = `ca-app-pub-XXXX/YYYY`
+
+When unset, release builds use Google’s in-app test banner ID. Also set your production AdMob **app ID** in `apps/mobile/android/app/src/main/AndroidManifest.xml`. See [monetisation.md](monetisation.md).
+
 ### Optional: Google Play upload
 
 Set **one** of:
