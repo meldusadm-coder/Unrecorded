@@ -136,7 +136,7 @@ See [FUNDING.md](FUNDING.md).
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md). AI coding assistants should follow [AGENTS.md](AGENTS.md) (tool-agnostic; no vendor-specific rule files in the repo).
 
 ## Licence
 

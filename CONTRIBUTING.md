@@ -36,6 +36,10 @@ dart analyze
 cd apps/mobile && flutter build apk --debug
 ```
 
+## AI-assisted contributions
+
+Project-wide rules for humans and AI tools live in **[AGENTS.md](AGENTS.md)**. Use that file in your assistant’s project-instructions setting, or `@AGENTS.md` in chat. Do not add Cursor-, Copilot-, or other vendor-specific rule files to the repo.
+
 ## Contribution rules
 
 ### Privacy first
@@ -74,4 +78,4 @@ Maintainers shipping app versions: see [docs/release.md](docs/release.md) for ve
 - Analytics or telemetry
 - Ad SDKs
 - ML-based detection
-- Extra AI configuration files
+- Tool-specific AI rule files in the repo (use [AGENTS.md](AGENTS.md) instead)

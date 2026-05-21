@@ -1,5 +1,9 @@
 # AGENTS.md
 
+Canonical instructions for **any** AI coding assistant (Cursor, GitHub Copilot, Claude Code, Codex, Gemini CLI, etc.). Humans contributing with or without AI should follow the same rules in [CONTRIBUTING.md](CONTRIBUTING.md).
+
+Do **not** commit tool-specific rule files (for example `.cursor/rules/`, `CLAUDE.md`, `.github/copilot-instructions.md`). If your editor supports local overrides, keep them on your machine or add `.cursor/` locally (it is gitignored).
+
 ## Project summary
 
 Unrecorded is an open-source privacy app for detecting possible nearby smart glasses or wearable recording devices and warning users about potential unwanted recording risk.
@@ -65,6 +69,11 @@ cd apps/mobile && flutter build apk --debug
 - Add or update tests for scoring and privacy-sensitive behaviour.
 - Keep docs concise and update them only when behaviour or architecture changes.
 
+## Agent workflow
+
+- Keep edits small, testable, and privacy-first.
+- When changing detection, scoring, permissions, or privacy-sensitive behaviour, update the relevant tests and concise docs.
+
 ## Things not to do
 
 - Do not claim recording can be proven.
@@ -73,7 +82,7 @@ cd apps/mobile && flutter build apk --debug
 - Do not add ad SDKs.
 - Do not add accounts/auth.
 - Do not add ML detection yet.
-- Do not create more AI configuration files.
+- Do not add committed tool-specific AI rule/config files; extend this file instead.
 
 ## Dev container
 
