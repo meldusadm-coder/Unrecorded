@@ -22,13 +22,15 @@ void main() {
     expect(RemoveAdsPricing.productIdForGbp(20), 'remove_ads_2000');
   });
 
-  test('isRemoveAdsProductId accepts tier and legacy ids', () {
+  test('isRemoveAdsProductId accepts tier, legacy, and historical ids', () {
     expect(RemoveAdsPricing.isRemoveAdsProductId('remove_ads_200'), isTrue);
     expect(RemoveAdsPricing.isRemoveAdsProductId('remove_ads_25'), isTrue);
     expect(RemoveAdsPricing.isRemoveAdsProductId('remove_ads_3'), isTrue);
     expect(RemoveAdsPricing.isRemoveAdsProductId('remove_ads_50'), isTrue);
-    expect(RemoveAdsPricing.isRemoveAdsProductId('remove_ads_30'), isFalse);
+    expect(RemoveAdsPricing.isRemoveAdsProductId('remove_ads_30'), isTrue);
+    expect(RemoveAdsPricing.isRemoveAdsProductId('remove_ads_2100'), isTrue);
     expect(RemoveAdsPricing.isRemoveAdsProductId('remove_ads_foo'), isFalse);
+    expect(RemoveAdsPricing.isRemoveAdsProductId('remove_ads_0'), isFalse);
     expect(RemoveAdsPricing.isRemoveAdsProductId('other'), isFalse);
   });
 

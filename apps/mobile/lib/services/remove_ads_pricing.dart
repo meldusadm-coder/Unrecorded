@@ -43,14 +43,16 @@ class RemoveAdsPricing {
     return 'remove_ads_$pence';
   }
 
+  /// True for any sold or legacy `remove_ads_*` SKU (used on purchase restore).
+  ///
+  /// New purchases use the [isSupportedAmount] tier grid only; historical numeric
+  /// IDs (e.g. `remove_ads_2100`, off-grid tiers) must still grant entitlement.
   static bool isRemoveAdsProductId(String id) {
     if (legacyProductIds.contains(id)) return true;
     if (!id.startsWith('remove_ads_')) return false;
     final suffix = id.substring('remove_ads_'.length);
-    if (suffix.isEmpty) return false;
-    final pence = int.tryParse(suffix);
-    if (pence == null) return false;
-    return pence >= 25 && pence <= 2000 && pence % 25 == 0;
+    if (suffix.isEmpty || !RegExp(r'^\d+$').hasMatch(suffix)) return false;
+    return int.parse(suffix) > 0;
   }
 
   /// Parses user input; returns null if invalid or not on the tier grid.

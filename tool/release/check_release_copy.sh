@@ -5,7 +5,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "${REPO_ROOT}"
 
-# Patterns that imply certainty (negated forms like "not proof of recording" are OK).
+# Patterns that imply certainty. Negated disclaimers (e.g. "not proof that …") are OK.
 FORBIDDEN=(
   'recording detected'
   'spy detected'
@@ -29,10 +29,19 @@ for pattern in "${FORBIDDEN[@]}"; do
     if [[ ! -e "${path}" ]]; then
       continue
     fi
-    if grep -riE --include='*.txt' --include='*.md' "${pattern}" "${path}" 2>/dev/null; then
-      echo "Error: forbidden phrase matched '${pattern}' under ${path}" >&2
-      found=1
-    fi
+    while IFS= read -r -d '' file; do
+      while IFS= read -r line || [[ -n "${line}" ]]; do
+        if ! echo "${line}" | grep -qiE "${pattern}"; then
+          continue
+        fi
+        if echo "${line}" | grep -qiE "not[[:space:]]+${pattern}"; then
+          continue
+        fi
+        echo "Error: forbidden phrase '${pattern}' in ${file}" >&2
+        echo "  ${line}" >&2
+        found=1
+      done < "${file}"
+    done < <(find "${path}" \( -name '*.txt' -o -name '*.md' \) -print0 2>/dev/null)
   done
 done
 
