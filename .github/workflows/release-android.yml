@@ -122,6 +122,8 @@ jobs:
             echo "::error::Keystore decode failed or alias/password mismatch. Check ANDROID_KEYSTORE_* secrets."
             exit 1
           fi
+          echo "::notice::Upload key SHA-1 (must match Play Console → Setup → App signing → Upload key certificate):"
+          keytool -list -v -keystore "${KEYSTORE_PATH}" -storepass "${ANDROID_KEYSTORE_PASSWORD}" -alias "${ANDROID_KEY_ALIAS}" 2>/dev/null | grep -E "SHA1:|SHA256:" || true
           PROP_FILE="${ANDROID_DIR}/key.properties"
           echo "storePassword=${ANDROID_KEYSTORE_PASSWORD}" > "${PROP_FILE}"
           echo "keyPassword=${ANDROID_KEY_PASSWORD}" >> "${PROP_FILE}"
