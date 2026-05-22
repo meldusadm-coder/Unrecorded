@@ -2,6 +2,8 @@
 
 Unrecorded is designed to be privacy-protective by default.
 
+**Public privacy policy (Play, AdMob, stores):** [https://unrecorded.app/privacy.html](https://unrecorded.app/privacy.html) — maintained in [`apps/site/privacy.html`](../apps/site/privacy.html).
+
 ## Principles
 
 - **Local-first scanning.** All detection and scoring happens on-device. No scan data leaves the phone.

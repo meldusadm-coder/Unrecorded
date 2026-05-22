@@ -23,6 +23,9 @@ pubspec.lock
 **/android/local.properties
 **/android/**/GeneratedPluginRegistrant.java
 **/android/key.properties
+apps/mobile/android/app/*.jks
+apps/mobile/android/app/*.keystore
+**/*.keystore
 *.jks
 
 # iOS
@@ -62,11 +65,17 @@ coverage/
 # IDE
 .idea/
 .vscode/
+.cursor/
 !.vscode/launch.json
 *.iml
 *.swp
 *.swo
 .devcontainer/gitconfig
+
+# Play service account keys (never commit)
+store/android/*.json
+**/play-service-account.json
+tool/play/.venv/
 
 # OS
 .DS_Store

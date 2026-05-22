@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:unrecorded_core/unrecorded_core.dart';
 import 'package:unrecorded_ui/unrecorded_ui.dart';
 
+import '../../services/ad_consent_service.dart';
 import '../../services/entitlement_service.dart';
 import '../../services/notification_prefs.dart';
 import '../../services/notification_risk_threshold.dart';
@@ -71,10 +72,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     setState(() => _notificationRiskThreshold = threshold);
   }
 
+  Future<void> _showAdPrivacyChoices() async {
+    try {
+      await ref.read(adConsentServiceProvider).showPrivacyOptionsForm();
+      ref.invalidate(adPrivacyOptionsRequiredProvider);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Ad privacy choices are unavailable right now.'),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final adsRemoved = ref.watch(adsRemovedProvider);
+    final privacyOptionsRequired = ref.watch(adPrivacyOptionsRequiredProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -193,6 +209,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               subtitle: adsRemoved
                   ? 'Ads are removed on this device. Thank you for your support.'
                   : 'Optional banner ads may appear. Scan data is never sent to ad networks.',
+            ),
+            privacyOptionsRequired.maybeWhen(
+              data: (required) {
+                if (!required) return const SizedBox.shrink();
+                return ListTile(
+                  key: const Key('ad_privacy_choices_tile'),
+                  contentPadding: EdgeInsets.zero,
+                  leading: UnrecordedIcon(
+                    asset: UnrecordedIconAsset.privacy,
+                    size: 24,
+                    color: theme.colorScheme.primary,
+                  ),
+                  title: const Text(AppCopy.adPrivacyChoicesTitle),
+                  subtitle: const Text(AppCopy.adPrivacyChoicesSubtitle),
+                  trailing: const UnrecordedListTrailing(),
+                  onTap: _showAdPrivacyChoices,
+                );
+              },
+              orElse: () => const SizedBox.shrink(),
             ),
             const SizedBox(height: 16),
             ListTile(

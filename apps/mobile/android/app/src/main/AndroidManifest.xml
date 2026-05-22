@@ -40,7 +40,7 @@
         <!-- Google AdMob (replace with production app ID for release builds). -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713"/>
+            android:value="ca-app-pub-5555183606520770~8345311336"/>
         <receiver
             android:name=".UnrecordedWidgetProvider"
             android:exported="true">

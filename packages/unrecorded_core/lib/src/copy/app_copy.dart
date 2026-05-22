@@ -63,17 +63,24 @@ class AppCopy {
   static const String removeAdsFreeNote =
       'Core scanning stays free. Payment only removes ads.';
 
+  static const String adPrivacyChoicesTitle = 'Ad privacy choices';
+  static const String adPrivacyChoicesSubtitle =
+      'Change or withdraw consent for advertising cookies and data use.';
+
   static const String maybeLater = 'Maybe later';
   static const String restorePurchase = 'Restore purchase';
   static const String restorePurchaseHint =
       'Restore requested. If you previously paid, ads will be removed.';
 
-  static const String removeAdsAmountLabel = 'Your amount (GBP)';
+  static const String removeAdsAmountLabel = 'Choose your amount';
   static const String removeAdsAmountHint =
-      'Choose any amount you like. Default is £2. The app store needs a '
-      'matching product for your amount (see docs/monetisation.md).';
-  static const String removeAdsInvalidAmount =
-      'Enter an amount between £0.50 and £100.00.';
+      'Slide to pick what you’d like to pay, from £0.25 to £20.00 in 25p steps. '
+      'Default is £2.00.';
+
+  /// Shown when the store has no product for the selected tier.
+  static String removeAdsAmountUnavailable(String formattedAmount) =>
+      '$formattedAmount isn’t available for payment right now. '
+      'Try another amount on the slider, or check back after the store is updated.';
 
   // Notifications
   static const String riskNotificationsTitle = 'Risk alerts';

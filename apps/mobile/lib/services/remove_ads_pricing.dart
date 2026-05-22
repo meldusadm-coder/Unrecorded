@@ -1,10 +1,14 @@
-/// Pay-what-you-want remove-ads pricing (store product per amount in pence).
+/// Pay-what-you-want remove-ads pricing (one store product per tier in pence).
 class RemoveAdsPricing {
   RemoveAdsPricing._();
 
   static const double defaultGbp = 2.0;
-  static const double minGbp = 0.50;
-  static const double maxGbp = 100.0;
+  static const double minGbp = 0.25;
+  static const double maxGbp = 20.0;
+  static const double stepGbp = 0.25;
+
+  static int get tierCount =>
+      ((maxGbp - minGbp) / stepGbp).round() + 1; // 80 tiers
 
   /// Legacy fixed-tier IDs still honoured on restore.
   static const legacyProductIds = <String>{
@@ -14,27 +18,52 @@ class RemoveAdsPricing {
     'remove_ads_10',
   };
 
+  /// GBP amount for slider tier [index] (0 = £0.25).
+  static double amountForTier(int index) {
+    assert(index >= 0 && index < tierCount);
+    return minGbp + index * stepGbp;
+  }
+
+  /// Nearest tier index for [gbp], clamped to valid range.
+  static int tierIndexForAmount(double gbp) {
+    final clamped = gbp.clamp(minGbp, maxGbp);
+    final index = ((clamped - minGbp) / stepGbp).round();
+    return index.clamp(0, tierCount - 1);
+  }
+
+  static bool isSupportedAmount(double gbp) {
+    final pence = (gbp * 100).round();
+    if (pence < 25 || pence > 2000) return false;
+    return pence % 25 == 0;
+  }
+
   /// Store product ID for a GBP amount, e.g. £2.00 → `remove_ads_200`.
   static String productIdForGbp(double gbp) {
     final pence = (gbp * 100).round();
     return 'remove_ads_$pence';
   }
 
+  /// True for any sold or legacy `remove_ads_*` SKU (used on purchase restore).
+  ///
+  /// New purchases use the [isSupportedAmount] tier grid only; historical numeric
+  /// IDs (e.g. `remove_ads_2100`, off-grid tiers) must still grant entitlement.
   static bool isRemoveAdsProductId(String id) {
     if (legacyProductIds.contains(id)) return true;
     if (!id.startsWith('remove_ads_')) return false;
     final suffix = id.substring('remove_ads_'.length);
-    if (suffix.isEmpty) return false;
-    return int.tryParse(suffix) != null;
+    if (suffix.isEmpty || !RegExp(r'^\d+$').hasMatch(suffix)) return false;
+    return int.parse(suffix) > 0;
   }
 
-  /// Parses user input; returns null if invalid.
+  /// Parses user input; returns null if invalid or not on the tier grid.
   static double? parseGbp(String input) {
     final trimmed = input.trim().replaceFirst(RegExp(r'^£\s*'), '');
     if (trimmed.isEmpty) return null;
     final value = double.tryParse(trimmed);
-    if (value == null || value < minGbp || value > maxGbp) return null;
-    return double.parse(value.toStringAsFixed(2));
+    if (value == null) return null;
+    final rounded = double.parse(value.toStringAsFixed(2));
+    if (!isSupportedAmount(rounded)) return null;
+    return rounded;
   }
 
   static String formatGbp(double gbp) => '£${gbp.toStringAsFixed(2)}';

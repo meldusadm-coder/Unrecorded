@@ -1,0 +1,13 @@
+Unrecorded helps you understand possible privacy risk from nearby Bluetooth signals that may match smart glasses or wearable recording devices.
+
+Features:
+- On-device BLE scanning
+- Risk levels with plain-English reasons
+- Local-first: scan data stays on your device
+
+Limitations:
+- Cannot prove that anyone is recording
+- May not detect devices with hidden or randomised names
+- Bluetooth-only; does not detect all cameras or microphones
+
+Treat results as awareness signals, not proof of recording.

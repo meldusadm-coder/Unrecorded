@@ -36,6 +36,10 @@ dart analyze
 cd apps/mobile && flutter build apk --debug
 ```
 
+## AI-assisted contributions
+
+Project-wide rules for humans and AI tools live in **[AGENTS.md](AGENTS.md)**. Use that file in your assistant’s project-instructions setting, or `@AGENTS.md` in chat. Do not add Cursor-, Copilot-, or other vendor-specific rule files to the repo.
+
 ## Contribution rules
 
 ### Privacy first
@@ -49,6 +53,17 @@ cd apps/mobile && flutter build apk --debug
 - Never claim the app can prove someone is recording.
 - Use language like "possible", "may indicate", "potential risk".
 - Keep risk explanations understandable to non-technical users.
+
+### Git branches
+
+- **`dev`** — integration; open feature PRs here.
+- **`main`** — production; merge via `release/*` or `hotfix/*` PRs (see [docs/git-flow.md](docs/git-flow.md)).
+- Helpers: `./tool/git/start_release_branch.sh`, `./tool/git/preflight_release.sh`, etc. ([tool/git/README.md](tool/git/README.md)).
+- AI assistants: step-by-step playbooks in [skills/README.md](skills/README.md) (e.g. “create release”, “branch for issue 42”).
+
+### Releases
+
+Maintainers shipping app versions: [docs/git-flow.md](docs/git-flow.md) (branching) and [docs/release.md](docs/release.md) (versioning, signing, Android workflow).
 
 ### Keep changes focused
 
@@ -70,4 +85,4 @@ cd apps/mobile && flutter build apk --debug
 - Analytics or telemetry
 - Ad SDKs
 - ML-based detection
-- Extra AI configuration files
+- Tool-specific AI rule files in the repo (use [AGENTS.md](AGENTS.md) instead)

@@ -33,6 +33,7 @@ A Dart pub workspace monorepo:
 | Path | Description |
 |---|---|
 | `apps/mobile` | Flutter app (Android & iOS) |
+| `apps/site` | Static marketing and privacy policy site for [unrecorded.app](https://unrecorded.app) |
 | `packages/unrecorded_core` | Pure Dart: models, risk scoring, privacy text |
 | `packages/unrecorded_radio` | Scanner abstraction: fake + BLE implementations |
 | `packages/unrecorded_ui` | Shared Flutter widgets |
@@ -117,6 +118,10 @@ Optional external setup (still free tiers available):
 - GitHub Actions + Android emulator runner (open source action).
 - Firebase Test Lab free quota for occasional physical-device smoke tests.
 
+## Releases
+
+Maintainers: see [docs/release.md](docs/release.md) for versioning, signed Android App Bundle builds, GitHub Releases, and optional Google Play upload.
+
 ## Privacy model
 
 All scanning is local. No account, no cloud, no analytics. See [docs/privacy-model.md](docs/privacy-model.md).
@@ -131,7 +136,7 @@ See [FUNDING.md](FUNDING.md).
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md). AI coding assistants should follow [AGENTS.md](AGENTS.md) (tool-agnostic; no vendor-specific rule files in the repo).
 
 ## Licence
 
