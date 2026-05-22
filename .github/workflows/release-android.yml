@@ -75,7 +75,7 @@ jobs:
         run: flutter pub get
 
       - name: Bump version
-        run: ./tool/release/bump_version.sh "${VERSION_NAME}" "${VERSION_CODE}" --allow-dirty
+        run: bash tool/release/bump_version.sh "${VERSION_NAME}" "${VERSION_CODE}" --allow-dirty
 
       - name: Format check
         run: dart format --set-exit-if-changed .
@@ -93,7 +93,7 @@ jobs:
         run: cd apps/mobile && flutter test
 
       - name: Release copy guardrails
-        run: ./tool/release/check_release_copy.sh
+        run: bash tool/release/check_release_copy.sh
 
       - name: Configure Android release signing
         env:
@@ -156,7 +156,7 @@ jobs:
           fi
 
       - name: Extract release notes
-        run: ./tool/release/extract_release_notes.sh "${FULL_VERSION}" "${RUNNER_TEMP}/release-notes.md"
+        run: bash tool/release/extract_release_notes.sh "${FULL_VERSION}" "${RUNNER_TEMP}/release-notes.md"
 
       - name: Upload workflow artifacts
         uses: actions/upload-artifact@v4
