@@ -51,7 +51,7 @@ Pattern: `remove_ads_{pence}` where pence = amount × 100 (rounded).
 
 Use license testers (Play) or Sandbox (Apple) for test purchases.
 
-If a product ID is missing in the store, the app shows which ID to create.
+If a product ID is missing in the store, the app tells the user that amount is not available and suggests trying common amounts (e.g. £2.00).
 
 ### Dev bypass
 

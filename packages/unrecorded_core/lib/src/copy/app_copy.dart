@@ -74,10 +74,16 @@ class AppCopy {
 
   static const String removeAdsAmountLabel = 'Your amount (GBP)';
   static const String removeAdsAmountHint =
-      'Choose any amount you like. Default is £2. The app store needs a '
-      'matching product for your amount (see docs/monetisation.md).';
+      'Choose what you’d like to pay. Default is £2.00. Not every amount is '
+      'available in the app store — use the check button beside the field '
+      'to confirm yours before paying.';
   static const String removeAdsInvalidAmount =
       'Enter an amount between £0.50 and £100.00.';
+
+  /// Shown when the store has no product for the user’s chosen GBP amount.
+  static String removeAdsAmountUnavailable(String formattedAmount) =>
+      '$formattedAmount isn’t available for payment right now. '
+      'Try £2.00, £5.00, or £10.00, or use the check button to try another amount.';
 
   // Notifications
   static const String riskNotificationsTitle = 'Risk alerts';

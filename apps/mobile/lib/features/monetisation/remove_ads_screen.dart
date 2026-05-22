@@ -56,9 +56,8 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
       _previewProduct = product;
       _loading = false;
       if (product == null) {
-        _message = 'This amount is not set up in the app store yet. '
-            'Create product ${RemoveAdsPricing.productIdForGbp(amount)} '
-            'in Play Console / App Store Connect.';
+        _message =
+            AppCopy.removeAdsAmountUnavailable(RemoveAdsPricing.formatGbp(amount));
       }
     });
   }
@@ -84,9 +83,8 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
     if (product == null) {
       setState(() {
         _loading = false;
-        _message = 'Could not find a store product for '
-            '${RemoveAdsPricing.formatGbp(amount)}. '
-            'Check store configuration.';
+        _message =
+            AppCopy.removeAdsAmountUnavailable(RemoveAdsPricing.formatGbp(amount));
       });
       return;
     }
