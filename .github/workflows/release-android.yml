@@ -1,10 +1,8 @@
 name: Release Android
 
 on:
+  # Manual only — run from branch `main` in the Actions UI (see docs/release.md).
   workflow_dispatch:
-    # Manual releases only from production branch (see docs/release.md).
-    branches:
-      - main
     inputs:
       version_name:
         description: Semantic version (e.g. 0.1.0)
