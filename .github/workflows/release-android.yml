@@ -115,7 +115,8 @@ jobs:
           done
           ANDROID_DIR="apps/mobile/android"
           KEYSTORE_FILE="ci-release.keystore.jks"
-          KEYSTORE_PATH="${ANDROID_DIR}/${KEYSTORE_FILE}"
+          # storeFile in key.properties is resolved relative to android/app/ (see build.gradle.kts).
+          KEYSTORE_PATH="${ANDROID_DIR}/app/${KEYSTORE_FILE}"
           printf '%s' "${ANDROID_KEYSTORE_BASE64}" | base64 -d > "${KEYSTORE_PATH}"
           if ! keytool -list -keystore "${KEYSTORE_PATH}" -storepass "${ANDROID_KEYSTORE_PASSWORD}" -alias "${ANDROID_KEY_ALIAS}" >/dev/null 2>&1; then
             echo "::error::Keystore decode failed or alias/password mismatch. Check ANDROID_KEYSTORE_* secrets."
