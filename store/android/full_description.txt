@@ -1,0 +1,15 @@
+Unrecorded helps you understand possible privacy risk from nearby Bluetooth signals that may match smart glasses or wearable recording devices.
+
+What it does:
+- Scans for nearby BLE signals on your device
+- Compares signals against patterns associated with known smart glasses and wearables
+- Shows a privacy-risk level (low / medium / high) with plain-English explanations
+
+What it does not do:
+- Prove that anyone is recording
+- Detect non-Bluetooth cameras or microphones
+- Upload scan data off your device by default
+
+Bluetooth signals can be hidden, randomised, or spoofed. Unrecorded provides risk indicators — not certainty. Treat alerts as awareness signals only.
+
+Scan data stays on your device. No account required.

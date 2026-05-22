@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Unrecorded — Privacy awareness for nearby smart glasses</title>
+    <meta
+      name="description"
+      content="Unrecorded is a local-first privacy app that warns when nearby Bluetooth signals may match smart glasses or wearable recording devices."
+    />
+    <link rel="canonical" href="https://unrecorded.app/" />
+    <meta name="theme-color" content="#5B4DFF" />
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://unrecorded.app/" />
+    <meta
+      property="og:title"
+      content="Unrecorded — Privacy awareness for nearby smart glasses"
+    />
+    <meta
+      property="og:description"
+      content="Unrecorded is a local-first privacy app that warns when nearby Bluetooth signals may match smart glasses or wearable recording devices."
+    />
+    <meta property="og:image" content="https://unrecorded.app/assets/social-card.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Unrecorded — Privacy awareness for nearby smart glasses"
+    />
+    <meta
+      name="twitter:description"
+      content="Unrecorded is a local-first privacy app that warns when nearby Bluetooth signals may match smart glasses or wearable recording devices."
+    />
+    <meta name="twitter:image" content="https://unrecorded.app/assets/social-card.svg" />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+
+    <header class="site-header">
+      <div class="container">
+        <a class="brand-link" href="/">
+          <img
+            src="/assets/logo-mark.svg"
+            width="36"
+            height="36"
+            alt=""
+            aria-hidden="true"
+          />
+          <span class="brand-name">Unrecorded</span>
+        </a>
+        <nav aria-label="Primary">
+          <ul class="nav-links">
+            <li><a href="#how-it-works">How it works</a></li>
+            <li><a href="#limits">Limits</a></li>
+            <li><a href="/privacy.html">Privacy</a></li>
+            <li>
+              <a
+                href="https://github.com/meldusadm-coder/Unrecorded"
+                rel="noopener noreferrer"
+                >GitHub</a
+              >
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-heading">
+        <div class="container">
+          <div class="hero-content">
+            <p class="hero-eyebrow">Local-first privacy awareness</p>
+            <h1 id="hero-heading">
+              Know when nearby signals may suggest smart glasses.
+            </h1>
+            <p class="hero-lead">
+              Unrecorded is a local-first privacy awareness app that helps you
+              understand when nearby Bluetooth signals may match smart glasses or
+              wearable recording devices.
+            </p>
+            <p class="hero-note">
+              <strong>Important:</strong> Unrecorded does not prove anyone is
+              recording. It highlights possible privacy risk indicators so you can
+              make a more informed choice.
+            </p>
+            <div class="hero-actions">
+              <span
+                class="btn btn-primary"
+                role="status"
+                aria-disabled="true"
+                title="Android release coming soon"
+                >Coming soon for Android</span
+              >
+              <a class="btn btn-secondary" href="/privacy.html"
+                >Read the privacy policy</a
+              >
+            </div>
+          </div>
+          <div class="hero-visual" aria-hidden="true">
+            <div class="signal-visual">
+              <svg
+                viewBox="0 0 320 320"
+                xmlns="http://www.w3.org/2000/svg"
+                role="img"
+                aria-label="Abstract illustration of gentle signal rings"
+              >
+                <defs>
+                  <linearGradient id="ring-grad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#7C3AED" stop-opacity="0.35" />
+                    <stop offset="1" stop-color="#5B4DFF" stop-opacity="0.25" />
+                  </linearGradient>
+                </defs>
+                <circle
+                  cx="160"
+                  cy="160"
+                  r="140"
+                  fill="none"
+                  stroke="url(#ring-grad)"
+                  stroke-width="2"
+                />
+                <circle
+                  cx="160"
+                  cy="160"
+                  r="105"
+                  fill="none"
+                  stroke="#5B4DFF"
+                  stroke-width="2"
+                  opacity="0.35"
+                />
+                <circle
+                  cx="160"
+                  cy="160"
+                  r="70"
+                  fill="none"
+                  stroke="#5B4DFF"
+                  stroke-width="2"
+                  opacity="0.5"
+                />
+                <circle
+                  cx="160"
+                  cy="160"
+                  r="36"
+                  fill="#ECEBFF"
+                  stroke="#5B4DFF"
+                  stroke-width="2"
+                />
+                <g transform="translate(96 96) scale(1)">
+                  <path
+                    d="M64 16c-18 0-34 7-45 19"
+                    stroke="#5B4DFF"
+                    stroke-width="6"
+                    stroke-linecap="round"
+                    fill="none"
+                  />
+                  <path
+                    d="M109 35C98 23 82 16 64 16"
+                    stroke="#5B4DFF"
+                    stroke-width="6"
+                    stroke-linecap="round"
+                    fill="none"
+                  />
+                  <path
+                    d="M38 50c7-8 16-12 26-12s19 4 26 12"
+                    stroke="#5B4DFF"
+                    stroke-width="6"
+                    stroke-linecap="round"
+                    fill="none"
+                  />
+                  <path
+                    d="M32 52v25c0 19 13 32 32 42 19-10 32-23 32-42V52"
+                    stroke="#5B4DFF"
+                    stroke-width="6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    fill="none"
+                  />
+                  <circle cx="64" cy="72" r="14" fill="#2B2D42" />
+                  <circle cx="69" cy="67" r="4" fill="#FFFFFF" opacity=".95" />
+                </g>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="what-heading">
+        <div class="container">
+          <header class="section-header">
+            <h2 id="what-heading">What Unrecorded does</h2>
+            <p>
+              Awareness based on visible nearby signals — not certainty about
+              recording.
+            </p>
+          </header>
+          <div class="card-grid">
+            <article class="card">
+              <svg
+                class="card-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                aria-hidden="true"
+              >
+                <path
+                  d="M12 2a7 7 0 0 0-7 7v3l-2 4h18l-2-4V9a7 7 0 0 0-7-7z"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path d="M9 22h6" stroke-linecap="round" />
+              </svg>
+              <h3>Nearby signal awareness</h3>
+              <p>
+                Scans for Bluetooth Low Energy signals that may match known smart
+                glasses or wearable recording devices.
+              </p>
+            </article>
+            <article class="card">
+              <svg
+                class="card-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                aria-hidden="true"
+              >
+                <path d="M4 19h16M6 16V9M12 16V5M18 16v-4" stroke-linecap="round" />
+              </svg>
+              <h3>Calm risk indicators</h3>
+              <p>
+                Shows low, medium, or high privacy risk based on visible signal
+                patterns — not certainty.
+              </p>
+            </article>
+            <article class="card">
+              <svg
+                class="card-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                aria-hidden="true"
+              >
+                <rect x="3" y="11" width="18" height="11" rx="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke-linecap="round" />
+              </svg>
+              <h3>Local-first by design</h3>
+              <p>
+                Scan data is processed on your device. No account, no cloud upload,
+                and no analytics by default.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="limits"
+        class="section section-alt"
+        aria-labelledby="limits-heading"
+      >
+        <div class="container">
+          <div class="limits-panel">
+            <h2 id="limits-heading">Honest about limits</h2>
+            <p>
+              Unrecorded cannot confirm whether a device is recording. Bluetooth
+              visibility varies, device names can be hidden or changed, and not
+              every camera or microphone uses Bluetooth.
+            </p>
+            <ul class="limits-list">
+              <li>It cannot prove someone is recording.</li>
+              <li>It cannot detect every camera or microphone.</li>
+              <li>It cannot guarantee that nearby devices are smart glasses.</li>
+              <li>
+                It should be treated as a privacy awareness tool, not a security
+                guarantee.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="how-it-works"
+        class="section"
+        aria-labelledby="how-heading"
+      >
+        <div class="container">
+          <header class="section-header">
+            <h2 id="how-heading">How it works</h2>
+          </header>
+          <ol class="steps">
+            <li class="step">
+              <div class="step-num" aria-hidden="true"></div>
+              <h3>Scan nearby signals</h3>
+              <p>
+                Unrecorded looks for Bluetooth Low Energy signals while the app is
+                open.
+              </p>
+            </li>
+            <li class="step">
+              <div class="step-num" aria-hidden="true"></div>
+              <h3>Compare privacy indicators</h3>
+              <p>
+                Visible names, signal patterns, and device behaviour are compared
+                against known risk indicators.
+              </p>
+            </li>
+            <li class="step">
+              <div class="step-num" aria-hidden="true"></div>
+              <h3>Show clear guidance</h3>
+              <p>
+                The app explains why a signal may be worth noticing, using calm
+                language and clear limitations.
+              </p>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="section section-alt" aria-labelledby="privacy-heading">
+        <div class="container">
+          <div class="privacy-callout">
+            <h2 id="privacy-heading">Built around privacy, not tracking</h2>
+            <p>
+              Unrecorded is designed so scan data stays on your device. The app
+              does not require an account, does not upload nearby scan results to
+              our servers, and does not include analytics by default.
+            </p>
+            <a class="btn btn-secondary" href="/privacy.html"
+              >Read the full privacy policy</a
+            >
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="opensource-heading">
+        <div class="container">
+          <div class="opensource">
+            <h2 id="opensource-heading">Open-source and transparent</h2>
+            <p>
+              Unrecorded is being built as an open-source project so its behaviour
+              can be inspected, questioned, and improved. The goal is simple: more
+              awareness without hidden tracking or overblown claims.
+            </p>
+            <p class="byline">Built by <strong>Meldlife Ltd</strong>.</p>
+            <a
+              class="btn btn-secondary"
+              href="https://github.com/meldusadm-coder/Unrecorded"
+              rel="noopener noreferrer"
+              >View on GitHub</a
+            >
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <nav aria-label="Footer">
+          <ul class="footer-nav">
+            <li><a href="/privacy.html">Privacy Policy</a></li>
+            <li>
+              <a
+                href="https://github.com/meldusadm-coder/Unrecorded"
+                rel="noopener noreferrer"
+                >GitHub</a
+              >
+            </li>
+            <li>
+              <a href="mailto:privacy@unrecorded.app">Contact</a>
+            </li>
+          </ul>
+        </nav>
+        <p class="footer-copy">
+          © 2026 Meldlife Ltd. Unrecorded is a privacy awareness tool and does not
+          prove recording activity.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,7 @@
+# Copy to .devcontainer/gitconfig (gitignored) and set your name and email.
+[user]
+	name = Your Name
+	email = you@example.com
+[safe]
+	directory = /sdks/flutter
+	directory = /workspace

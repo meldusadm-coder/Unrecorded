@@ -1,0 +1,91 @@
+name: CodeQL
+
+# GitHub default CodeQL and this advanced workflow cannot both upload results.
+# While default setup is enabled (typical for new repos), analysis jobs are skipped
+# and scanning is handled by GitHub under Settings → Code security.
+#
+# To use this workflow instead:
+#   1. Settings → Code security → Code scanning → CodeQL → "Switch to advanced"
+#   2. Settings → Secrets and variables → Actions → Variables:
+#        CODEQL_USE_ADVANCED_WORKFLOW = true
+#   3. Re-run this workflow
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+  schedule:
+    - cron: "0 8 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  default-setup-active:
+    name: CodeQL (default setup)
+    if: vars.CODEQL_USE_ADVANCED_WORKFLOW != 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Skip advanced workflow
+        run: |
+          echo "::notice title=CodeQL::Advanced workflow skipped — GitHub default CodeQL setup is active."
+          echo "::notice::Security → Code scanning should show results from default setup."
+          echo "::notice::To run this file instead: Switch to advanced CodeQL, then set repository variable CODEQL_USE_ADVANCED_WORKFLOW=true (see docs/codeql.md)."
+
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    if: vars.CODEQL_USE_ADVANCED_WORKFLOW == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: java-kotlin
+            build-mode: manual
+          - language: python
+            build-mode: none
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Flutter (Android build)
+        if: matrix.language == 'java-kotlin'
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Java (Android)
+        if: matrix.language == 'java-kotlin'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+
+      - name: Build Android for CodeQL
+        if: matrix.language == 'java-kotlin'
+        run: |
+          set -euo pipefail
+          flutter pub get
+          cd apps/mobile
+          flutter build apk --debug
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:${{matrix.language}}"

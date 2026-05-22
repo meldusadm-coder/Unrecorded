@@ -1,0 +1,29 @@
+name: unrecorded_ui
+description: Shared UI components for the Unrecorded app.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+  flutter: ">=3.22.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_svg: ^2.0.17
+  unrecorded_core:
+    path: ../unrecorded_core
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  assets:
+    - assets/brand/
+    - assets/icons/
+    - assets/status/
+    - assets/navigation/

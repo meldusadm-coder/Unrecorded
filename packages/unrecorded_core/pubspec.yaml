@@ -1,0 +1,13 @@
+name: unrecorded_core
+description: Pure Dart core library for Unrecorded — models, risk scoring, and privacy utilities.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+
+resolution: workspace
+
+dev_dependencies:
+  test: ^1.25.0
+  lints: ^5.0.0

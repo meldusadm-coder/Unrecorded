@@ -1,0 +1,61 @@
+{
+  "$schema": "https://tokens.studio/schemas/v1.json",
+  "unrecorded": {
+    "primary": {
+      "value": "#5B4DFF",
+      "type": "color"
+    },
+    "primary_dark": {
+      "value": "#3F36C9",
+      "type": "color"
+    },
+    "accent": {
+      "value": "#7C3AED",
+      "type": "color"
+    },
+    "success": {
+      "value": "#22C55E",
+      "type": "color"
+    },
+    "warning": {
+      "value": "#F59E0B",
+      "type": "color"
+    },
+    "danger": {
+      "value": "#EF4444",
+      "type": "color"
+    },
+    "info": {
+      "value": "#3B82F6",
+      "type": "color"
+    },
+    "surface": {
+      "value": "#F6F6FA",
+      "type": "color"
+    },
+    "surface_alt": {
+      "value": "#ECEBFF",
+      "type": "color"
+    },
+    "background": {
+      "value": "#0F1117",
+      "type": "color"
+    },
+    "on_surface": {
+      "value": "#2B2D42",
+      "type": "color"
+    },
+    "muted": {
+      "value": "#6B7280",
+      "type": "color"
+    },
+    "line": {
+      "value": "#D8D7E6",
+      "type": "color"
+    },
+    "white": {
+      "value": "#FFFFFF",
+      "type": "color"
+    }
+  }
+}

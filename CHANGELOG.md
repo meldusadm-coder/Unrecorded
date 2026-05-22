@@ -1,0 +1,34 @@
+# Changelog
+
+## 0.2.0+2
+
+### Added
+- Android release pipeline (signed AAB/APK, GitHub Actions, optional Play upload).
+- Static site and privacy policy at unrecorded.app.
+- Optional banner ads and remove-ads IAP; AdMob and Play billing integration.
+- Home screen widget, local risk notifications, and notification threshold settings.
+- App shell navigation, alert details route, and nearby-signals UI on scan screen.
+- SVG branding assets, adaptive launcher icons, and splash screen.
+- Dev container improvements (host ADB, Gradle build dir, demo scan scenarios).
+- Git workflow docs, `tool/git/` scripts, and agent playbooks under `skills/`.
+
+### Changed
+- Scan and settings UI refresh; help screen layout; debug testing section.
+- Risk notification handling and deep links from notifications.
+- Scanner configuration (emulator detection, fake scanner demo modes).
+
+### Fixed
+- Widget tap-to-open and banner ad load notifications.
+- Dev-container build symlink removed from version control.
+- Format and CI fixes across the monorepo.
+
+## 0.1.0+1
+
+### Added
+- Initial Android release pipeline scaffolding.
+
+### Changed
+- 
+
+### Fixed
+- 
