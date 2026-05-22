@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.1+3
+
+### Fixed
+- Release Android workflow YAML: signing step no longer uses shell grouping that broke GitHub’s workflow parser (line 119).
+
+### Changed
+- 
+
+### Fixed
+- 
+
+
 ## 0.2.0+2
 
 ### Added
