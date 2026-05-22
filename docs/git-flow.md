@@ -83,11 +83,11 @@ Review, merge when CI is green. On GitHub choose **Create a merge commit** (not 
 
 ### 4. Ship from `main`
 
-1. Check out `main` and pull.
-2. GitHub Actions → **Release Android** → run on branch **`main`** with `version_name` / `version_code` matching `pubspec.yaml` (or let the workflow bump — see [release.md](release.md)).
-3. Tag format: `mobile-v0.2.0+3`.
+1. Merge the release/hotfix PR into **`main`** with a **merge commit** (version bump must be in `pubspec.yaml` on `main`).
+2. **Release Android** runs automatically on push to `main` when `pubspec.yaml` or `CHANGELOG.md` changes: builds, uploads to Play **internal** (draft), and creates GitHub Release `mobile-vX.Y.Z+N`.
+3. Optional: re-run manually from Actions if needed (see [release.md](release.md)).
 
-Do **not** run the release workflow from `dev` while `main` is behind; store artifacts should match `main`.
+Do **not** rely on releases from `dev`; production artifacts come from `main` only.
 
 ### 5. Back-merge into `dev`
 
@@ -140,7 +140,7 @@ Version bump details: [`tool/release/bump_version.sh`](../tool/release/bump_vers
 ## CI
 
 - **Mobile CI:** PRs and pushes to `dev` and `main`.
-- **Release Android:** Manual `workflow_dispatch` (select branch **`main`** in the Actions UI after merge).
+- **Release Android:** Auto on **`main`** when `pubspec.yaml` / `CHANGELOG.md` change; manual `workflow_dispatch` optional.
 
 ## AI assistants
 

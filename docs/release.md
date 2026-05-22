@@ -66,17 +66,22 @@ Without `key.properties`, release builds use debug signing (local testing only).
 
 Workflow: [`.github/workflows/release-android.yml`](../.github/workflows/release-android.yml)
 
-**Trigger:** Actions → **Release Android** → **Run workflow**
+**Triggers:**
 
-| Input | Default | Purpose |
+1. **Automatic** — push to **`main`** that changes `apps/mobile/pubspec.yaml` or `CHANGELOG.md` (typical after a release/hotfix PR merge). Reads version from `pubspec.yaml`, uploads a **draft** to the Play **internal** track, and creates a GitHub Release. No manual dispatch needed.
+2. **Manual** — Actions → **Release Android** → **Run workflow** on **`main`** (re-run or overrides).
+
+| Input (manual only) | Default | Purpose |
 |-------|---------|---------|
-| `version_name` | (required) | e.g. `0.1.0` |
-| `version_code` | (required) | Integer build number |
+| `version_name` | (from pubspec if empty) | e.g. `0.1.0` |
+| `version_code` | (from pubspec if empty) | Integer build number |
 | `track` | `internal` | Play track when uploading |
-| `upload_to_play` | `false` | Upload AAB to Google Play |
+| `upload_to_play` | `true` | Upload AAB to Google Play |
 | `create_github_release` | `true` | Tag `mobile-vX.Y.Z+N` + GitHub Release |
 
-The workflow runs format, analyze, tests, release copy checks, signed AAB/APK build, artifact upload, optional Play upload, and optional GitHub Release.
+Ensure the release PR already bumped `pubspec.yaml` on `main` before merge; the automatic run does **not** bump version again.
+
+The workflow runs format, analyze, tests, release copy checks, signed AAB/APK build, artifact upload, Play upload (internal draft by default), and GitHub Release.
 
 ### Required GitHub Secrets (signed release)
 
@@ -115,7 +120,7 @@ Set **one** of:
 
 Play Console → **Setup** → **API access** → create a service account with release permissions, download JSON, store as secret.
 
-Enable **Upload to Google Play** in the workflow. Default upload `status` is **draft** (review in Play Console before promoting).
+Pushes to `main` with a version bump upload automatically when Play secrets are set. Default upload `status` is **draft** on the **internal** track (review in Play Console → **Testing → Internal testing** before promoting).
 
 Package name: `app.unrecorded.unrecorded_mobile` (must match Play Console).
 
