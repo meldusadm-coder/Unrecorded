@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1+4
+
+### Changed
+- Release Android workflow runs automatically on `main` when version changes; uploads to Play internal (draft) and creates GitHub Release.
+
 ## 0.2.1+3
 
 ### Fixed
