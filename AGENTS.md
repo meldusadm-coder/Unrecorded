@@ -101,7 +101,7 @@ Run shell commands from the skill; report after each step; ask before push/merge
 | Start release | `./tool/git/start_release_branch.sh <version> [build]` — [docs/git-flow.md](docs/git-flow.md) |
 | Preflight | `./tool/git/preflight_release.sh` |
 | Open PR to `main` | `./tool/git/open_release_pr.sh` |
-| Ship build | **Release Android** on `main` — [docs/release.md](docs/release.md) |
+| Ship build | **Release Android** auto on `main` after version bump merge — [docs/release.md](docs/release.md) |
 | Sync after ship | `./tool/git/backmerge_main_to_dev.sh` |
 | Status | `./tool/git/release_status.sh` |
 
