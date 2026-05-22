@@ -140,7 +140,7 @@ Version bump details: [`tool/release/bump_version.sh`](../tool/release/bump_vers
 ## CI
 
 - **Mobile CI:** PRs and pushes to `dev` and `main`.
-- **Release Android:** Manual `workflow_dispatch` on **`main` only** (after merge).
+- **Release Android:** Manual `workflow_dispatch` (select branch **`main`** in the Actions UI after merge).
 
 ## AI assistants
 
