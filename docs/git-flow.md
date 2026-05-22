@@ -15,6 +15,18 @@ Concise branching model for Unrecorded. Feature work integrates on **`dev`**; **
 
 `dev` and `main` are protected (PR required). Do not push directly to them.
 
+### Merge policy (required)
+
+| PR direction | Allowed merge method |
+|--------------|----------------------|
+| `release/*` or `hotfix/*` → **`main`** | **Merge commit** only |
+| `sync/*` or `main` → **`dev`** (back-merge) | **Merge commit** only |
+| `feature/*` → **`dev`** | Squash or merge per maintainer preference |
+
+**Never squash-merge into `main`.** Squash replay creates a new commit hash; `dev` will show large “ahead” counts and `main` commits will not be ancestors of `dev`, even when file trees are identical.
+
+Repository setting: **Allow merge commits** enabled, **Allow squash merging** disabled for production hygiene (maintainers can still squash feature → `dev` if desired).
+
 ## Day-to-day development
 
 ```text
@@ -67,7 +79,7 @@ Without a build number (branch only):
 
 Uses `gh` when installed; otherwise prints the manual PR URL.
 
-Review, merge when CI is green.
+Review, merge when CI is green. On GitHub choose **Create a merge commit** (not “Squash and merge”).
 
 ### 4. Ship from `main`
 
@@ -84,6 +96,8 @@ Do **not** run the release workflow from `dev` while `main` is behind; store art
 ```
 
 Opens (or prints) a PR **`main` → `dev`** so the next feature cycle includes shipped commits.
+
+**Important:** merge that PR with a **merge commit**, not squash. Squash back-merges replay the diff but do not link `main`’s commit hashes into `dev`, so `dev` stays “behind” `main` even when the tree matches.
 
 ## Direct `dev` → `main` PR
 
@@ -126,7 +140,7 @@ Version bump details: [`tool/release/bump_version.sh`](../tool/release/bump_vers
 ## CI
 
 - **Mobile CI:** PRs and pushes to `dev` and `main`.
-- **Release Android:** Manual `workflow_dispatch` on the selected branch (use `main` after merge).
+- **Release Android:** Manual `workflow_dispatch` on **`main` only** (after merge).
 
 ## AI assistants
 

@@ -19,7 +19,9 @@ bool get _isFlutterTest =>
 String get _bannerAdUnitId {
   const fromEnv = String.fromEnvironment('ADMOB_BANNER_ID');
   if (fromEnv.isNotEmpty) return fromEnv;
-  return kDebugMode ? _testBannerId : _testBannerId;
+  if (kDebugMode) return _testBannerId;
+  // Release builds must pass ADMOB_BANNER_ID (see docs/release.md).
+  return '';
 }
 
 /// Bumped when banner load state changes so [bannerAdWidgetProvider] rebuilds.
@@ -47,8 +49,14 @@ class AdsService {
     _bannerAd = null;
     _loaded = false;
 
+    final unitId = _bannerAdUnitId;
+    if (unitId.isEmpty) {
+      _notifyBannerStateChanged();
+      return;
+    }
+
     _bannerAd = BannerAd(
-      adUnitId: _bannerAdUnitId,
+      adUnitId: unitId,
       size: AdSize.banner,
       request: AdConsentService.adRequest,
       listener: BannerAdListener(

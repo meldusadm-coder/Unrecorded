@@ -67,6 +67,7 @@ Back-merge shipped commits from \`${PRODUCTION_BRANCH}\` into \`${INTEGRATION_BR
 
 ## Checklist
 - [ ] CI green
+- [ ] Merge with a **merge commit** (not squash) so \`${PRODUCTION_BRANCH}\` commit hashes remain ancestors of \`${INTEGRATION_BRANCH}\`
 - [ ] No unintended conflict resolutions (release-only commits should already be on both sides when possible)
 EOF
 )"
@@ -88,7 +89,8 @@ if git_lib_has_gh; then
     --title "${TITLE}" \
     --body "${BODY}" || true
   git_lib_print_next_steps "Back-merge PR" \
-    "Merge the PR into ${INTEGRATION_BRANCH}." \
+    "Merge the PR into ${INTEGRATION_BRANCH} with **Create a merge commit** (never squash)." \
+    "Optional: gh pr merge --merge (after CI green)." \
     "Delete branch ${SYNC_BRANCH} after merge."
 else
   echo ""
