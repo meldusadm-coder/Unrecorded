@@ -1,19 +1,25 @@
 name: Release Android
 
 on:
-  # Manual only — run from branch `main` in the Actions UI (see docs/release.md).
+  # After a release/hotfix PR merges to main with a version bump in pubspec.
+  push:
+    branches: [main]
+    paths:
+      - apps/mobile/pubspec.yaml
+      - CHANGELOG.md
+  # Manual re-run or one-off overrides (optional inputs).
   workflow_dispatch:
     inputs:
       version_name:
-        description: Semantic version (e.g. 0.1.0)
-        required: true
+        description: Semantic version (e.g. 0.1.0); leave empty to use pubspec on main
+        required: false
         type: string
       version_code:
-        description: Android versionCode / iOS build number (integer)
-        required: true
+        description: Android versionCode; leave empty to use pubspec on main
+        required: false
         type: string
       track:
-        description: Google Play track (when upload_to_play is true)
+        description: Google Play track
         required: true
         default: internal
         type: choice
@@ -25,13 +31,17 @@ on:
       upload_to_play:
         description: Upload AAB to Google Play
         required: true
-        default: false
+        default: true
         type: boolean
       create_github_release:
         description: Create git tag and GitHub Release with artifacts
         required: true
         default: true
         type: boolean
+
+concurrency:
+  group: release-android-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -41,13 +51,43 @@ jobs:
   release:
     name: Android release
     runs-on: ubuntu-latest
-    env:
-      VERSION_NAME: ${{ inputs.version_name }}
-      VERSION_CODE: ${{ inputs.version_code }}
-      FULL_VERSION: ${{ inputs.version_name }}+${{ inputs.version_code }}
-      TAG_NAME: mobile-v${{ inputs.version_name }}+${{ inputs.version_code }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Resolve release parameters
+        id: release_params
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            eval "$(bash tool/release/verify_version.sh)"
+            echo "VERSION_NAME=${version_name}" >> "${GITHUB_ENV}"
+            echo "VERSION_CODE=${build_number}" >> "${GITHUB_ENV}"
+            echo "FULL_VERSION=${version_name}+${build_number}" >> "${GITHUB_ENV}"
+            echo "TAG_NAME=mobile-v${version_name}+${build_number}" >> "${GITHUB_ENV}"
+            echo "PLAY_TRACK=internal" >> "${GITHUB_ENV}"
+            echo "UPLOAD_TO_PLAY=true" >> "${GITHUB_ENV}"
+            echo "CREATE_GITHUB_RELEASE=true" >> "${GITHUB_ENV}"
+            echo "SKIP_BUMP=true" >> "${GITHUB_ENV}"
+            echo "Release mode: automatic (push to main, version from pubspec)."
+          else
+            if [[ -n "${{ inputs.version_name }}" && -n "${{ inputs.version_code }}" ]]; then
+              vn="${{ inputs.version_name }}"
+              vc="${{ inputs.version_code }}"
+            else
+              eval "$(bash tool/release/verify_version.sh)"
+              vn="${version_name}"
+              vc="${build_number}"
+            fi
+            echo "VERSION_NAME=${vn}" >> "${GITHUB_ENV}"
+            echo "VERSION_CODE=${vc}" >> "${GITHUB_ENV}"
+            echo "FULL_VERSION=${vn}+${vc}" >> "${GITHUB_ENV}"
+            echo "TAG_NAME=mobile-v${vn}+${vc}" >> "${GITHUB_ENV}"
+            echo "PLAY_TRACK=${{ inputs.track }}" >> "${GITHUB_ENV}"
+            echo "UPLOAD_TO_PLAY=${{ inputs.upload_to_play }}" >> "${GITHUB_ENV}"
+            echo "CREATE_GITHUB_RELEASE=${{ inputs.create_github_release }}" >> "${GITHUB_ENV}"
+            echo "SKIP_BUMP=false" >> "${GITHUB_ENV}"
+            echo "Release mode: manual workflow_dispatch."
+          fi
 
       - name: Resolve AdMob banner unit id
         id: admob
@@ -75,6 +115,7 @@ jobs:
         run: flutter pub get
 
       - name: Bump version
+        if: env.SKIP_BUMP != 'true'
         run: bash tool/release/bump_version.sh "${VERSION_NAME}" "${VERSION_CODE}" --allow-dirty
 
       - name: Format check
@@ -193,7 +234,7 @@ jobs:
 
       - name: Prepare Google Play service account JSON
         id: play_credentials
-        if: inputs.upload_to_play == true
+        if: env.UPLOAD_TO_PLAY == 'true'
         env:
           PLAY_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
           PLAY_JSON_B64: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64 }}
@@ -210,18 +251,18 @@ jobs:
           fi
           echo "path=${OUT}" >> "${GITHUB_OUTPUT}"
 
-      - name: Upload to Google Play
-        if: inputs.upload_to_play == true
+      - name: Upload to Google Play (internal draft)
+        if: env.UPLOAD_TO_PLAY == 'true'
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJson: ${{ steps.play_credentials.outputs.path }}
           packageName: app.unrecorded.unrecorded_mobile
           releaseFiles: ${{ runner.temp }}/app-release.aab
-          track: ${{ inputs.track }}
+          track: ${{ env.PLAY_TRACK }}
           status: draft
 
       - name: Create GitHub Release
-        if: inputs.create_github_release == true
+        if: env.CREATE_GITHUB_RELEASE == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.TAG_NAME }}

@@ -33,29 +33,16 @@ Skip only if the same commit already passed preflight on the release PR and noth
 
 ## Step 2 — GitHub Actions: Release Android
 
-Direct the user (or run via `gh` if available and user approves):
+After the release PR is **merged to `main`**, the workflow usually **starts automatically** when `apps/mobile/pubspec.yaml` or `CHANGELOG.md` changes. It reads version from `pubspec.yaml`, uploads to Play **internal** (draft), and creates GitHub Release `mobile-v<version>+<build>`.
 
-**Actions → Release Android → Run workflow**
+Tell the user to watch: **Actions → Release Android** (trigger: `push` to `main`).
 
-| Input | Value |
-|-------|--------|
-| Branch | **`main`** (required) |
-| `version_name` | From `verify_version.sh` |
-| `version_code` | Build number from `verify_version.sh` |
-| `upload_to_play` | User choice (`false` for artifacts only first time) |
-| `track` | Usually `internal` first |
-| `create_github_release` | Usually `true` |
+**Manual re-run only if needed** (failed Play upload, missing secrets, etc.):
 
-Tag created: `mobile-v<version>+<build>` (e.g. `mobile-v0.2.0+3`).
-
-**Optional `gh` dispatch** (ask before running):
+**Actions → Release Android → Run workflow** on **`main`**. Leave version fields empty to use `pubspec.yaml`; defaults upload to Play internal.
 
 ```bash
-gh workflow run release-android.yml --ref main \
-  -f version_name=<VERSION_NAME> \
-  -f version_code=<BUILD_NUMBER> \
-  -f upload_to_play=false \
-  -f create_github_release=true
+gh run list --workflow=release-android.yml --limit 3
 ```
 
 Never run this workflow on `dev` while `main` is the production branch.
