@@ -37,8 +37,9 @@ BODY="$(cat <<EOF
 - [ ] CHANGELOG.md updated for \`${full_version}\`
 - [ ] \`./tool/git/preflight_release.sh\` passed locally
 - [ ] CI green on this PR
+- [ ] Merge with **Create a merge commit** (never squash into \`${PRODUCTION_BRANCH}\`)
 - [ ] After merge: run **Release Android** on \`${PRODUCTION_BRANCH}\` (see docs/release.md)
-- [ ] After release: \`./tool/git/backmerge_main_to_dev.sh\`
+- [ ] After release: \`./tool/git/backmerge_main_to_dev.sh\` (back-merge PR also merge-commit only)
 EOF
 )"
 

@@ -58,6 +58,7 @@ Project-wide rules for humans and AI tools live in **[AGENTS.md](AGENTS.md)**. U
 
 - **`dev`** — integration; open feature PRs here.
 - **`main`** — production; merge via `release/*` or `hotfix/*` PRs (see [docs/git-flow.md](docs/git-flow.md)).
+- **Merge commits only** for PRs into `main` and for back-merge PRs `main` → `dev`. Do **not** squash those merges (GitHub: “Create a merge commit”).
 - Helpers: `./tool/git/start_release_branch.sh`, `./tool/git/preflight_release.sh`, etc. ([tool/git/README.md](tool/git/README.md)).
 - AI assistants: step-by-step playbooks in [skills/README.md](skills/README.md) (e.g. “create release”, “branch for issue 42”).
 

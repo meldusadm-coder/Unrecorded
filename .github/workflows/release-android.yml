@@ -2,6 +2,9 @@ name: Release Android
 
 on:
   workflow_dispatch:
+    # Manual releases only from production branch (see docs/release.md).
+    branches:
+      - main
     inputs:
       version_name:
         description: Semantic version (e.g. 0.1.0)
@@ -45,10 +48,21 @@ jobs:
       VERSION_CODE: ${{ inputs.version_code }}
       FULL_VERSION: ${{ inputs.version_name }}+${{ inputs.version_code }}
       TAG_NAME: mobile-v${{ inputs.version_name }}+${{ inputs.version_code }}
-      # Repository variable or secret; optional — omit to use in-app test banner ID.
-      ADMOB_BANNER_ID: ${{ vars.ADMOB_BANNER_ID || secrets.ADMOB_BANNER_ID }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Resolve AdMob banner unit id
+        id: admob
+        env:
+          ADMOB_VAR: ${{ vars.ADMOB_BANNER_ID }}
+          ADMOB_SECRET: ${{ secrets.ADMOB_BANNER_ID }}
+        run: |
+          set -euo pipefail
+          if [[ -n "${ADMOB_VAR}" ]]; then
+            echo "banner_id=${ADMOB_VAR}" >> "${GITHUB_OUTPUT}"
+          elif [[ -n "${ADMOB_SECRET}" ]]; then
+            echo "banner_id=${ADMOB_SECRET}" >> "${GITHUB_OUTPUT}"
+          fi
 
       - uses: actions/setup-java@v4
         with:
@@ -115,12 +129,11 @@ EOF
         run: |
           set -euo pipefail
           args=(--release)
-          if [[ -n "${ADMOB_BANNER_ID:-}" ]]; then
-            echo "Using ADMOB_BANNER_ID from GitHub configuration."
-            args+=(--dart-define=ADMOB_BANNER_ID="${ADMOB_BANNER_ID}")
-          else
-            echo "ADMOB_BANNER_ID not set; release build uses in-app test banner ID."
+          if [[ -z "${{ steps.admob.outputs.banner_id }}" ]]; then
+            echo "::error::Set repository variable or secret ADMOB_BANNER_ID before running a release build."
+            exit 1
           fi
+          args+=(--dart-define=ADMOB_BANNER_ID="${{ steps.admob.outputs.banner_id }}")
           flutter build appbundle "${args[@]}"
 
       - name: Build release APK (convenience)
@@ -128,9 +141,7 @@ EOF
         run: |
           set -euo pipefail
           args=(--release)
-          if [[ -n "${ADMOB_BANNER_ID:-}" ]]; then
-            args+=(--dart-define=ADMOB_BANNER_ID="${ADMOB_BANNER_ID}")
-          fi
+          args+=(--dart-define=ADMOB_BANNER_ID="${{ steps.admob.outputs.banner_id }}")
           flutter build apk "${args[@]}"
 
       - name: Stage release artifacts

@@ -28,7 +28,7 @@
 5. Publish the European regulations message with **Ad unit deployment off** (the app uses UMP SDK).
 6. Users change or withdraw ad consent via **Settings & Privacy → Ad privacy choices** (required revocation entry point).
 
-Debug builds use Google’s test banner ID by default.
+Debug builds use Google’s test banner ID when `ADMOB_BANNER_ID` is omitted. Release builds require `ADMOB_BANNER_ID` and show no banner when it is missing.
 
 ### In-app purchase (pay what you want)
 

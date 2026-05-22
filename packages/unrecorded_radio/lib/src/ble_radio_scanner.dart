@@ -72,9 +72,11 @@ class BleRadioScanner implements RadioScanner {
           );
         },
       );
-    } on RadioScannerException {
-      rethrow;
+    } on RadioScannerException catch (e) {
+      _scanning = false;
+      _controller?.addError(e);
     } catch (e) {
+      _scanning = false;
       _controller?.addError(
         RadioScannerException('Failed to start BLE scan', cause: e),
       );

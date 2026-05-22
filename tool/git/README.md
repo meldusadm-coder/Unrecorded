@@ -21,4 +21,6 @@ Hotfix:
 
 Requires `git`. Optional: [GitHub CLI](https://cli.github.com/) (`gh`) for `open_release_pr.sh` and `backmerge_main_to_dev.sh`.
 
+**Merge policy:** PRs into `main` and back-merge PRs into `dev` must use a merge commit, not squash. See [docs/git-flow.md](../../docs/git-flow.md).
+
 Environment overrides: `INTEGRATION_BRANCH` (default `dev`), `PRODUCTION_BRANCH` (default `main`).

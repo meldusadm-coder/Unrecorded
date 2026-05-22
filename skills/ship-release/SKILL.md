@@ -51,7 +51,7 @@ Tag created: `mobile-v<version>+<build>` (e.g. `mobile-v0.2.0+3`).
 **Optional `gh` dispatch** (ask before running):
 
 ```bash
-gh workflow run release-android.yml \
+gh workflow run release-android.yml --ref main \
   -f version_name=<VERSION_NAME> \
   -f version_code=<BUILD_NUMBER> \
   -f upload_to_play=false \
