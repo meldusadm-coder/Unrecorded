@@ -119,6 +119,8 @@ Enable **Upload to Google Play** in the workflow. Default upload `status` is **d
 
 Package name: `app.unrecorded.unrecorded_mobile` (must match Play Console).
 
+**Upload key:** The keystore in `ANDROID_KEYSTORE_BASE64` must be registered as your Play **upload key** (Play Console → **Setup** → **App signing** → upload certificate SHA-1). If CI builds a signed AAB but upload fails with “must be signed”, the certificate usually does not match Play. The Release Android workflow logs the upload key SHA-1 in the “Configure Android release signing” step.
+
 ## GitHub Releases and tags
 
 Tag format: `mobile-v{version}+{build}` (e.g. `mobile-v0.1.0+2`).
