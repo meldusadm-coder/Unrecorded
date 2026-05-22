@@ -54,8 +54,8 @@ class AdConsentService {
 
     try {
       await updateConsentInfo();
-      final status =
-          await ConsentInformation.instance.getPrivacyOptionsRequirementStatus();
+      final status = await ConsentInformation.instance
+          .getPrivacyOptionsRequirementStatus();
       return status == PrivacyOptionsRequirementStatus.required;
     } catch (_) {
       return false;

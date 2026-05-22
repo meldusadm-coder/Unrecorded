@@ -47,8 +47,8 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
       _previewProduct = product;
       _loading = false;
       if (product == null) {
-        _message =
-            AppCopy.removeAdsAmountUnavailable(RemoveAdsPricing.formatGbp(amount));
+        _message = AppCopy.removeAdsAmountUnavailable(
+            RemoveAdsPricing.formatGbp(amount));
       }
     });
   }
@@ -70,8 +70,8 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
     if (product == null) {
       setState(() {
         _loading = false;
-        _message =
-            AppCopy.removeAdsAmountUnavailable(RemoveAdsPricing.formatGbp(amount));
+        _message = AppCopy.removeAdsAmountUnavailable(
+            RemoveAdsPricing.formatGbp(amount));
       });
       return;
     }
@@ -176,12 +176,9 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
               max: (RemoveAdsPricing.tierCount - 1).toDouble(),
               divisions: RemoveAdsPricing.tierCount - 1,
               label: RemoveAdsPricing.formatGbp(amount),
-              onChanged: adsRemoved
-                  ? null
-                  : (value) => _onTierChanged(value.round()),
-              onChangeEnd: adsRemoved
-                  ? null
-                  : (_) => _loadPreview(),
+              onChanged:
+                  adsRemoved ? null : (value) => _onTierChanged(value.round()),
+              onChangeEnd: adsRemoved ? null : (_) => _loadPreview(),
             ),
             if (storePrice != null) ...[
               const SizedBox(height: 4),
@@ -200,9 +197,8 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
               const Center(child: CircularProgressIndicator())
             else
               FilledButton(
-                onPressed: adsRemoved || _previewProduct == null
-                    ? null
-                    : _purchase,
+                onPressed:
+                    adsRemoved || _previewProduct == null ? null : _purchase,
                 child: Text(
                   adsRemoved
                       ? 'Ads already removed'
