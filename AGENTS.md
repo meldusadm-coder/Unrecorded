@@ -76,6 +76,8 @@ cd apps/mobile && flutter build apk --debug
 
 Branching model: **`dev`** (integration) → **`release/*` or `hotfix/*`** → **`main`** (shipped) → back-merge to **`dev`**. Do not push directly to `dev` or `main`.
 
+**Merge policy (required):** PRs into **`main`** and back-merge PRs into **`dev`** must use a **merge commit**, never squash or rebase merge. Squash merges break `main`/`dev` ancestry and leave misleading ahead/behind counts even when trees match. See [docs/git-flow.md](docs/git-flow.md).
+
 ### User phrases → playbooks
 
 When the user asks for git/release work, **read the matching skill in full** and follow it step by step ([skills/README.md](skills/README.md)):
@@ -103,7 +105,7 @@ Run shell commands from the skill; report after each step; ask before push/merge
 | Sync after ship | `./tool/git/backmerge_main_to_dev.sh` |
 | Status | `./tool/git/release_status.sh` |
 
-Never run the release workflow from `dev` while `main` is behind production. Never reuse a published Android `version_code`.
+Never run the release workflow from `dev` while `main` is behind production. Never reuse a published Android `version_code`. Never squash-merge into `main` or squash-merge a `main` → `dev` back-merge PR.
 
 ## Agent workflow
 

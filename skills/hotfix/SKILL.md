@@ -56,6 +56,8 @@ On `hotfix/<version_name>`.
 
 ## Step 6 — After merge
 
+Merge the hotfix PR into `main` with **Create a merge commit** only (`gh pr merge <PR> --merge`).
+
 Follow [ship-release/SKILL.md](../ship-release/SKILL.md):
 
 - Release Android on **`main`**

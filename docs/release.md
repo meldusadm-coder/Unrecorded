@@ -102,7 +102,7 @@ Set **`ADMOB_BANNER_ID`** as a repository **variable** (recommended) or **secret
 
 **Settings → Secrets and variables → Actions → Variables** → `ADMOB_BANNER_ID` = `ca-app-pub-XXXX/YYYY`
 
-When unset, release builds use Google’s in-app test banner ID. Also set your production AdMob **app ID** in `apps/mobile/android/app/src/main/AndroidManifest.xml`. See [monetisation.md](monetisation.md).
+Release builds **fail in CI** when unset. Debug builds use Google’s test banner ID. Also set your production AdMob **app ID** in `apps/mobile/android/app/src/main/AndroidManifest.xml`. See [monetisation.md](monetisation.md).
 
 ### Optional: Google Play upload
 

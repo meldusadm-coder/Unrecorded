@@ -96,7 +96,12 @@ Checklist for the PR body (ensure covered):
 - [ ] Preflight passed
 - [ ] CI will run on the PR
 
-Tell the user: **merge is human/maintainer action** unless they explicitly ask you to merge and you have permission.
+Tell the user: **merge is human/maintainer action** unless they explicitly ask you to merge and you have permission. When merging the release PR into `main`, use **Create a merge commit** only — never squash.
+
+```bash
+# After CI green:
+gh pr merge <PR_NUMBER> --merge
+```
 
 ## Step 6 — Hand off to ship
 

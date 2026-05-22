@@ -32,7 +32,12 @@ Creates `sync/main-into-dev-YYYYMMDD` and opens PR → `dev` (with `gh`) or prin
 
 ## Step 2 — User merges PR
 
-Wait for CI on the sync PR. User (or maintainer) merges into `dev`.
+Wait for CI on the sync PR. Merge into `dev` with **Create a merge commit** only — never squash.
+
+```bash
+# After CI green (replace PR number):
+gh pr merge <PR_NUMBER> --merge
+```
 
 ## Step 3 — Cleanup
 
