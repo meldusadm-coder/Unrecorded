@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
@@ -17,31 +16,23 @@ class RemoveAdsScreen extends ConsumerStatefulWidget {
 }
 
 class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
-  final _amountController = TextEditingController(
-    text: RemoveAdsPricing.defaultGbp.toStringAsFixed(2),
-  );
+  late int _tierIndex =
+      RemoveAdsPricing.tierIndexForAmount(RemoveAdsPricing.defaultGbp);
 
   bool _loading = false;
   String? _message;
   ProductDetails? _previewProduct;
 
-  @override
-  void dispose() {
-    _amountController.dispose();
-    super.dispose();
-  }
+  double get _amountGbp => RemoveAdsPricing.amountForTier(_tierIndex);
 
-  double? get _amountGbp => RemoveAdsPricing.parseGbp(_amountController.text);
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadPreview());
+  }
 
   Future<void> _loadPreview() async {
     final amount = _amountGbp;
-    if (amount == null) {
-      setState(() {
-        _previewProduct = null;
-        _message = null;
-      });
-      return;
-    }
 
     setState(() {
       _loading = true;
@@ -64,10 +55,6 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
 
   Future<void> _purchase() async {
     final amount = _amountGbp;
-    if (amount == null) {
-      setState(() => _message = AppCopy.removeAdsInvalidAmount);
-      return;
-    }
 
     setState(() {
       _loading = true;
@@ -108,6 +95,10 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
     if (mounted) {
       setState(() => _message = AppCopy.restorePurchaseHint);
     }
+  }
+
+  void _onTierChanged(int index) {
+    setState(() => _tierIndex = index);
   }
 
   @override
@@ -156,36 +147,48 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
               ),
             ],
             const SizedBox(height: 24),
-            TextField(
-              controller: _amountController,
-              enabled: !adsRemoved,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-              ],
-              decoration: InputDecoration(
-                labelText: AppCopy.removeAdsAmountLabel,
-                prefixText: '£ ',
-                helperText:
-                    '${RemoveAdsPricing.formatGbp(RemoveAdsPricing.minGbp)}–'
-                    '${RemoveAdsPricing.formatGbp(RemoveAdsPricing.maxGbp)}',
-                suffixIcon: IconButton(
-                  icon: const UnrecordedIcon(
-                    asset: UnrecordedIconAsset.signal,
-                    size: 22,
-                  ),
-                  tooltip: 'Check store price',
-                  onPressed: adsRemoved || _loading ? null : _loadPreview,
-                ),
-              ),
-              onSubmitted: (_) => _loadPreview(),
+            Text(
+              AppCopy.removeAdsAmountLabel,
+              style: theme.textTheme.titleSmall,
             ),
-            if (storePrice != null && amount != null) ...[
-              const SizedBox(height: 8),
+            const SizedBox(height: 8),
+            Text(
+              RemoveAdsPricing.formatGbp(amount),
+              style: theme.textTheme.headlineMedium?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '${RemoveAdsPricing.formatGbp(RemoveAdsPricing.minGbp)} – '
+              '${RemoveAdsPricing.formatGbp(RemoveAdsPricing.maxGbp)}',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            Slider(
+              key: const Key('remove_ads_amount_slider'),
+              value: _tierIndex.toDouble(),
+              min: 0,
+              max: (RemoveAdsPricing.tierCount - 1).toDouble(),
+              divisions: RemoveAdsPricing.tierCount - 1,
+              label: RemoveAdsPricing.formatGbp(amount),
+              onChanged: adsRemoved
+                  ? null
+                  : (value) => _onTierChanged(value.round()),
+              onChangeEnd: adsRemoved
+                  ? null
+                  : (_) => _loadPreview(),
+            ),
+            if (storePrice != null) ...[
+              const SizedBox(height: 4),
               Text(
                 'Store price: $storePrice',
                 style: theme.textTheme.bodySmall,
+                textAlign: TextAlign.center,
               ),
             ],
             if (_message != null) ...[
@@ -197,12 +200,14 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
               const Center(child: CircularProgressIndicator())
             else
               FilledButton(
-                onPressed: adsRemoved || amount == null ? null : _purchase,
+                onPressed: adsRemoved || _previewProduct == null
+                    ? null
+                    : _purchase,
                 child: Text(
                   adsRemoved
                       ? 'Ads already removed'
-                      : amount == null
-                          ? AppCopy.removeAdsAmountLabel
+                      : _previewProduct == null
+                          ? 'Store product unavailable'
                           : 'Pay ${RemoveAdsPricing.formatGbp(amount)} to remove ads',
                 ),
               ),

@@ -72,6 +72,11 @@ coverage/
 *.swo
 .devcontainer/gitconfig
 
+# Play service account keys (never commit)
+store/android/*.json
+**/play-service-account.json
+tool/play/.venv/
+
 # OS
 .DS_Store
 Thumbs.db

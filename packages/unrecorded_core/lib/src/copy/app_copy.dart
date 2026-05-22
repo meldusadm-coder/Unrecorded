@@ -72,18 +72,15 @@ class AppCopy {
   static const String restorePurchaseHint =
       'Restore requested. If you previously paid, ads will be removed.';
 
-  static const String removeAdsAmountLabel = 'Your amount (GBP)';
+  static const String removeAdsAmountLabel = 'Choose your amount';
   static const String removeAdsAmountHint =
-      'Choose what you’d like to pay. Default is £2.00. Not every amount is '
-      'available in the app store — use the check button beside the field '
-      'to confirm yours before paying.';
-  static const String removeAdsInvalidAmount =
-      'Enter an amount between £0.50 and £100.00.';
+      'Slide to pick what you’d like to pay, from £0.25 to £20.00 in 25p steps. '
+      'Default is £2.00.';
 
-  /// Shown when the store has no product for the user’s chosen GBP amount.
+  /// Shown when the store has no product for the selected tier.
   static String removeAdsAmountUnavailable(String formattedAmount) =>
       '$formattedAmount isn’t available for payment right now. '
-      'Try £2.00, £5.00, or £10.00, or use the check button to try another amount.';
+      'Try another amount on the slider, or check back after the store is updated.';
 
   // Notifications
   static const String riskNotificationsTitle = 'Risk alerts';

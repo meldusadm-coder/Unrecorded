@@ -3,7 +3,7 @@
 ## Overview
 
 - **Banner ads:** Google AdMob bottom banners on scan (when no active alert), help, and settings.
-- **Remove ads:** Pay-what-you-want non-consumable IAP — user enters any amount (default **£2.00**, range **£0.50–£100.00**).
+- **Remove ads:** Pay-what-you-want non-consumable IAP — slider from **£0.25–£20.00** in **25p** steps (default **£2.00**).
 - **Core scanning:** Always free; payment only removes ads.
 
 ## Privacy boundary
@@ -32,26 +32,43 @@ Debug builds use Google’s test banner ID by default.
 
 ### In-app purchase (pay what you want)
 
-App stores require **one product per price**. The app maps the user’s GBP amount to a product ID:
+App stores require **one product per price**. The app uses a **slider** with fixed tiers only:
 
-| User amount | Product ID        |
-|-------------|-------------------|
-| £2.00       | `remove_ads_200`  |
-| £5.50       | `remove_ads_550`  |
-| £10.00      | `remove_ads_1000` |
+| Range | Step | Product count | Pattern |
+|-------|------|---------------|---------|
+| £0.25–£20.00 | 25p | 80 | `remove_ads_{pence}` |
 
-Pattern: `remove_ads_{pence}` where pence = amount × 100 (rounded).
+Examples:
 
-**Play Console / App Store Connect**
+| User amount | Product ID |
+|-------------|------------|
+| £0.25 | `remove_ads_25` |
+| £2.00 | `remove_ads_200` |
+| £5.50 | `remove_ads_550` |
+| £20.00 | `remove_ads_2000` |
 
-1. Create **non-consumable** products for each price you want to support.
-2. At minimum, create `remove_ads_200` for the default £2 tier.
-3. For full flexibility, bulk-create products for the pence values you expect (e.g. every 50p from 50p to £20, or use store APIs/scripts).
-4. Legacy tier IDs (`remove_ads_1`, `remove_ads_3`, `remove_ads_5`, `remove_ads_10`) still work for restore if you already shipped them.
+Pence = GBP × 100 (must be divisible by 25).
+
+#### Bulk-create on Google Play
+
+Use the Play Developer API script (same service account as CI upload):
+
+```bash
+./tool/play/run.sh --dry-run
+./tool/play/run.sh --apply --credentials store/android/your-service-account.json
+```
+
+See [tool/play/README.md](../tool/play/README.md) (`python3` + venv; not `python` / `pip`).
+
+See [tool/play/README.md](../tool/play/README.md).
+
+**Play Console (manual):** Monetize → Products → create **non-consumable** products with IDs and prices matching the table above. At minimum ship `remove_ads_200` before wider tiers.
+
+Legacy tier IDs (`remove_ads_1`, `remove_ads_3`, `remove_ads_5`, `remove_ads_10`) still work for restore if you already shipped them.
 
 Use license testers (Play) or Sandbox (Apple) for test purchases.
 
-If a product ID is missing in the store, the app tells the user that amount is not available and suggests trying common amounts (e.g. £2.00).
+If a tier is missing in the store, the remove-ads screen shows that the amount is unavailable.
 
 ### Dev bypass
 
@@ -61,4 +78,4 @@ flutter run --dart-define=UNRECORDED_ADS_REMOVED=true
 
 ## Store limitation
 
-Apple and Google do not support a single “any amount” SKU. The UI lets users type any value in range; the purchase uses the matching `remove_ads_{pence}` product. Amounts without a store product cannot be purchased until that product exists.
+Apple and Google do not support a single “any amount” SKU. The UI offers **80 discrete tiers** on a slider; each maps to `remove_ads_{pence}`. Amounts outside £0.25–£20.00 or off the 25p grid are not offered (legacy purchases still restore).
