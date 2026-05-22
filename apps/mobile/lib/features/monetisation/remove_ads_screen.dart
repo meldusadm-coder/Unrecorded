@@ -48,7 +48,8 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
       _loading = false;
       if (product == null) {
         _message = AppCopy.removeAdsAmountUnavailable(
-            RemoveAdsPricing.formatGbp(amount));
+          RemoveAdsPricing.formatGbp(amount),
+        );
       }
     });
   }
@@ -71,7 +72,8 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
       setState(() {
         _loading = false;
         _message = AppCopy.removeAdsAmountUnavailable(
-            RemoveAdsPricing.formatGbp(amount));
+          RemoveAdsPricing.formatGbp(amount),
+        );
       });
       return;
     }
