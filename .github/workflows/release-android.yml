@@ -113,13 +113,19 @@ jobs:
               exit 1
             fi
           done
-          KEYSTORE_PATH="${RUNNER_TEMP}/upload-keystore.jks"
-          echo "${ANDROID_KEYSTORE_BASE64}" | base64 -d > "${KEYSTORE_PATH}"
-          PROP_FILE="apps/mobile/android/key.properties"
+          ANDROID_DIR="apps/mobile/android"
+          KEYSTORE_FILE="ci-release.keystore.jks"
+          KEYSTORE_PATH="${ANDROID_DIR}/${KEYSTORE_FILE}"
+          printf '%s' "${ANDROID_KEYSTORE_BASE64}" | base64 -d > "${KEYSTORE_PATH}"
+          if ! keytool -list -keystore "${KEYSTORE_PATH}" -storepass "${ANDROID_KEYSTORE_PASSWORD}" -alias "${ANDROID_KEY_ALIAS}" >/dev/null 2>&1; then
+            echo "::error::Keystore decode failed or alias/password mismatch. Check ANDROID_KEYSTORE_* secrets."
+            exit 1
+          fi
+          PROP_FILE="${ANDROID_DIR}/key.properties"
           echo "storePassword=${ANDROID_KEYSTORE_PASSWORD}" > "${PROP_FILE}"
           echo "keyPassword=${ANDROID_KEY_PASSWORD}" >> "${PROP_FILE}"
           echo "keyAlias=${ANDROID_KEY_ALIAS}" >> "${PROP_FILE}"
-          echo "storeFile=${KEYSTORE_PATH}" >> "${PROP_FILE}"
+          echo "storeFile=${KEYSTORE_FILE}" >> "${PROP_FILE}"
 
       - name: Build App Bundle (store artifact)
         working-directory: apps/mobile
@@ -132,6 +138,20 @@ jobs:
           fi
           args+=(--dart-define=ADMOB_BANNER_ID="${{ steps.admob.outputs.banner_id }}")
           flutter build appbundle "${args[@]}"
+
+      - name: Verify release AAB is signed
+        run: |
+          set -euo pipefail
+          AAB="$(find apps/mobile/build -name 'app-release.aab' -type f | head -n 1)"
+          if [[ -z "${AAB}" ]]; then
+            echo "::error::app-release.aab not found after build"
+            exit 1
+          fi
+          if ! unzip -l "${AAB}" | grep -qE 'META-INF/.*\.(RSA|DSA|EC)'; then
+            echo "::error::AAB has no META-INF signatures — release signing did not run (check key.properties)."
+            exit 1
+          fi
+          echo "AAB signature entries present."
 
       - name: Build release APK (convenience)
         working-directory: apps/mobile
