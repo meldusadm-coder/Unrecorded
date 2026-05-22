@@ -54,9 +54,16 @@ Project-wide rules for humans and AI tools live in **[AGENTS.md](AGENTS.md)**. U
 - Use language like "possible", "may indicate", "potential risk".
 - Keep risk explanations understandable to non-technical users.
 
+### Git branches
+
+- **`dev`** — integration; open feature PRs here.
+- **`main`** — production; merge via `release/*` or `hotfix/*` PRs (see [docs/git-flow.md](docs/git-flow.md)).
+- Helpers: `./tool/git/start_release_branch.sh`, `./tool/git/preflight_release.sh`, etc. ([tool/git/README.md](tool/git/README.md)).
+- AI assistants: step-by-step playbooks in [skills/README.md](skills/README.md) (e.g. “create release”, “branch for issue 42”).
+
 ### Releases
 
-Maintainers shipping app versions: see [docs/release.md](docs/release.md) for versioning and the Android release workflow.
+Maintainers shipping app versions: [docs/git-flow.md](docs/git-flow.md) (branching) and [docs/release.md](docs/release.md) (versioning, signing, Android workflow).
 
 ### Keep changes focused
 

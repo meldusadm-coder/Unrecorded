@@ -21,7 +21,10 @@ Unrecorded alerts users to possible recording risk. It must never claim to prove
 | `packages/unrecorded_core` | Pure Dart: models, risk scoring engine, privacy disclaimers |
 | `packages/unrecorded_radio` | Scanner abstraction: `FakeRadioScanner`, `BleRadioScanner` |
 | `packages/unrecorded_ui` | Shared Flutter UI widgets |
-| `docs/` | Architecture, detection-limitations, privacy-model |
+| `docs/` | Architecture, detection-limitations, privacy-model, git-flow, release |
+| `skills/` | Agent-agnostic step-by-step playbooks (release, feature branch, hotfix) |
+| `tool/git/` | Branching helpers: release/hotfix/feature branches, preflight, back-merge |
+| `tool/release/` | Version bump, copy checks, release notes for CI |
 
 ## Setup commands
 
@@ -69,10 +72,44 @@ cd apps/mobile && flutter build apk --debug
 - Add or update tests for scoring and privacy-sensitive behaviour.
 - Keep docs concise and update them only when behaviour or architecture changes.
 
+## Git workflow
+
+Branching model: **`dev`** (integration) → **`release/*` or `hotfix/*`** → **`main`** (shipped) → back-merge to **`dev`**. Do not push directly to `dev` or `main`.
+
+### User phrases → playbooks
+
+When the user asks for git/release work, **read the matching skill in full** and follow it step by step ([skills/README.md](skills/README.md)):
+
+| User says (examples) | Read first |
+|----------------------|------------|
+| create release, start release, prepare release | [skills/create-release/SKILL.md](skills/create-release/SKILL.md) |
+| ship release, publish, run release workflow | [skills/ship-release/SKILL.md](skills/ship-release/SKILL.md) |
+| branch for issue N, feature branch from issue | [skills/create-feature-branch/SKILL.md](skills/create-feature-branch/SKILL.md) |
+| hotfix, patch production | [skills/hotfix/SKILL.md](skills/hotfix/SKILL.md) |
+| backmerge, sync main to dev | [skills/backmerge/SKILL.md](skills/backmerge/SKILL.md) |
+| release status, dev vs main | [skills/release-status/SKILL.md](skills/release-status/SKILL.md) |
+
+Run shell commands from the skill; report after each step; ask before push/merge/workflow dispatch unless the user already approved.
+
+### Quick reference
+
+| Task | Command / doc |
+|------|----------------|
+| Feature from issue | `./tool/git/start_feature_branch.sh <issue#>` |
+| Start release | `./tool/git/start_release_branch.sh <version> [build]` — [docs/git-flow.md](docs/git-flow.md) |
+| Preflight | `./tool/git/preflight_release.sh` |
+| Open PR to `main` | `./tool/git/open_release_pr.sh` |
+| Ship build | **Release Android** on `main` — [docs/release.md](docs/release.md) |
+| Sync after ship | `./tool/git/backmerge_main_to_dev.sh` |
+| Status | `./tool/git/release_status.sh` |
+
+Never run the release workflow from `dev` while `main` is behind production. Never reuse a published Android `version_code`.
+
 ## Agent workflow
 
 - Keep edits small, testable, and privacy-first.
 - When changing detection, scoring, permissions, or privacy-sensitive behaviour, update the relevant tests and concise docs.
+- For release-related edits: use a `release/*` or `hotfix/*` branch (not direct commits intended only for `main`), update `CHANGELOG.md`, run `./tool/git/preflight_release.sh`, and follow [docs/git-flow.md](docs/git-flow.md).
 
 ## Things not to do
 

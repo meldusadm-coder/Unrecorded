@@ -2,6 +2,8 @@
 
 Concise steps for maintainers shipping the Unrecorded Flutter app (`apps/mobile`).
 
+**Git:** merge to `main` via a `release/*` branch first — see [git-flow.md](git-flow.md). After merge, run this workflow on **`main`** and back-merge with `./tool/git/backmerge_main_to_dev.sh`.
+
 ## Versioning
 
 **Source of truth:** [`apps/mobile/pubspec.yaml`](../apps/mobile/pubspec.yaml)
@@ -177,6 +179,7 @@ Future TestFlight automation would need secrets such as `APP_STORE_CONNECT_API_K
 
 ## Related
 
+- [git-flow.md](git-flow.md) — `dev` / `main` / `release/*` branching and `tool/git/` scripts
 - [local-testing.md](local-testing.md) — UAT and debug builds
 - [AGENTS.md](../AGENTS.md) — product guardrails (no certainty claims)
 - [CHANGELOG.md](../CHANGELOG.md) — version history
