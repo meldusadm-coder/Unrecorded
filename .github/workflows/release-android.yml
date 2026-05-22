@@ -115,12 +115,12 @@ jobs:
           done
           KEYSTORE_PATH="${RUNNER_TEMP}/upload-keystore.jks"
           echo "${ANDROID_KEYSTORE_BASE64}" | base64 -d > "${KEYSTORE_PATH}"
-          cat > apps/mobile/android/key.properties <<EOF
-storePassword=${ANDROID_KEYSTORE_PASSWORD}
-keyPassword=${ANDROID_KEY_PASSWORD}
-keyAlias=${ANDROID_KEY_ALIAS}
-storeFile=${KEYSTORE_PATH}
-EOF
+          {
+            echo "storePassword=${ANDROID_KEYSTORE_PASSWORD}"
+            echo "keyPassword=${ANDROID_KEY_PASSWORD}"
+            echo "keyAlias=${ANDROID_KEY_ALIAS}"
+            echo "storeFile=${KEYSTORE_PATH}"
+          } > apps/mobile/android/key.properties
 
       - name: Build App Bundle (store artifact)
         working-directory: apps/mobile
