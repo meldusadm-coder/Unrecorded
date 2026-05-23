@@ -186,16 +186,20 @@ jobs:
       - name: Verify release AAB is signed
         run: |
           set -euo pipefail
-          AAB="$(find apps/mobile/build -name 'app-release.aab' -type f | head -n 1)"
-          if [[ -z "${AAB}" ]]; then
-            echo "::error::app-release.aab not found after build"
+          AAB="apps/mobile/build/app/outputs/bundle/release/app-release.aab"
+          if [[ ! -f "${AAB}" ]]; then
+            echo "::error::${AAB} not found after build"
             exit 1
           fi
-          if ! unzip -l "${AAB}" | grep -qE 'META-INF/.*\.(RSA|DSA|EC)'; then
-            echo "::error::AAB has no META-INF signatures — release signing did not run (check key.properties)."
+          if ! unzip -l "${AAB}" | grep -qE '^[[:space:]]+[0-9]+.*META-INF/[^/]+\.(RSA|DSA|EC)$'; then
+            echo "::error::${AAB} has no bundle-root META-INF signatures (release signing did not run)."
             exit 1
           fi
-          echo "AAB signature entries present."
+          if ! jarsigner -verify "${AAB}" >/dev/null 2>&1; then
+            echo "::error::jarsigner could not verify ${AAB}"
+            exit 1
+          fi
+          echo "Release AAB is signed: ${AAB}"
 
       - name: Build release APK (convenience)
         working-directory: apps/mobile
@@ -208,14 +212,14 @@ jobs:
       - name: Stage release artifacts
         run: |
           set -euo pipefail
-          AAB="$(find apps/mobile/build -name '*.aab' -type f | head -n 1)"
-          APK="$(find apps/mobile/build -name '*release*.apk' -type f | head -n 1)"
-          if [[ -z "${AAB}" ]]; then
-            echo "::error::No .aab found under apps/mobile/build"
+          AAB="apps/mobile/build/app/outputs/bundle/release/app-release.aab"
+          APK="apps/mobile/build/app/outputs/flutter-apk/app-release.apk"
+          if [[ ! -f "${AAB}" ]]; then
+            echo "::error::Signed release AAB not found at ${AAB}"
             exit 1
           fi
           cp "${AAB}" "${RUNNER_TEMP}/app-release.aab"
-          if [[ -n "${APK}" ]]; then
+          if [[ -f "${APK}" ]]; then
             cp "${APK}" "${RUNNER_TEMP}/app-release.apk"
           fi
 
