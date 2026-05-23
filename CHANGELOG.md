@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1+5
+
+### Fixed
+- Release workflow staged an unsigned intermediary AAB instead of the signed `app-release.aab`, causing Play Console "app not signed" errors.
+
 ## 0.2.1+4
 
 ### Changed
