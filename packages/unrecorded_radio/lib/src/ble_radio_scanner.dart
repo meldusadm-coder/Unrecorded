@@ -57,8 +57,11 @@ class BleRadioScanner implements RadioScanner {
 
       // No timeout — scan runs until [stop] is called. The scan controller
       // restarts the stream if the platform ends a session early.
+      // Android 12+ uses BLUETOOTH_SCAN with neverForLocation — do not request
+      // fine location at scan time (manifest excludes it on API 31+).
       await FlutterBluePlus.startScan(
-        androidUsesFineLocation: true,
+        androidUsesFineLocation: false,
+        androidCheckLocationServices: false,
       );
 
       _subscription = FlutterBluePlus.onScanResults.listen(

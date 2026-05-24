@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.2+6
+
+### Fixed
+- Android internal test scan failed on API 31+ because BLE scan requested fine location while the manifest only declares it for API 30 and below. Use `neverForLocation` on `BLUETOOTH_SCAN`, scan without location, and require Bluetooth runtime permissions on modern Android.
+
 ## 0.2.1+5
 
 ### Fixed
