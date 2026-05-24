@@ -72,18 +72,21 @@ class ScanRuntime {
   }
 
   Future<bool> _requestPermissions() async {
+    final androidInfo = await DeviceInfoPlugin().androidInfo;
+    if (androidInfo.version.sdkInt >= 31) {
+      final statuses = await [
+        Permission.bluetoothScan,
+        Permission.bluetoothConnect,
+      ].request();
+
+      return (statuses[Permission.bluetoothScan]?.isGranted ?? false) &&
+          (statuses[Permission.bluetoothConnect]?.isGranted ?? false);
+    }
+
     final statuses = await [
-      Permission.bluetoothScan,
-      Permission.bluetoothConnect,
       Permission.locationWhenInUse,
     ].request();
 
-    final hasBluetoothRuntime =
-        (statuses[Permission.bluetoothScan]?.isGranted ?? false) &&
-            (statuses[Permission.bluetoothConnect]?.isGranted ?? false);
-    final hasLegacyLocation =
-        statuses[Permission.locationWhenInUse]?.isGranted ?? false;
-
-    return hasBluetoothRuntime || hasLegacyLocation;
+    return statuses[Permission.locationWhenInUse]?.isGranted ?? false;
   }
 }
