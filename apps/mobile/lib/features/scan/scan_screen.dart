@@ -20,6 +20,8 @@ class ScanScreen extends ConsumerWidget {
     final controller = ref.read(scanControllerProvider.notifier);
     final showAlert = state.status == ScanStatus.possibleRiskDetected &&
         !state.alertDismissed;
+    final topSignals = _signalClassifier.topAlertSignals(state.signals);
+    final topSignal = topSignals.isEmpty ? null : topSignals.first;
     return Scaffold(
       appBar: AppBar(
         leading: const Padding(
@@ -64,6 +66,17 @@ class ScanScreen extends ConsumerWidget {
             _buildNextStep(context, state, controller),
             if (showAlert) ...[
               const SizedBox(height: 16),
+              if (topSignal != null)
+                Card(
+                  child: ListTile(
+                    title: Text(
+                      topSignal.signal.displayName ?? 'Unknown nearby device',
+                    ),
+                    subtitle: Text(topSignal.typeLabel),
+                    trailing: const Text('View details'),
+                    onTap: () => context.push('/alert-details'),
+                  ),
+                ),
               RiskAlertCard(
                 title: AppCopy.alertCardTitle,
                 body: AppCopy.alertCardBody,

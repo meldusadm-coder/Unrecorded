@@ -26,7 +26,12 @@ class AppLogo extends StatelessWidget {
 
     final colorFilter = forColoredBackground
         ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
-        : null;
+        : (isDark
+            ? ColorFilter.mode(
+                Theme.of(context).colorScheme.onSurface,
+                BlendMode.srcIn,
+              )
+            : null);
 
     return SvgPicture.asset(
       assetPath,

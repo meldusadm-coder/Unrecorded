@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.3.0+7
+
+### Added
+- Alert details now show clearer nearby device identity and proximity context.
+
+### Changed
+- Dark mode scan and alert surfaces use improved contrast for readability.
+- Risk scoring now weighs signal distance/proximity alongside existing heuristics.
+
+### Fixed
+- Bluetooth permission handling now maps denied/permanently-denied states more reliably.
+- App startup no longer triggers immediate false high-risk alert states.
+
+
 ## 0.2.2+6
 
 ### Fixed
