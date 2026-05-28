@@ -137,11 +137,15 @@ class ScanController extends StateNotifier<ScanState> {
     required ScannerMode Function() scannerModeFactory,
     required RiskScoringEngine scoringEngine,
     void Function(ScanState previous, ScanState next)? onStateChanged,
+    Duration startupGraceDuration = const Duration(seconds: 5),
+    int requiredElevatedScans = 2,
   })  : _scannerFactory = scannerFactory,
         _runtime = runtime,
         _scannerModeFactory = scannerModeFactory,
         _scoringEngine = scoringEngine,
         _onStateChanged = onStateChanged,
+        _startupGraceDuration = startupGraceDuration,
+        _requiredElevatedScans = requiredElevatedScans,
         super(const ScanState());
 
   final RadioScanner Function() _scannerFactory;
@@ -150,11 +154,16 @@ class ScanController extends StateNotifier<ScanState> {
   final ScannerMode Function() _scannerModeFactory;
   final void Function(ScanState previous, ScanState next)? _onStateChanged;
 
+  final Duration _startupGraceDuration;
+  final int _requiredElevatedScans;
+
   StreamSubscription<List<RadioScanResult>>? _subscription;
   RadioScanner? _activeScanner;
   bool _startInFlight = false;
   bool _restartInFlight = false;
   ProtectionPrefs? _prefs;
+  DateTime? _scanStreamStartedAt;
+  int _consecutiveElevatedScans = 0;
 
   ScannerMode get _scannerMode => _scannerModeFactory();
 
@@ -171,6 +180,10 @@ class ScanController extends StateNotifier<ScanState> {
 
   /// Injects a high-risk batch for debug UAT (no BLE required).
   void simulateHighRiskAlert() {
+    _scanStreamStartedAt = DateTime.now().subtract(
+      _startupGraceDuration + const Duration(seconds: 1),
+    );
+    _consecutiveElevatedScans = _requiredElevatedScans - 1;
     _onResults(FakeRadioScanner.highRiskBatch());
     if (state.status == ScanStatus.possibleRiskDetected) {
       _emit(state.copyWith(alertDismissed: false));
@@ -263,6 +276,9 @@ class ScanController extends StateNotifier<ScanState> {
   }
 
   Future<void> _beginScanStream() async {
+    _scanStreamStartedAt = DateTime.now();
+    _consecutiveElevatedScans = 0;
+
     _emit(
       state.copyWith(
         status: ScanStatus.scanning,
@@ -351,18 +367,30 @@ class ScanController extends StateNotifier<ScanState> {
     final snapshot = ScanSnapshot(signals: signals, capturedAt: now);
     final result = _scoringEngine.evaluate(snapshot);
 
-    final nextStatus =
-        (result.level == RiskLevel.medium || result.level == RiskLevel.high)
-            ? ScanStatus.possibleRiskDetected
-            : ScanStatus.scanning;
+    final rawElevated =
+        result.level == RiskLevel.medium || result.level == RiskLevel.high;
+    if (rawElevated) {
+      _consecutiveElevatedScans++;
+    } else {
+      _consecutiveElevatedScans = 0;
+    }
+
+    final pastGrace = _scanStreamStartedAt != null &&
+        now.difference(_scanStreamStartedAt!) >= _startupGraceDuration;
+    final alertConfirmed =
+        pastGrace && _consecutiveElevatedScans >= _requiredElevatedScans;
+
+    final nextStatus = alertConfirmed && rawElevated
+        ? ScanStatus.possibleRiskDetected
+        : ScanStatus.scanning;
 
     _emit(
       state.copyWith(
         status: nextStatus,
         signals: signals,
-        riskLevel: result.level,
-        score: result.totalScore,
-        reasons: result.reasons,
+        riskLevel: alertConfirmed && rawElevated ? result.level : RiskLevel.low,
+        score: alertConfirmed ? result.totalScore : 0,
+        reasons: alertConfirmed ? result.reasons : const [],
         lastCheckedAt: now,
         alertDismissed: nextStatus == ScanStatus.possibleRiskDetected
             ? state.alertDismissed

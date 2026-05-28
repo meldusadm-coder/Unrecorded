@@ -107,8 +107,8 @@ class FakeRadioScanner implements RadioScanner {
       ..._benignBatch(now),
       RadioScanResult(
         id: 'fake:medium:01',
-        name: 'Unknown BLE',
-        rssi: -48,
+        name: 'Meta Smart Glasses',
+        rssi: -85,
         isConnectable: false,
         observedAt: now,
       ),

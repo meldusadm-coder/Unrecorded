@@ -98,6 +98,39 @@ void main() {
       expect(result.level, RiskLevel.medium);
     });
 
+    test('multiple strong benign devices stay low risk', () {
+      final snapshot = ScanSnapshot(
+        signals: [
+          DetectedSignal(
+            id: 'aa:bb:cc:dd:ee:01',
+            displayName: 'AirPods Pro',
+            rssi: -45,
+            seenAt: DateTime.now(),
+            isConnectable: true,
+          ),
+          DetectedSignal(
+            id: 'aa:bb:cc:dd:ee:02',
+            displayName: 'Galaxy Buds',
+            rssi: -48,
+            seenAt: DateTime.now(),
+            isConnectable: true,
+          ),
+          DetectedSignal(
+            id: 'aa:bb:cc:dd:ee:03',
+            displayName: 'JBL Flip 6',
+            rssi: -50,
+            seenAt: DateTime.now(),
+            isConnectable: true,
+          ),
+        ],
+        capturedAt: DateTime.now(),
+      );
+      final result = engine.evaluate(snapshot);
+
+      expect(result.level, RiskLevel.low);
+      expect(result.totalScore, 0);
+    });
+
     test('strong unknown signal alone does not auto-escalate to high', () {
       final snapshot = ScanSnapshot(
         signals: [

@@ -24,12 +24,16 @@ ScanController _controller({
   required RadioScanner scanner,
   required ScanRuntime runtime,
   ScannerMode scannerMode = ScannerMode.auto,
+  Duration startupGraceDuration = Duration.zero,
+  int requiredElevatedScans = 1,
 }) {
   return ScanController(
     scannerFactory: () => scanner,
     runtime: runtime,
     scannerModeFactory: () => scannerMode,
     scoringEngine: RiskScoringEngine(),
+    startupGraceDuration: startupGraceDuration,
+    requiredElevatedScans: requiredElevatedScans,
   );
 }
 
@@ -138,6 +142,35 @@ void main() {
 
     expect(scanner.restartCount, greaterThanOrEqualTo(1));
     expect(controller.state.status, ScanStatus.paused);
+  });
+
+  test('startup grace suppresses first elevated scan batch', () async {
+    final streamController =
+        StreamController<List<RadioScanResult>>.broadcast();
+    final scanner = _StreamScanner(streamController.stream);
+    final controller = _controller(
+      scanner: scanner,
+      runtime: _TestRuntime(const ScanPreflightResult.ok()),
+      startupGraceDuration: const Duration(seconds: 5),
+      requiredElevatedScans: 2,
+    );
+
+    await controller.startProtection(persist: false);
+
+    streamController.add([
+      RadioScanResult(
+        id: '1',
+        name: 'Ray-Ban Meta',
+        rssi: -40,
+        isConnectable: true,
+        observedAt: DateTime.now(),
+      ),
+    ]);
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+
+    expect(controller.state.status, ScanStatus.scanning);
+    expect(controller.state.riskLevel, RiskLevel.low);
+    await streamController.close();
   });
 
   test('high risk results set possibleRiskDetected', () async {

@@ -51,25 +51,31 @@ class RiskScoringEngine {
       );
     }
 
-    var total = 0;
+    var bestScore = 0;
     final reasons = <String>{};
     final contributing = <DetectedSignal>[];
 
     for (final signal in snapshot.signals) {
-      var signalScored = false;
+      var signalScore = 0;
+      final signalReasons = <String>{};
       for (final rule in _rules) {
         final pts = rule.score(signal);
         if (pts > 0) {
-          total += pts;
-          signalScored = true;
+          signalScore += pts;
           final r = rule.reason(signal);
-          if (r != null) reasons.add(r);
+          if (r != null) signalReasons.add(r);
         }
       }
-      if (signalScored) contributing.add(signal);
+      if (signalScore > 0) contributing.add(signal);
+      if (signalScore > bestScore) {
+        bestScore = signalScore;
+        reasons
+          ..clear()
+          ..addAll(signalReasons);
+      }
     }
 
-    final level = _levelFromScore(total);
+    final level = _levelFromScore(bestScore);
 
     if (reasons.isEmpty) {
       reasons.add(
@@ -80,7 +86,7 @@ class RiskScoringEngine {
 
     return ScoringResult(
       level: level,
-      totalScore: total,
+      totalScore: bestScore,
       reasons: reasons.toList(),
       contributingSignals: contributing,
     );

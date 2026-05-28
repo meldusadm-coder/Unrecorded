@@ -25,14 +25,23 @@ class SuspiciousNameRule extends ScoringRule {
     'optic',
   ];
 
+  /// Whether [name] matches a known wearable/recording-device keyword.
+  static bool matchesName(String? name) {
+    final lower = name?.toLowerCase();
+    if (lower == null) return false;
+    for (final kw in keywords) {
+      if (lower.contains(kw)) return true;
+    }
+    return false;
+  }
+
+  /// Whether [signal] has a suspicious display name.
+  static bool matches(DetectedSignal signal) => matchesName(signal.displayName);
+
   @override
   int score(DetectedSignal signal) {
-    final name = signal.displayName?.toLowerCase();
-    if (name == null) return 0;
-    for (final kw in keywords) {
-      if (name.contains(kw)) return 35;
-    }
-    return 0;
+    if (!matches(signal)) return 0;
+    return 35;
   }
 
   @override
@@ -52,6 +61,7 @@ class StrongSignalRule extends ScoringRule {
 
   @override
   int score(DetectedSignal signal) {
+    if (!SuspiciousNameRule.matches(signal)) return 0;
     final rssi = signal.rssi;
     if (rssi == null) return 0;
     if (rssi >= _strongThreshold) return 10;
@@ -80,6 +90,7 @@ class StrongSignalRule extends ScoringRule {
 class ConnectableDeviceRule extends ScoringRule {
   @override
   int score(DetectedSignal signal) {
+    if (!SuspiciousNameRule.matches(signal)) return 0;
     return signal.isConnectable ? 10 : 0;
   }
 
