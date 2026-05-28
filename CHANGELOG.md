@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.1+8
+
+### Added
+- Release workflow now publishes the Google Play internal testing URL in the job summary after a successful internal upload.
+
+### Changed
+- Android Play upload status is `completed` so internal releases are published automatically instead of staying as drafts.
+
+### Fixed
+- No additional fixes in this release.
+
+
 ## 0.3.0+7
 
 ### Added
