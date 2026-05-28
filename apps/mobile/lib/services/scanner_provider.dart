@@ -37,7 +37,7 @@ RadioScanner _scannerForConfig(ScannerConfig config) {
 final radioScannerProvider = Provider<RadioScanner>((ref) {
   final config = ref.watch(scannerConfigProvider);
   if (config == null) {
-    return FakeRadioScanner(scenario: FakeDemoScenario.high);
+    return FakeRadioScanner(scenario: FakeDemoScenario.low);
   }
   return _scannerForConfig(config);
 });
@@ -221,6 +221,11 @@ class ScanController extends StateNotifier<ScanState> {
           protectionEnabled: true,
           status: ScanStatus.starting,
           statusMessage: AppCopy.permissionHelper,
+          signals: const [],
+          reasons: const [],
+          riskLevel: RiskLevel.low,
+          score: 0,
+          alertDismissed: false,
           clearStatusMessage: false,
         ),
       );
@@ -248,6 +253,8 @@ class ScanController extends StateNotifier<ScanState> {
     switch (failure) {
       case ScanPreflightFailure.permissionDenied:
         return AppCopy.permissionHelper;
+      case ScanPreflightFailure.permissionPermanentlyDenied:
+        return AppCopy.permissionPermanentlyDeniedHelper;
       case ScanPreflightFailure.bluetoothUnsupported:
         return AppCopy.bluetoothUnsupportedMessage;
       case ScanPreflightFailure.bluetoothOff:
@@ -273,7 +280,7 @@ class ScanController extends StateNotifier<ScanState> {
         _emit(
           state.copyWith(
             status: ScanStatus.error,
-            statusMessage: 'Scan failed. Please try again.',
+            statusMessage: AppCopy.scanErrorMessage,
           ),
         );
       },
