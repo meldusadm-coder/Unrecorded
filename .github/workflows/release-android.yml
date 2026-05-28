@@ -270,7 +270,7 @@ jobs:
           prerelease: false
           generate_release_notes: false
 
-      - name: Upload to Google Play (internal draft)
+      - name: Upload to Google Play
         id: play_upload
         if: env.UPLOAD_TO_PLAY == 'true'
         continue-on-error: true
@@ -280,10 +280,19 @@ jobs:
           packageName: app.unrecorded.unrecorded_mobile
           releaseFiles: ${{ runner.temp }}/app-release.aab
           track: ${{ env.PLAY_TRACK }}
-          status: draft
+          status: completed
 
       - name: Play upload result
         if: env.UPLOAD_TO_PLAY == 'true' && steps.play_upload.outcome == 'failure'
         run: |
           echo "::warning::Play upload failed (often upload key not registered in Play Console). GitHub Release and artifacts were still published."
           exit 1
+
+      - name: Publish internal testing URL
+        if: env.UPLOAD_TO_PLAY == 'true' && steps.play_upload.outcome == 'success' && env.PLAY_TRACK == 'internal'
+        run: |
+          {
+            echo "## Google Play internal testing"
+            echo
+            echo "Testing URL: https://play.google.com/apps/testing/app.unrecorded.unrecorded_mobile"
+          } >> "${GITHUB_STEP_SUMMARY}"
