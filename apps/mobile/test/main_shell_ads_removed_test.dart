@@ -6,7 +6,8 @@ import 'package:unrecorded_mobile/services/ads_service.dart';
 import 'package:unrecorded_mobile/services/entitlement_service.dart';
 
 void main() {
-  testWidgets('hides bottom ad slot content when ads are removed', (tester) async {
+  testWidgets('hides bottom ad slot content when ads are removed',
+      (tester) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
