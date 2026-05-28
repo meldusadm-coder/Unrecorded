@@ -134,7 +134,7 @@ class AlertDetailsScreen extends ConsumerWidget {
 
   Widget _deviceTile(ThemeData theme, ClassifiedSignal classified) {
     final signal = classified.signal;
-    final name = signal.displayName ?? 'Unknown device';
+    final name = signal.displayName ?? 'Unknown nearby device';
     final idLine = '${DeviceSignalClassifier.idLabel(signal.id)}: '
         '${DeviceSignalClassifier.formatId(signal.id)}';
 
@@ -171,16 +171,24 @@ class AlertDetailsScreen extends ConsumerWidget {
             ],
             const SizedBox(height: 2),
             Text(idLine, style: theme.textTheme.bodySmall),
+            const SizedBox(height: 2),
+            Text(_proximityLabel(signal.rssi), style: theme.textTheme.bodySmall),
+            const SizedBox(height: 2),
+            Text(
+              signal.isConnectable ? 'Connectable nearby' : 'Connectable status unavailable',
+              style: theme.textTheme.bodySmall,
+            ),
           ],
         ),
-        trailing: signal.rssi != null
-            ? Text(
-                '${signal.rssi} dBm',
-                style: theme.textTheme.bodySmall,
-              )
-            : null,
       ),
     );
+  }
+
+  String _proximityLabel(int? rssi) {
+    if (rssi == null) return 'Weak or uncertain signal';
+    if (rssi >= -55) return 'Strong nearby signal';
+    if (rssi >= -68) return 'Moderate nearby signal';
+    return 'Weak or uncertain signal';
   }
 
   String _lastCheckedLine(DateTime t) {

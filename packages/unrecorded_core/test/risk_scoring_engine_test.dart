@@ -82,6 +82,56 @@ void main() {
       expect(result.totalScore, greaterThanOrEqualTo(40));
     });
 
+    test('suspicious name with weak signal is less urgent', () {
+      final snapshot = ScanSnapshot(
+        signals: [
+          DetectedSignal(
+            id: '11:22:33:44:55:66',
+            displayName: 'Meta Smart Glasses',
+            rssi: -85,
+            seenAt: DateTime.now(),
+          ),
+        ],
+        capturedAt: DateTime.now(),
+      );
+      final result = engine.evaluate(snapshot);
+      expect(result.level, RiskLevel.medium);
+    });
+
+    test('strong unknown signal alone does not auto-escalate to high', () {
+      final snapshot = ScanSnapshot(
+        signals: [
+          DetectedSignal(
+            id: 'de:ad:be:ef:00:01',
+            displayName: 'Bluetooth Speaker',
+            rssi: -45,
+            seenAt: DateTime.now(),
+          ),
+        ],
+        capturedAt: DateTime.now(),
+      );
+      final result = engine.evaluate(snapshot);
+      expect(result.level, isNot(RiskLevel.high));
+    });
+
+    test('benign connectable nearby signal stays low risk', () {
+      final snapshot = ScanSnapshot(
+        signals: [
+          DetectedSignal(
+            id: 'aa:bb:cc:dd:ee:ff',
+            displayName: 'AirPods Pro',
+            rssi: -56,
+            seenAt: DateTime.now(),
+            isConnectable: true,
+          ),
+        ],
+        capturedAt: DateTime.now(),
+      );
+      final result = engine.evaluate(snapshot);
+      expect(result.level, RiskLevel.low);
+      expect(result.totalScore, lessThan(15));
+    });
+
     test('multiple suspicious signals compound the score', () {
       final snapshot = ScanSnapshot(
         signals: [
