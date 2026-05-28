@@ -30,7 +30,7 @@ class SuspiciousNameRule extends ScoringRule {
     final name = signal.displayName?.toLowerCase();
     if (name == null) return 0;
     for (final kw in keywords) {
-      if (name.contains(kw)) return 40;
+      if (name.contains(kw)) return 35;
     }
     return 0;
   }
@@ -47,21 +47,28 @@ class SuspiciousNameRule extends ScoringRule {
 
 /// Awards points when a signal is very strong (close proximity).
 class StrongSignalRule extends ScoringRule {
-  static const _strongThreshold = -50;
+  static const _strongThreshold = -55;
+  static const _moderateThreshold = -68;
 
   @override
   int score(DetectedSignal signal) {
     final rssi = signal.rssi;
     if (rssi == null) return 0;
-    if (rssi >= _strongThreshold) return 15;
+    if (rssi >= _strongThreshold) return 10;
+    if (rssi >= _moderateThreshold) return 5;
     return 0;
   }
 
   @override
   String? reason(DetectedSignal signal) {
-    if (score(signal) > 0) {
-      return 'A signal is unusually strong, suggesting the device '
-          'may be very close.';
+    final pts = score(signal);
+    if (pts >= 10) {
+      return 'A strong nearby signal was seen. Signal strength is only a rough '
+          'proximity indicator and not precise distance.';
+    }
+    if (pts == 5) {
+      return 'A moderate nearby signal was seen. Signal strength is only a rough '
+          'proximity indicator.';
     }
     return null;
   }

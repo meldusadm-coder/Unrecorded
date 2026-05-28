@@ -10,6 +10,7 @@ enum ScannerMode { auto, demo }
 
 enum ScanPreflightFailure {
   permissionDenied,
+  permissionPermanentlyDenied,
   bluetoothUnsupported,
   bluetoothOff
 }
@@ -56,8 +57,11 @@ class ScanRuntime {
 
     final permissionGranted = await _requestPermissions();
     if (!permissionGranted) {
-      return const ScanPreflightResult.fail(
-        ScanPreflightFailure.permissionDenied,
+      final permanentlyDenied = await isPermissionPermanentlyDenied();
+      return ScanPreflightResult.fail(
+        permanentlyDenied
+            ? ScanPreflightFailure.permissionPermanentlyDenied
+            : ScanPreflightFailure.permissionDenied,
       );
     }
 
@@ -78,9 +82,13 @@ class ScanRuntime {
         Permission.bluetoothScan,
         Permission.bluetoothConnect,
       ].request();
-
-      return (statuses[Permission.bluetoothScan]?.isGranted ?? false) &&
-          (statuses[Permission.bluetoothConnect]?.isGranted ?? false);
+      final scanStatus = statuses[Permission.bluetoothScan];
+      final connectStatus = statuses[Permission.bluetoothConnect];
+      if ((scanStatus?.isPermanentlyDenied ?? false) ||
+          (connectStatus?.isPermanentlyDenied ?? false)) {
+        return false;
+      }
+      return (scanStatus?.isGranted ?? false) && (connectStatus?.isGranted ?? false);
     }
 
     final statuses = await [
@@ -88,5 +96,16 @@ class ScanRuntime {
     ].request();
 
     return statuses[Permission.locationWhenInUse]?.isGranted ?? false;
+  }
+
+  Future<bool> isPermissionPermanentlyDenied() async {
+    final androidInfo = await DeviceInfoPlugin().androidInfo;
+    if (androidInfo.version.sdkInt >= 31) {
+      final scan = await Permission.bluetoothScan.status;
+      final connect = await Permission.bluetoothConnect.status;
+      return scan.isPermanentlyDenied || connect.isPermanentlyDenied;
+    }
+    final location = await Permission.locationWhenInUse.status;
+    return location.isPermanentlyDenied;
   }
 }

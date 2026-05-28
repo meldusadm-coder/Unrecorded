@@ -36,9 +36,12 @@ class AppCopy {
 
   // Permissions
   static const String permissionHelper =
-      'Nearby scanning needs Bluetooth and/or location-style permissions '
-      'depending on your device. These permissions help detect nearby '
-      'signals — they are not used to track where you go.';
+      'Nearby scanning needs Bluetooth access to check for nearby signals '
+      'that may match recording-device patterns. Scan data stays on your '
+      'device and is not used to track where you go.';
+  static const String permissionPermanentlyDeniedHelper =
+      'Bluetooth permission is blocked. Open system settings to allow Nearby '
+      'Devices access for scanning.';
 
   static const String permissionRequiredTitle = 'Permissions needed';
 
@@ -48,6 +51,8 @@ class AppCopy {
   static const String bluetoothUnsupportedMessage =
       'Bluetooth scanning is not supported on this device. '
       'You can use demo mode for a preview.';
+  static const String scanErrorMessage =
+      'Scanning is temporarily unavailable. Please try again in a moment.';
 
   // Actions
   static const String turnOnProtection = 'Turn on protection';
