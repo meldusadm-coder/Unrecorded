@@ -172,10 +172,13 @@ class AlertDetailsScreen extends ConsumerWidget {
             const SizedBox(height: 2),
             Text(idLine, style: theme.textTheme.bodySmall),
             const SizedBox(height: 2),
-            Text(_proximityLabel(signal.rssi), style: theme.textTheme.bodySmall),
+            Text(_proximityLabel(signal.rssi),
+                style: theme.textTheme.bodySmall),
             const SizedBox(height: 2),
             Text(
-              signal.isConnectable ? 'Connectable nearby' : 'Connectable status unavailable',
+              signal.isConnectable
+                  ? 'Connectable nearby'
+                  : 'Connectable status unavailable',
               style: theme.textTheme.bodySmall,
             ),
           ],

@@ -69,7 +69,8 @@ class ScanScreen extends ConsumerWidget {
               if (topSignal != null)
                 Card(
                   child: ListTile(
-                    title: Text(topSignal.signal.displayName ?? 'Unknown nearby device'),
+                    title: Text(topSignal.signal.displayName ??
+                        'Unknown nearby device'),
                     subtitle: Text(topSignal.typeLabel),
                     trailing: const Text('View details'),
                     onTap: () => context.push('/alert-details'),

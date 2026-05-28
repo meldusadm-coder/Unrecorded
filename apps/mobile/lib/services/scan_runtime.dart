@@ -88,7 +88,8 @@ class ScanRuntime {
           (connectStatus?.isPermanentlyDenied ?? false)) {
         return false;
       }
-      return (scanStatus?.isGranted ?? false) && (connectStatus?.isGranted ?? false);
+      return (scanStatus?.isGranted ?? false) &&
+          (connectStatus?.isGranted ?? false);
     }
 
     final statuses = await [
