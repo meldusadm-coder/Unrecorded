@@ -114,6 +114,24 @@ void main() {
       expect(result.level, isNot(RiskLevel.high));
     });
 
+    test('benign connectable nearby signal stays low risk', () {
+      final snapshot = ScanSnapshot(
+        signals: [
+          DetectedSignal(
+            id: 'aa:bb:cc:dd:ee:ff',
+            displayName: 'AirPods Pro',
+            rssi: -56,
+            seenAt: DateTime.now(),
+            isConnectable: true,
+          ),
+        ],
+        capturedAt: DateTime.now(),
+      );
+      final result = engine.evaluate(snapshot);
+      expect(result.level, RiskLevel.low);
+      expect(result.totalScore, lessThan(15));
+    });
+
     test('multiple suspicious signals compound the score', () {
       final snapshot = ScanSnapshot(
         signals: [

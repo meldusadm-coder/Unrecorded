@@ -80,7 +80,11 @@ class StrongSignalRule extends ScoringRule {
 class ConnectableDeviceRule extends ScoringRule {
   @override
   int score(DetectedSignal signal) {
-    return signal.isConnectable ? 10 : 0;
+    if (!signal.isConnectable) return 0;
+    final name = signal.displayName?.toLowerCase();
+    if (name == null) return 0;
+    final looksSuspicious = SuspiciousNameRule.keywords.any(name.contains);
+    return looksSuspicious ? 10 : 0;
   }
 
   @override
