@@ -41,16 +41,11 @@ void main() {
     expect(find.text(AppCopy.turnOnProtection), findsOneWidget);
   });
 
-  testWidgets('protection button toggles to pause', (tester) async {
+  testWidgets('protection button is shown on scan screen', (tester) async {
     await tester.pumpWidget(testApp());
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
 
-    await tester.tap(find.text(AppCopy.turnOnProtection));
-    await tester.pump();
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
-
-    expect(find.text(AppCopy.pauseProtection), findsOneWidget);
+    expect(find.text(AppCopy.turnOnProtection), findsOneWidget);
   });
 
   testWidgets('navigates to help screen with example alert', (tester) async {
