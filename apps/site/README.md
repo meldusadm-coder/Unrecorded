@@ -130,6 +130,28 @@ Use this URL in Play Console and AdMob app settings:
 
 The policy names **Google AdMob**, local BLE processing, optional IAP, no accounts, and no core analytics. See [`docs/release.md`](../../docs/release.md#privacy-policy-url-required).
 
+### app-ads.txt (AdMob)
+
+To help protect AdMob earnings from ad fraud, publish this file at the root of the developer domain used by your store listings:
+
+- Required URL: **`https://unrecorded.app/app-ads.txt`**
+- Required content (single line):
+
+  ```text
+  google.com, pub-5555183606520770, DIRECT, f08c47fec0942fa0
+  ```
+
+- The domain in Google Play / App Store must match this host exactly.
+- After deployment, allow at least 24 hours for AdMob to crawl and verify.
+- In AdMob, check status at **Apps → app-ads.txt**.
+
+Quick verification checklist:
+
+1. Deploy static site changes from `apps/site`.
+2. Open `https://unrecorded.app/app-ads.txt` and confirm it is public and returns HTTP 200.
+3. Confirm the file contains exactly the required line above.
+4. After 24+ hours, recheck your app's app-ads.txt status in AdMob.
+
 ## TODOs before launch
 
 - [x] Legal entity: **Meldlife Ltd** — section 1 in `privacy.html`

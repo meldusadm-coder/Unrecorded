@@ -65,6 +65,7 @@ jobs:
             echo "FULL_VERSION=${version_name}+${build_number}" >> "${GITHUB_ENV}"
             echo "TAG_NAME=mobile-v${version_name}+${build_number}" >> "${GITHUB_ENV}"
             echo "PLAY_TRACK=internal" >> "${GITHUB_ENV}"
+            echo "PLAY_RELEASE_STATUS=completed" >> "${GITHUB_ENV}"
             echo "UPLOAD_TO_PLAY=true" >> "${GITHUB_ENV}"
             echo "CREATE_GITHUB_RELEASE=true" >> "${GITHUB_ENV}"
             echo "SKIP_BUMP=true" >> "${GITHUB_ENV}"
@@ -83,6 +84,11 @@ jobs:
             echo "FULL_VERSION=${vn}+${vc}" >> "${GITHUB_ENV}"
             echo "TAG_NAME=mobile-v${vn}+${vc}" >> "${GITHUB_ENV}"
             echo "PLAY_TRACK=${{ inputs.track }}" >> "${GITHUB_ENV}"
+            if [[ "${{ inputs.track }}" == "internal" ]]; then
+              echo "PLAY_RELEASE_STATUS=completed" >> "${GITHUB_ENV}"
+            else
+              echo "PLAY_RELEASE_STATUS=draft" >> "${GITHUB_ENV}"
+            fi
             echo "UPLOAD_TO_PLAY=${{ inputs.upload_to_play }}" >> "${GITHUB_ENV}"
             echo "CREATE_GITHUB_RELEASE=${{ inputs.create_github_release }}" >> "${GITHUB_ENV}"
             echo "SKIP_BUMP=false" >> "${GITHUB_ENV}"
@@ -280,7 +286,7 @@ jobs:
           packageName: app.unrecorded.unrecorded_mobile
           releaseFiles: ${{ runner.temp }}/app-release.aab
           track: ${{ env.PLAY_TRACK }}
-          status: completed
+          status: ${{ env.PLAY_RELEASE_STATUS }}
 
       - name: Play upload result
         if: env.UPLOAD_TO_PLAY == 'true' && steps.play_upload.outcome == 'failure'

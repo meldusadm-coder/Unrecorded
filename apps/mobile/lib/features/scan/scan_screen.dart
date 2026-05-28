@@ -52,7 +52,7 @@ class ScanScreen extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           children: [
             ScanStatusCard(
-              icon: _iconWidgetForStatus(state.status),
+              icon: _iconWidgetForStatus(state.status, state.riskLevel),
               title: _titleForStatus(state),
               subtitle: _subtitleForStatus(state),
               lastCheckedText: _lastCheckedText(state),
@@ -224,7 +224,7 @@ class ScanScreen extends ConsumerWidget {
     return 'Last checked: ${diff.inHours} h ago';
   }
 
-  Widget _iconWidgetForStatus(ScanStatus status) {
+  Widget _iconWidgetForStatus(ScanStatus status, RiskLevel riskLevel) {
     switch (status) {
       case ScanStatus.scanning:
         return const UnrecordedStatusIcon(
@@ -232,6 +232,13 @@ class ScanScreen extends ConsumerWidget {
           size: 48,
         );
       case ScanStatus.possibleRiskDetected:
+        if (riskLevel == RiskLevel.medium) {
+          return const UnrecordedIcon(
+            asset: UnrecordedIconAsset.riskMedium,
+            size: 48,
+            color: UnrecordedColors.warning,
+          );
+        }
         return const UnrecordedStatusIcon(
           asset: UnrecordedStatusAsset.highRisk,
           size: 48,
