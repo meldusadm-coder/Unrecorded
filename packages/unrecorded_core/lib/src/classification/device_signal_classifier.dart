@@ -28,8 +28,7 @@ class DeviceSignalClassifier {
   DeviceSignalClassifier({
     DetectionEngine? detectionEngine,
     SignatureMatcher? matcher,
-  })
-      : _engine = detectionEngine ?? DetectionEngine(matcher: matcher),
+  })  : _engine = detectionEngine ?? DetectionEngine(matcher: matcher),
         _matcher = matcher ?? const SignatureMatcher();
 
   final DetectionEngine _engine;

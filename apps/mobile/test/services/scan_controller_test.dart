@@ -150,7 +150,8 @@ void main() {
     await controller.pauseProtection(persist: false);
   });
 
-  test('scan window end does not count cached elevation toward alert', () async {
+  test('scan window end does not count cached elevation toward alert',
+      () async {
     final streamController =
         StreamController<List<RadioScanResult>>.broadcast();
     final scanner = _StreamScanner(streamController.stream);
