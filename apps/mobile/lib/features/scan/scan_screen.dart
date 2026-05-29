@@ -54,12 +54,12 @@ class ScanScreen extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           children: [
             if (state.isDemoMode && state.protectionRequested)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
+              const Padding(
+                padding: EdgeInsets.only(bottom: 12),
                 child: MaterialBanner(
-                  content: const Text(AppCopy.demoModeBanner),
-                  leading: const Icon(Icons.science_outlined),
-                  actions: const [SizedBox.shrink()],
+                  content: Text(AppCopy.demoModeBanner),
+                  leading: Icon(Icons.science_outlined),
+                  actions: [SizedBox.shrink()],
                 ),
               ),
             ScanStatusCard(

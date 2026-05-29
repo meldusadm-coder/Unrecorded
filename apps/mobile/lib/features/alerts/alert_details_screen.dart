@@ -149,8 +149,10 @@ class AlertDetailsScreen extends ConsumerWidget {
           size: 24,
           color: UnrecordedColors.warning,
         ),
-        title: Text(signal.title,
-            style: const TextStyle(fontWeight: FontWeight.w600)),
+        title: Text(
+          signal.title,
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

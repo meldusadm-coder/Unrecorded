@@ -29,6 +29,10 @@ ScanController _controller({
   ScannerMode scannerMode = ScannerMode.auto,
   Duration startupGraceDuration = Duration.zero,
   int requiredElevatedScans = 1,
+  ScannerCadenceConfig cadence = const ScannerCadenceConfig(
+    scanWindow: Duration(seconds: 30),
+    restInterval: Duration(seconds: 30),
+  ),
 }) {
   final pipeline = DetectionPipeline();
   final coordinator = ScanLifecycleCoordinator(
@@ -36,10 +40,7 @@ ScanController _controller({
     runtime: runtime,
     scannerModeFactory: () => scannerMode,
     pipeline: pipeline,
-    cadence: const ScannerCadenceConfig(
-      scanWindow: Duration(seconds: 30),
-      restInterval: Duration(seconds: 30),
-    ),
+    cadence: cadence,
     startupGraceDuration: startupGraceDuration,
     requiredElevatedScans: requiredElevatedScans,
   );
@@ -145,6 +146,74 @@ void main() {
 
     expect(controller.state.status, ScanStatus.possibleRiskDetected);
     expect(controller.state.lastCheckedAt, isNotNull);
+    await streamController.close();
+    await controller.pauseProtection(persist: false);
+  });
+
+  test('scan window end does not count cached elevation toward alert', () async {
+    final streamController =
+        StreamController<List<RadioScanResult>>.broadcast();
+    final scanner = _StreamScanner(streamController.stream);
+    final controller = _controller(
+      scanner: scanner,
+      runtime: _TestRuntime(const ScanPreflightResult.ok()),
+      startupGraceDuration: Duration.zero,
+      requiredElevatedScans: 2,
+      cadence: const ScannerCadenceConfig(
+        scanWindow: Duration(milliseconds: 80),
+        restInterval: Duration(seconds: 30),
+      ),
+    );
+
+    await controller.startProtection(persist: false);
+
+    streamController.add([
+      RadioScanResult(
+        id: '1',
+        name: 'Ray-Ban Meta',
+        rssi: -40,
+        isConnectable: true,
+        observedAt: DateTime.now(),
+      ),
+    ]);
+    await Future<void>.delayed(const Duration(milliseconds: 30));
+    expect(controller.state.status, isNot(ScanStatus.possibleRiskDetected));
+
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    expect(controller.state.status, isNot(ScanStatus.possibleRiskDetected));
+
+    await streamController.close();
+    await controller.pauseProtection(persist: false);
+  });
+
+  test('two elevated batches confirm alert', () async {
+    final streamController =
+        StreamController<List<RadioScanResult>>.broadcast();
+    final scanner = _StreamScanner(streamController.stream);
+    final controller = _controller(
+      scanner: scanner,
+      runtime: _TestRuntime(const ScanPreflightResult.ok()),
+      startupGraceDuration: Duration.zero,
+      requiredElevatedScans: 2,
+    );
+
+    await controller.startProtection(persist: false);
+
+    final batch = [
+      RadioScanResult(
+        id: '1',
+        name: 'Ray-Ban Meta',
+        rssi: -40,
+        isConnectable: true,
+        observedAt: DateTime.now(),
+      ),
+    ];
+    streamController.add(batch);
+    await Future<void>.delayed(const Duration(milliseconds: 30));
+    streamController.add(batch);
+    await Future<void>.delayed(const Duration(milliseconds: 30));
+
+    expect(controller.state.status, ScanStatus.possibleRiskDetected);
     await streamController.close();
     await controller.pauseProtection(persist: false);
   });

@@ -25,8 +25,10 @@ class ClassifiedSignal {
 
 /// Local, catalogue-based classification — delegates to [DetectionEngine].
 class DeviceSignalClassifier {
-  DeviceSignalClassifier(
-      {DetectionEngine? detectionEngine, SignatureMatcher? matcher})
+  DeviceSignalClassifier({
+    DetectionEngine? detectionEngine,
+    SignatureMatcher? matcher,
+  })
       : _engine = detectionEngine ?? DetectionEngine(matcher: matcher),
         _matcher = matcher ?? const SignatureMatcher();
 

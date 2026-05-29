@@ -99,13 +99,15 @@ class ScanLifecycleCoordinator {
     await _manager.stop();
     pipeline.reset();
     onStateChanged?.call(
-      ScanState(
+      const ScanState(
         status: ScanStatus.paused,
         protectionRequested: false,
       ),
       PipelineResult(
         snapshot: DetectionSnapshot(
-            assessments: const [], capturedAt: DateTime.now()),
+          assessments: const [],
+          capturedAt: DateTime.now(),
+        ),
         scoring: const ScoringResult(
           level: RiskLevel.low,
           totalScore: 0,
@@ -130,7 +132,11 @@ class ScanLifecycleCoordinator {
         )
         .toList();
     final result = pipeline.processBatch(signals, now);
-    _emitFromPipeline(now, pipelineResult: result);
+    _emitFromPipeline(
+      now,
+      pipelineResult: result,
+      fromScanBatch: true,
+    );
   }
 
   void _emitFromPipeline(
@@ -138,15 +144,22 @@ class ScanLifecycleCoordinator {
     ScanStatus? statusOverride,
     bool forceResting = false,
     PipelineResult? pipelineResult,
+    bool fromScanBatch = false,
   }) {
     final result = pipelineResult ?? pipeline.expireAndEvaluate(now);
     final scoring = result.scoring;
     final rawElevated =
         scoring.level == RiskLevel.medium || scoring.level == RiskLevel.high;
 
-    if (rawElevated) {
-      _consecutiveElevatedScans++;
-    } else {
+    // Only real radio batches count toward consecutive elevated scans.
+    // Rest/window re-evaluation may still clear the counter when risk drops.
+    if (fromScanBatch) {
+      if (rawElevated) {
+        _consecutiveElevatedScans++;
+      } else {
+        _consecutiveElevatedScans = 0;
+      }
+    } else if (!rawElevated) {
       _consecutiveElevatedScans = 0;
     }
 
