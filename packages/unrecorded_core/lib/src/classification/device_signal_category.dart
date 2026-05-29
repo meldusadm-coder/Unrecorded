@@ -6,6 +6,38 @@ enum DeviceSignalCategory {
   /// No strong match either way (still shown in main nearby list).
   unknown,
 
-  /// Name strongly suggests headphones, speakers, etc. (unlikely recording).
+  /// Headphones, earbuds, speakers.
+  likelyAudio,
+
+  /// Keyboard, mouse, trackpad.
+  likelyInput,
+
+  /// TV, streaming, media devices.
+  likelyMediaTv,
+
+  /// Fitness trackers, watches (non-recording wearable).
+  likelyWearableFitness,
+
+  /// Car audio / vehicle infotainment.
+  likelyVehicle,
+
+  /// Legacy alias — maps to [likelyAudio] in UI where needed.
   likelyBenign,
+}
+
+extension DeviceSignalCategoryLabels on DeviceSignalCategory {
+  String get displayLabel => switch (this) {
+        DeviceSignalCategory.possibleRecordingWearable =>
+          'Possible recording wearable',
+        DeviceSignalCategory.unknown => 'Unknown nearby device',
+        DeviceSignalCategory.likelyAudio => 'Likely audio device',
+        DeviceSignalCategory.likelyInput => 'Likely input device',
+        DeviceSignalCategory.likelyMediaTv => 'Likely TV or media device',
+        DeviceSignalCategory.likelyWearableFitness => 'Likely fitness or watch',
+        DeviceSignalCategory.likelyVehicle => 'Likely vehicle',
+        DeviceSignalCategory.likelyBenign => 'Likely audio device',
+      };
+
+  bool get isOtherNearby =>
+      this != DeviceSignalCategory.possibleRecordingWearable;
 }

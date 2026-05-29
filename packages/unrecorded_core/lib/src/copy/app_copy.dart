@@ -11,6 +11,18 @@ class AppCopy {
   static const String scanningActive =
       'Scanning nearby signals for possible recording risk.';
 
+  static const String scanResting =
+      'Checking again shortly. Keep the app open for the most reliable scanning.';
+
+  static const String confirmingRisk =
+      'Confirming a possible risk signal nearby.';
+
+  static const String demoModeBanner =
+      'Demo mode — using sample scan data, not live Bluetooth.';
+
+  static const String notProofOfRecording =
+      'This is not proof that someone is recording.';
+
   static const String noRiskWhileScanning =
       'No obvious recording risk detected right now. '
       'Keep scanning active for ongoing checks.';
@@ -90,8 +102,9 @@ class AppCopy {
   // Notifications
   static const String riskNotificationsTitle = 'Risk alerts';
   static const String riskNotificationsSubtitle =
-      'Show a notification when possible recording risk is detected '
-      '(including when the app is in the background).';
+      'Show a notification when possible recording risk is detected while '
+      'protection is active. Background behaviour may be limited by Android; '
+      'keep the app open for the most reliable scanning.';
 
   static const String riskNotificationLevelTitle = 'Notify me for';
   static const String riskNotificationLevelSubtitle =
@@ -104,4 +117,5 @@ class AppCopy {
   static const String widgetPossibleRisk = 'Possible risk nearby';
   static const String widgetPermissionsNeeded = 'Permissions needed';
   static const String widgetScanningPaused = 'Scanning paused';
+  static const String widgetCheckingShortly = 'Checking again shortly';
 }

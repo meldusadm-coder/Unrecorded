@@ -1,9 +1,11 @@
+import '../detection/detection_assessment.dart';
+import '../detection/detection_engine.dart';
 import '../detection/signature_matcher.dart';
 import '../models/detected_signal.dart';
-import '../scoring/risk_scoring_engine.dart';
+import '../session/scan_session.dart';
 import 'device_signal_category.dart';
 
-/// Result of classifying a single [DetectedSignal] for display and filtering.
+/// Result of classifying a single signal for display and filtering.
 class ClassifiedSignal {
   const ClassifiedSignal({
     required this.signal,
@@ -17,75 +19,59 @@ class ClassifiedSignal {
   final DeviceSignalCategory category;
   final String typeLabel;
 
-  /// Optional hint from a local MAC prefix map (not proof of vendor).
   final String? vendorHint;
-
-  /// Higher = more relevant for alert-details ranking.
   final int relevanceScore;
 }
 
-/// Local, catalogue-based classification — no network lookups.
+/// Local, catalogue-based classification — delegates to [DetectionEngine].
 class DeviceSignalClassifier {
-  DeviceSignalClassifier({
-    RiskScoringEngine? scoringEngine,
-    SignatureMatcher? matcher,
-  })  : _matcher = matcher ?? const SignatureMatcher(),
-        _scoringEngine = scoringEngine ??
-            RiskScoringEngine(matcher: matcher ?? const SignatureMatcher());
+  DeviceSignalClassifier(
+      {DetectionEngine? detectionEngine, SignatureMatcher? matcher})
+      : _engine = detectionEngine ?? DetectionEngine(matcher: matcher),
+        _matcher = matcher ?? const SignatureMatcher();
 
+  final DetectionEngine _engine;
   final SignatureMatcher _matcher;
-  final RiskScoringEngine _scoringEngine;
 
   ClassifiedSignal classify(DetectedSignal signal) {
+    final session = ScanSession();
+    session.observe(signal);
+    final assessment =
+        _engine.assessAll(session.activeSignals(signal.seenAt)).single;
     final vendorHint = _matcher.vendorHintFromId(signal.id);
-
-    if (SignatureMatcher.isBenignName(signal.displayName)) {
-      return ClassifiedSignal(
-        signal: signal,
-        category: DeviceSignalCategory.likelyBenign,
-        typeLabel: 'Headphones or speaker (unlikely recording)',
-        vendorHint: vendorHint,
-      );
-    }
-
-    final match = _matcher.bestMatch(signal);
-    if (match != null) {
-      return ClassifiedSignal(
-        signal: signal,
-        category: DeviceSignalCategory.possibleRecordingWearable,
-        typeLabel:
-            'Possible smart glasses / wearable (${match.signature.brandFamily})',
-        vendorHint: vendorHint,
-        relevanceScore: _relevanceScore(signal),
-      );
-    }
-
-    if (vendorHint != null) {
-      return ClassifiedSignal(
-        signal: signal,
-        category: DeviceSignalCategory.possibleRecordingWearable,
-        typeLabel: 'Possible smart glasses / wearable',
-        vendorHint: vendorHint,
-        relevanceScore: _relevanceScore(signal) + 5,
-      );
-    }
 
     return ClassifiedSignal(
       signal: signal,
-      category: DeviceSignalCategory.unknown,
-      typeLabel: 'Unknown nearby device',
+      category: assessment.category,
+      typeLabel: _typeLabel(assessment),
       vendorHint: vendorHint,
-      relevanceScore: _relevanceScore(signal),
+      relevanceScore: assessment.contributesToRisk ? 50 : 0,
     );
   }
 
-  /// Top signals to show on alert details (recording-relevant first).
+  String _typeLabel(DetectionAssessment assessment) {
+    final match = assessment.matchedSignature;
+    if (match != null) {
+      return 'Possible smart glasses / wearable (${match.brandFamily})';
+    }
+    if (assessment.category == DeviceSignalCategory.possibleRecordingWearable) {
+      return 'Possible smart glasses / wearable';
+    }
+    if (assessment.category == DeviceSignalCategory.likelyBenign ||
+        assessment.category == DeviceSignalCategory.likelyAudio) {
+      return 'Headphones or speaker (unlikely recording)';
+    }
+    return assessment.category.displayLabel;
+  }
+
   List<ClassifiedSignal> topAlertSignals(
     List<DetectedSignal> signals, {
     int max = 3,
   }) {
     final classified = signals.map(classify).toList()
-      ..removeWhere((c) => c.category == DeviceSignalCategory.likelyBenign);
+      ..removeWhere(
+        (c) => c.category != DeviceSignalCategory.possibleRecordingWearable,
+      );
     classified.sort((a, b) => b.relevanceScore.compareTo(a.relevanceScore));
     return classified.take(max).toList();
   }
@@ -93,15 +79,6 @@ class DeviceSignalClassifier {
   List<ClassifiedSignal> classifyAll(List<DetectedSignal> signals) =>
       signals.map(classify).toList();
 
-  int _relevanceScore(DetectedSignal signal) {
-    var total = 0;
-    for (final rule in _scoringEngine.rules) {
-      total += rule.score(signal);
-    }
-    return total;
-  }
-
-  /// User-facing label for [signal.id] line on alert details.
   static String idLabel(String id) => SignatureMatcher.normalizeMac(id) != null
       ? 'Bluetooth address'
       : 'Device ID';

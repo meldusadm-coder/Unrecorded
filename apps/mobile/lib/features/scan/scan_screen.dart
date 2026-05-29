@@ -8,6 +8,7 @@ import 'package:unrecorded_ui/unrecorded_ui.dart';
 import '../../services/scanner_provider.dart';
 import '../../services/widget_sync_service.dart';
 import 'scan_state.dart';
+import 'signal_ui_model.dart';
 
 class ScanScreen extends ConsumerWidget {
   const ScanScreen({super.key});
@@ -18,10 +19,11 @@ class ScanScreen extends ConsumerWidget {
 
     final state = ref.watch(scanControllerProvider);
     final controller = ref.read(scanControllerProvider.notifier);
-    final showAlert = state.status == ScanStatus.possibleRiskDetected &&
-        !state.alertDismissed;
-    final topSignals = _signalClassifier.topAlertSignals(state.signals);
-    final topSignal = topSignals.isEmpty ? null : topSignals.first;
+    final showAlert = state.showsRiskAlert;
+    final topRisk = state.possibleRiskSignals.isEmpty
+        ? null
+        : state.possibleRiskSignals.first;
+
     return Scaffold(
       appBar: AppBar(
         leading: const Padding(
@@ -51,6 +53,15 @@ class ScanScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           children: [
+            if (state.isDemoMode && state.protectionRequested)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: MaterialBanner(
+                  content: const Text(AppCopy.demoModeBanner),
+                  leading: const Icon(Icons.science_outlined),
+                  actions: const [SizedBox.shrink()],
+                ),
+              ),
             ScanStatusCard(
               icon: _iconWidgetForStatus(state.status, state.riskLevel),
               title: _titleForStatus(state),
@@ -66,13 +77,11 @@ class ScanScreen extends ConsumerWidget {
             _buildNextStep(context, state, controller),
             if (showAlert) ...[
               const SizedBox(height: 16),
-              if (topSignal != null)
+              if (topRisk != null)
                 Card(
                   child: ListTile(
-                    title: Text(
-                      topSignal.signal.displayName ?? 'Unknown nearby device',
-                    ),
-                    subtitle: Text(topSignal.typeLabel),
+                    title: Text(topRisk.title),
+                    subtitle: Text(topRisk.categoryLabel),
                     trailing: const Text('View details'),
                     onTap: () => context.push('/alert-details'),
                   ),
@@ -89,29 +98,33 @@ class ScanScreen extends ConsumerWidget {
             ],
             const SizedBox(height: 16),
             PrimaryActionButton(
-              label: state.isProtectionActive
+              label: state.protectionActive
                   ? AppCopy.pauseProtection
                   : AppCopy.turnOnProtection,
-              icon: state.isProtectionActive
+              icon: state.protectionActive
                   ? const UnrecordedStatusIcon(
                       asset: UnrecordedStatusAsset.scanningPaused,
                       size: 24,
                     )
                   : const AppLogo(size: 24, forColoredBackground: true),
-              color: state.isProtectionActive ? UnrecordedColors.danger : null,
+              color: state.protectionActive ? UnrecordedColors.danger : null,
               onPressed: () async {
-                if (state.isProtectionActive) {
+                if (state.protectionActive) {
                   await controller.pauseProtection();
                 } else {
                   await controller.startProtection();
                 }
               },
             ),
-            if (state.signals.isNotEmpty) ...[
+            if (state.possibleRiskSignals.isNotEmpty ||
+                state.otherNearbySignals.isNotEmpty) ...[
               const SizedBox(height: 20),
-              _NearbySignalsSection(signals: state.signals),
+              _NearbySignalsSection(
+                riskSignals: state.possibleRiskSignals,
+                otherSignals: state.otherNearbySignals,
+              ),
             ],
-            if (state.reasons.isNotEmpty && state.isProtectionActive) ...[
+            if (state.reasons.isNotEmpty && state.protectionActive) ...[
               const SizedBox(height: 16),
               Text(
                 'Why this risk level?',
@@ -130,6 +143,13 @@ class ScanScreen extends ConsumerWidget {
                   ),
                 ),
               ),
+              const SizedBox(height: 8),
+              Text(
+                AppCopy.notProofOfRecording,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+              ),
             ],
             const SizedBox(height: 16),
           ],
@@ -143,26 +163,28 @@ class ScanScreen extends ConsumerWidget {
     ScanState state,
     ScanController controller,
   ) {
+    if (state.isBlocked) {
+      return NextStepBanner(
+        message: state.statusMessage ?? AppCopy.permissionHelper,
+        actionLabel: 'Open settings',
+        onAction: openAppSettings,
+      );
+    }
     switch (state.status) {
-      case ScanStatus.permissionRequired:
-        return const NextStepBanner(
-          message:
-              'Bluetooth or location permission is needed to scan nearby signals.',
-          actionLabel: 'Open settings',
-          onAction: openAppSettings,
-        );
       case ScanStatus.possibleRiskDetected:
         return const NextStepBanner(
           message:
               'Stay aware of your surroundings. You can view details or dismiss the alert.',
         );
+      case ScanStatus.confirmingRisk:
+        return const NextStepBanner(message: AppCopy.confirmingRisk);
       case ScanStatus.scanning:
         if (!state.hasElevatedRisk) {
-          return const NextStepBanner(
-            message: AppCopy.noRiskWhileScanning,
-          );
+          return const NextStepBanner(message: AppCopy.noRiskWhileScanning);
         }
         return const SizedBox.shrink();
+      case ScanStatus.resting:
+        return const NextStepBanner(message: AppCopy.scanResting);
       case ScanStatus.error:
         return NextStepBanner(
           message: state.statusMessage ?? 'Something went wrong.',
@@ -188,14 +210,23 @@ class ScanScreen extends ConsumerWidget {
         return 'Starting protection…';
       case ScanStatus.scanning:
         return AppCopy.scanningActive;
+      case ScanStatus.resting:
+        return AppCopy.scanResting;
+      case ScanStatus.confirmingRisk:
+        return AppCopy.confirmingRisk;
       case ScanStatus.possibleRiskDetected:
         return AppCopy.possibleRiskTitle;
       case ScanStatus.paused:
         return 'Protection paused';
       case ScanStatus.error:
         return 'Scan issue';
-      case ScanStatus.permissionRequired:
+      case ScanStatus.permissionDenied:
+      case ScanStatus.permissionPermanentlyDenied:
         return AppCopy.permissionRequiredTitle;
+      case ScanStatus.bluetoothOff:
+        return 'Bluetooth is off';
+      case ScanStatus.bluetoothUnsupported:
+        return 'Bluetooth not supported';
     }
   }
 
@@ -227,8 +258,14 @@ class ScanScreen extends ConsumerWidget {
   Widget _iconWidgetForStatus(ScanStatus status, RiskLevel riskLevel) {
     switch (status) {
       case ScanStatus.scanning:
+      case ScanStatus.confirmingRisk:
         return const UnrecordedStatusIcon(
           asset: UnrecordedStatusAsset.scanningActive,
+          size: 48,
+        );
+      case ScanStatus.resting:
+        return const UnrecordedStatusIcon(
+          asset: UnrecordedStatusAsset.scanningPaused,
           size: 48,
         );
       case ScanStatus.possibleRiskDetected:
@@ -243,7 +280,10 @@ class ScanScreen extends ConsumerWidget {
           asset: UnrecordedStatusAsset.highRisk,
           size: 48,
         );
-      case ScanStatus.permissionRequired:
+      case ScanStatus.permissionDenied:
+      case ScanStatus.permissionPermanentlyDenied:
+      case ScanStatus.bluetoothOff:
+      case ScanStatus.bluetoothUnsupported:
         return const UnrecordedStatusIcon(
           asset: UnrecordedStatusAsset.permissionsNeeded,
           size: 48,
@@ -273,76 +313,53 @@ class ScanScreen extends ConsumerWidget {
   }
 }
 
-final _signalClassifier = DeviceSignalClassifier();
+class _NearbySignalsSection extends StatelessWidget {
+  const _NearbySignalsSection({
+    required this.riskSignals,
+    required this.otherSignals,
+  });
 
-class _NearbySignalsSection extends StatefulWidget {
-  const _NearbySignalsSection({required this.signals});
-
-  final List<DetectedSignal> signals;
-
-  @override
-  State<_NearbySignalsSection> createState() => _NearbySignalsSectionState();
-}
-
-class _NearbySignalsSectionState extends State<_NearbySignalsSection> {
-  var _benignExpanded = false;
+  final List<SignalUiModel> riskSignals;
+  final List<SignalUiModel> otherSignals;
 
   @override
   Widget build(BuildContext context) {
-    final classified = _signalClassifier.classifyAll(widget.signals);
-    final primary = classified
-        .where((c) => c.category != DeviceSignalCategory.likelyBenign)
-        .toList();
-    final benign = classified
-        .where((c) => c.category == DeviceSignalCategory.likelyBenign)
-        .toList();
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Nearby signals (${primary.length})',
-          style: Theme.of(context).textTheme.titleSmall,
-        ),
-        const SizedBox(height: 8),
-        if (primary.isEmpty)
+        if (riskSignals.isNotEmpty) ...[
           Text(
-            'Only devices unlikely to be recording wearables were detected. '
-            'See other nearby devices below.',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(height: 1.4),
+            'Possible risk signals (${riskSignals.length})',
+            style: Theme.of(context).textTheme.titleSmall,
           ),
-        ...primary.map(_signalCard),
-        if (benign.isNotEmpty) ...[
           const SizedBox(height: 8),
+          ...riskSignals.map(_signalCard),
+        ],
+        if (otherSignals.isNotEmpty) ...[
+          const SizedBox(height: 12),
           ExpansionTile(
             tilePadding: EdgeInsets.zero,
-            initiallyExpanded: _benignExpanded,
-            onExpansionChanged: (v) => setState(() => _benignExpanded = v),
             title: Text(
-              'Other nearby devices (${benign.length})',
+              'Other nearby devices (${otherSignals.length})',
               style: Theme.of(context).textTheme.titleSmall,
             ),
-            subtitle: Text(
-              'Unlikely to be recording wearables',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            children: benign.map(_signalCard).toList(),
+            subtitle: const Text('Unlikely to be recording wearables'),
+            children: otherSignals.map(_signalCard).toList(),
           ),
         ],
       ],
     );
   }
 
-  Widget _signalCard(ClassifiedSignal classified) {
-    final signal = classified.signal;
-    final name = signal.displayName ?? 'Unknown device';
+  Widget _signalCard(SignalUiModel signal) {
+    final evidence = signal.evidenceLabels.isNotEmpty
+        ? signal.evidenceLabels.first
+        : signal.confidenceLabel;
     return SignalCard(
-      name: name,
-      typeLabel: classified.typeLabel,
-      subtitle: DeviceSignalClassifier.formatId(signal.id),
-      rssi: signal.rssi,
-      isSuspicious:
-          classified.category == DeviceSignalCategory.possibleRecordingWearable,
+      name: signal.title,
+      typeLabel: '${signal.categoryLabel} · $evidence',
+      subtitle: '${signal.lastSeenLabel} · ${signal.signalStrengthLabel}',
+      isSuspicious: signal.contributesToRisk,
     );
   }
 }

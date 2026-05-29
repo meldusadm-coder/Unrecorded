@@ -53,7 +53,7 @@ void main() {
 
     expect(find.text('Alert details'), findsOneWidget);
     expect(find.text('Ray-Ban Meta'), findsOneWidget);
-    expect(find.text('Possible smart glasses / wearable'), findsOneWidget);
+    expect(find.text('Possible recording wearable'), findsOneWidget);
     expect(find.byType(RiskBadge), findsWidgets);
   });
 }

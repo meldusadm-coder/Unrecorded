@@ -105,4 +105,48 @@ void main() {
       expect(hint!.toLowerCase(), contains('not proof'));
     });
   });
+
+  group('false positive regression via DetectionEngine', () {
+    final engine = DetectionEngine();
+
+    DetectionAssessment assess(String name, {String id = 'fp-id'}) {
+      final session = ScanSession();
+      session.observe(
+        DetectedSignal(id: id, displayName: name, seenAt: DateTime(2025, 1, 1)),
+      );
+      return engine
+          .assessAll(session.activeSignals(DateTime(2025, 1, 1)))
+          .single;
+    }
+
+    final safeNames = [
+      'AirPods Pro',
+      'Galaxy Buds',
+      'Sony WH-1000XM5',
+      'Bose QuietComfort',
+      'JBL Flip 6',
+      'Logitech Keyboard',
+      'Garmin Forerunner',
+      'Fitbit Charge',
+      'Samsung Smart TV',
+      'Roku Streaming Stick',
+    ];
+
+    for (final name in safeNames) {
+      test('$name does not contribute to risk', () {
+        final a = assess(name, id: 'safe-$name');
+        expect(a.contributesToRisk, isFalse);
+      });
+    }
+
+    test('Ray-Ban Meta still contributes to risk', () {
+      final a = assess('Ray-Ban Meta', id: 'risk-1');
+      expect(a.contributesToRisk, isTrue);
+    });
+
+    test('MetaLab Keyboard does not match Meta glasses', () {
+      final a = assess('MetaLab Keyboard', id: 'kbd-1');
+      expect(a.contributesToRisk, isFalse);
+    });
+  });
 }

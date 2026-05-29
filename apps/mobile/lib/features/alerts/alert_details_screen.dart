@@ -6,20 +6,18 @@ import 'package:unrecorded_ui/unrecorded_ui.dart';
 
 import '../../router.dart';
 import '../../services/scanner_provider.dart';
-import '../scan/scan_state.dart';
+import '../scan/signal_ui_model.dart';
 
-/// Live alert context: risk level, possible devices, and reasons from the last scan.
+/// Live alert context: risk level, possible devices, and evidence from the session.
 class AlertDetailsScreen extends ConsumerWidget {
   const AlertDetailsScreen({super.key});
-
-  static final _classifier = DeviceSignalClassifier();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(scanControllerProvider);
     final theme = Theme.of(context);
-    final hasActiveAlert = state.status == ScanStatus.possibleRiskDetected;
-    final topSignals = _classifier.topAlertSignals(state.signals);
+    final hasActiveAlert = state.showsRiskAlert;
+    final devices = state.possibleRiskSignals;
 
     return Scaffold(
       appBar: AppBar(
@@ -69,11 +67,11 @@ class AlertDetailsScreen extends ConsumerWidget {
             ],
             const SizedBox(height: 20),
             Text(
-              'Possible device${topSignals.length == 1 ? '' : 's'}',
+              'Possible signal${devices.length == 1 ? '' : 's'}',
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
-            if (topSignals.isEmpty)
+            if (devices.isEmpty)
               Text(
                 hasActiveAlert
                     ? 'No specific device name was identified. Nearby signals '
@@ -82,7 +80,7 @@ class AlertDetailsScreen extends ConsumerWidget {
                 style: theme.textTheme.bodyMedium?.copyWith(height: 1.4),
               )
             else
-              ...topSignals.map((c) => _deviceTile(theme, c)),
+              ...devices.map((s) => _deviceTile(theme, s)),
             if (state.reasons.isNotEmpty) ...[
               const SizedBox(height: 20),
               Text('Why this alert', style: theme.textTheme.titleMedium),
@@ -107,6 +105,14 @@ class AlertDetailsScreen extends ConsumerWidget {
                 ),
               ),
             ],
+            const SizedBox(height: 12),
+            Text(
+              AppCopy.notProofOfRecording,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
             const SizedBox(height: 16),
             const HelperText(
               text: AppCopy.riskResultHelper,
@@ -132,68 +138,39 @@ class AlertDetailsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _deviceTile(ThemeData theme, ClassifiedSignal classified) {
-    final signal = classified.signal;
-    final name = signal.displayName ?? 'Unknown nearby device';
-    final idLine = '${DeviceSignalClassifier.idLabel(signal.id)}: '
-        '${DeviceSignalClassifier.formatId(signal.id)}';
-
+  Widget _deviceTile(ThemeData theme, SignalUiModel signal) {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       elevation: 0,
       color: theme.colorScheme.surfaceContainerHighest.withAlpha(80),
       child: ListTile(
-        leading: UnrecordedIcon(
-          asset: classified.category ==
-                  DeviceSignalCategory.possibleRecordingWearable
-              ? UnrecordedIconAsset.glasses
-              : UnrecordedIconAsset.device,
+        leading: const UnrecordedIcon(
+          asset: UnrecordedIconAsset.glasses,
           size: 24,
-          color: classified.category ==
-                  DeviceSignalCategory.possibleRecordingWearable
-              ? UnrecordedColors.warning
-              : theme.colorScheme.onSurfaceVariant,
+          color: UnrecordedColors.warning,
         ),
-        title: Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
+        title: Text(signal.title,
+            style: const TextStyle(fontWeight: FontWeight.w600)),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 2),
-            Text(classified.typeLabel, style: theme.textTheme.bodySmall),
-            if (classified.vendorHint != null) ...[
-              const SizedBox(height: 2),
-              Text(
-                classified.vendorHint!,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontStyle: FontStyle.italic,
+            Text(signal.categoryLabel, style: theme.textTheme.bodySmall),
+            Text(signal.confidenceLabel, style: theme.textTheme.bodySmall),
+            Text(signal.lastSeenLabel, style: theme.textTheme.bodySmall),
+            Text(signal.signalStrengthLabel, style: theme.textTheme.bodySmall),
+            if (signal.evidenceLabels.isNotEmpty) ...[
+              const SizedBox(height: 6),
+              ...signal.evidenceLabels.map(
+                (e) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text('• $e', style: theme.textTheme.bodySmall),
                 ),
               ),
             ],
-            const SizedBox(height: 2),
-            Text(idLine, style: theme.textTheme.bodySmall),
-            const SizedBox(height: 2),
-            Text(
-              _proximityLabel(signal.rssi),
-              style: theme.textTheme.bodySmall,
-            ),
-            const SizedBox(height: 2),
-            Text(
-              signal.isConnectable
-                  ? 'Connectable nearby'
-                  : 'Connectable status unavailable',
-              style: theme.textTheme.bodySmall,
-            ),
           ],
         ),
       ),
     );
-  }
-
-  String _proximityLabel(int? rssi) {
-    if (rssi == null) return 'Weak or uncertain signal';
-    if (rssi >= -55) return 'Strong nearby signal';
-    if (rssi >= -68) return 'Moderate nearby signal';
-    return 'Weak or uncertain signal';
   }
 
   String _lastCheckedLine(DateTime t) {

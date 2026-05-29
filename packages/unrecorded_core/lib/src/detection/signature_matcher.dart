@@ -46,9 +46,9 @@ class SignatureMatcher {
   }
 
   /// Best catalogue match for [signal], or null if none.
+  ///
+  /// Does not apply benign suppression — callers assess benign after matching.
   SignatureMatch? bestMatch(DetectedSignal signal) {
-    if (isBenignName(signal.displayName)) return null;
-
     SignatureMatch? best;
     for (final signature in signatures) {
       final nameMatch = _matchName(signal.displayName, signature);

@@ -13,10 +13,17 @@ class HelpScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        leading: const Padding(
-          padding: EdgeInsets.only(left: 12),
-          child: AppLogo(size: 26),
+        leading: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            BackButton(onPressed: () => context.pop()),
+            const Padding(
+              padding: EdgeInsets.only(right: 4),
+              child: AppLogo(size: 26),
+            ),
+          ],
         ),
+        leadingWidth: 96,
         title: const Text('Help'),
       ),
       body: SafeArea(
