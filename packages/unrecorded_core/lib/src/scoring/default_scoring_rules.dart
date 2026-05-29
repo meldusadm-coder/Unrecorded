@@ -1,57 +1,39 @@
+import '../detection/signature_matcher.dart';
 import '../models/detected_signal.dart';
 import 'scoring_rule.dart';
 
-/// Matches device names commonly associated with smart glasses or
-/// wearable recording devices.
-class SuspiciousNameRule extends ScoringRule {
-  /// Keywords shared with [DeviceSignalClassifier] for wearable-like names.
-  static const keywords = [
-    'ray-ban',
-    'meta',
-    'smart glasses',
-    'spectacles',
-    'camera',
-    'glasses',
-    'snap',
-    'stories',
-    'even realities',
-    'focals',
-    'vuzix',
-    'xreal',
-    'nreal',
-    'inmo',
-    'tcl',
-    'solos',
-    'optic',
-  ];
+/// Matches signals against the local detection signature catalogue.
+class SignatureMatchRule extends ScoringRule {
+  SignatureMatchRule({SignatureMatcher? matcher})
+      : _matcher = matcher ?? const SignatureMatcher();
+
+  final SignatureMatcher _matcher;
+
+  /// Whether [signal] matches any catalogue signature.
+  bool matches(DetectedSignal signal) => _matcher.hasMatch(signal);
+
+  SignatureMatch? matchFor(DetectedSignal signal) => _matcher.bestMatch(signal);
 
   @override
-  int score(DetectedSignal signal) {
-    final name = signal.displayName?.toLowerCase();
-    if (name == null) return 0;
-    for (final kw in keywords) {
-      if (name.contains(kw)) return 35;
-    }
-    return 0;
-  }
+  int score(DetectedSignal signal) => matchFor(signal)?.score ?? 0;
 
   @override
-  String? reason(DetectedSignal signal) {
-    if (score(signal) > 0) {
-      return 'A nearby signal has a name commonly associated with '
-          'smart glasses or a wearable recording device.';
-    }
-    return null;
-  }
+  String? reason(DetectedSignal signal) => matchFor(signal)?.explanation;
 }
 
 /// Awards points when a signal is very strong (close proximity).
 class StrongSignalRule extends ScoringRule {
+  StrongSignalRule({SignatureMatcher? matcher})
+      : _matcher = matcher ?? const SignatureMatcher();
+
+  final SignatureMatcher _matcher;
+
   static const _strongThreshold = -55;
   static const _moderateThreshold = -68;
 
   @override
   int score(DetectedSignal signal) {
+    if (!_matcher.hasMatch(signal)) return 0;
     final rssi = signal.rssi;
     if (rssi == null) return 0;
     if (rssi >= _strongThreshold) return 10;
@@ -74,12 +56,17 @@ class StrongSignalRule extends ScoringRule {
   }
 }
 
-/// Awards extra points when the same suspicious signal appears in multiple
-/// consecutive snapshots (approximated here by being connectable, which
-/// suggests sustained proximity rather than a drive-by).
+/// Awards extra points when a matched signal is connectable, which may
+/// suggest sustained proximity rather than a drive-by advertisement.
 class ConnectableDeviceRule extends ScoringRule {
+  ConnectableDeviceRule({SignatureMatcher? matcher})
+      : _matcher = matcher ?? const SignatureMatcher();
+
+  final SignatureMatcher _matcher;
+
   @override
   int score(DetectedSignal signal) {
+    if (!_matcher.hasMatch(signal)) return 0;
     return signal.isConnectable ? 10 : 0;
   }
 

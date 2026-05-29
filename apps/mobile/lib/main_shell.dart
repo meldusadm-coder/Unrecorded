@@ -28,7 +28,7 @@ class MainShell extends ConsumerWidget {
     final showAlert = state.status == ScanStatus.possibleRiskDetected &&
         !state.alertDismissed;
     if (showAlert) return false;
-    if (state.status == ScanStatus.permissionRequired) return false;
+    if (state.isBlocked) return false;
     if (state.status == ScanStatus.error) return false;
     return true;
   }

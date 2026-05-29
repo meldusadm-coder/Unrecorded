@@ -16,7 +16,7 @@ class NotificationPrefs {
     return NotificationPrefs(prefs);
   }
 
-  /// On by default so protection can warn when the app is in the background.
+  /// On by default when the user enables risk alerts in settings.
   bool get riskNotificationsEnabled =>
       _prefs.getBool(_keyRiskNotificationsEnabled) ?? true;
 

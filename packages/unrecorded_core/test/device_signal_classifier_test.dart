@@ -13,7 +13,7 @@ void main() {
         seenAt: DateTime(2025, 1, 1),
       ),
     );
-    expect(c.category, DeviceSignalCategory.likelyBenign);
+    expect(c.category, DeviceSignalCategory.likelyAudio);
     expect(c.typeLabel, contains('unlikely recording'));
   });
 

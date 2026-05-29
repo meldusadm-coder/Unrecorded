@@ -7,12 +7,10 @@ import 'package:unrecorded_core/unrecorded_core.dart';
 import '../features/scan/scan_state.dart';
 import 'scanner_provider.dart';
 
-/// Keys for home screen widget storage (no device names or scan payloads).
 const _keyStatus = 'widget_status';
 const _keySecondary = 'widget_secondary';
 const _keyLastChecked = 'widget_last_checked';
 
-/// Syncs minimal scan state to the Android home screen widget.
 class WidgetSyncService {
   const WidgetSyncService();
 
@@ -29,14 +27,13 @@ class WidgetSyncService {
         name: 'UnrecordedWidgetProvider',
         androidName: 'UnrecordedWidgetProvider',
       );
-    } catch (_) {
-      // HomeWidget unavailable in unit tests and some emulators.
-    }
+    } catch (_) {}
   }
 
   (String, String) _linesForState(ScanState state) {
     switch (state.status) {
       case ScanStatus.scanning:
+      case ScanStatus.confirmingRisk:
         if (state.hasElevatedRisk) {
           return (AppCopy.widgetPossibleRisk, _lastCheckedLine(state));
         }
@@ -46,9 +43,14 @@ class WidgetSyncService {
               ? AppCopy.widgetNoObviousRisk
               : _lastCheckedLine(state),
         );
+      case ScanStatus.resting:
+        return (AppCopy.widgetCheckingShortly, _lastCheckedLine(state));
       case ScanStatus.possibleRiskDetected:
         return (AppCopy.widgetPossibleRisk, _lastCheckedLine(state));
-      case ScanStatus.permissionRequired:
+      case ScanStatus.permissionDenied:
+      case ScanStatus.permissionPermanentlyDenied:
+      case ScanStatus.bluetoothOff:
+      case ScanStatus.bluetoothUnsupported:
         return (AppCopy.widgetPermissionsNeeded, 'Open app to fix');
       case ScanStatus.paused:
       case ScanStatus.idle:
