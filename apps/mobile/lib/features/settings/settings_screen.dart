@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:unrecorded_core/unrecorded_core.dart';
 import 'package:unrecorded_ui/unrecorded_ui.dart';
 
+import '../../services/app_version.dart';
 import '../../services/ad_consent_service.dart';
 import '../../services/entitlement_service.dart';
 import '../../services/notification_prefs.dart';
@@ -94,10 +95,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: const Padding(
-          padding: EdgeInsets.only(left: 12),
-          child: AppLogo(size: 26),
+        leading: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            BackButton(onPressed: () => context.pop()),
+            const Padding(
+              padding: EdgeInsets.only(right: 4),
+              child: AppLogo(size: 26),
+            ),
+          ],
         ),
+        leadingWidth: 96,
         title: const Text('Settings & Privacy'),
       ),
       body: SafeArea(
@@ -248,13 +256,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             const SizedBox(height: 32),
             const DebugTestingSection(),
             const SizedBox(height: 16),
-            Text(
-              'Unrecorded v0.1.0',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
+            ref.watch(appVersionLabelProvider).when(
+                  data: (label) => Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
+                ),
             const SizedBox(height: 16),
           ],
         ),

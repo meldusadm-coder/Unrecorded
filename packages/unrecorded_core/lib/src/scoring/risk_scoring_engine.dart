@@ -1,48 +1,34 @@
+import '../detection/detection_assessment.dart';
+import '../detection/detection_evidence.dart';
+import '../detection/signature_matcher.dart' show SignatureMatchKind;
 import '../models/detected_signal.dart';
 import '../models/risk_level.dart';
-import '../models/scan_snapshot.dart';
-import 'scoring_rule.dart';
-import 'default_scoring_rules.dart';
+import 'detection_snapshot.dart';
+import 'risk_scoring_policy.dart';
 
-/// Result of scoring a [ScanSnapshot].
+/// Result of scoring a [DetectionSnapshot].
 class ScoringResult {
-  /// The overall risk level.
   final RiskLevel level;
-
-  /// Numeric score (higher = more risk indicators found).
   final int totalScore;
-
-  /// Plain-English reasons explaining why this risk level was assigned.
   final List<String> reasons;
-
-  /// Signals that contributed at least one scoring rule (for alert details).
-  final List<DetectedSignal> contributingSignals;
+  final List<DetectionAssessment> contributingAssessments;
 
   const ScoringResult({
     required this.level,
     required this.totalScore,
     required this.reasons,
-    this.contributingSignals = const [],
+    this.contributingAssessments = const [],
   });
 }
 
-/// Deterministic, rule-based scoring engine.
-///
-/// Evaluates each signal in a snapshot against a set of [ScoringRule]s
-/// and produces a [ScoringResult] with a risk level, score, and
-/// human-readable reasons.
+/// Scores [DetectionAssessment] objects only — no matching or classification.
 class RiskScoringEngine {
-  final List<ScoringRule> _rules;
+  RiskScoringEngine({RiskScoringPolicy? policy})
+      : _policy = policy ?? defaultRiskScoringPolicy;
 
-  /// Creates an engine with default rules unless custom [rules] are supplied.
-  RiskScoringEngine({List<ScoringRule>? rules})
-      : _rules = rules ??
-            [SuspiciousNameRule(), StrongSignalRule(), ConnectableDeviceRule()];
+  final RiskScoringPolicy _policy;
 
-  List<ScoringRule> get rules => List.unmodifiable(_rules);
-
-  /// Score a single [ScanSnapshot] and return a [ScoringResult].
-  ScoringResult evaluate(ScanSnapshot snapshot) {
+  ScoringResult evaluate(DetectionSnapshot snapshot) {
     if (snapshot.isEmpty) {
       return const ScoringResult(
         level: RiskLevel.low,
@@ -53,20 +39,17 @@ class RiskScoringEngine {
 
     var bestScore = 0;
     final reasons = <String>{};
-    final contributing = <DetectedSignal>[];
+    final contributing = <DetectionAssessment>[];
 
-    for (final signal in snapshot.signals) {
-      var signalScore = 0;
-      final signalReasons = <String>{};
-      for (final rule in _rules) {
-        final pts = rule.score(signal);
-        if (pts > 0) {
-          signalScore += pts;
-          final r = rule.reason(signal);
-          if (r != null) signalReasons.add(r);
-        }
-      }
-      if (signalScore > 0) contributing.add(signal);
+    for (final assessment in snapshot.assessments) {
+      if (!assessment.contributesToRisk) continue;
+
+      final signalScore = _scoreAssessment(assessment);
+      if (signalScore <= 0) continue;
+
+      contributing.add(assessment);
+      final signalReasons = _reasonsFor(assessment, signalScore);
+
       if (signalScore > bestScore) {
         bestScore = signalScore;
         reasons
@@ -75,9 +58,9 @@ class RiskScoringEngine {
       }
     }
 
-    final level = _levelFromScore(bestScore);
+    final level = _policy.levelFromScore(bestScore);
 
-    if (reasons.isEmpty) {
+    if (reasons.isEmpty && snapshot.assessments.isNotEmpty) {
       reasons.add(
         'Nearby signals were detected but none match known '
         'recording-device patterns.',
@@ -88,13 +71,90 @@ class RiskScoringEngine {
       level: level,
       totalScore: bestScore,
       reasons: reasons.toList(),
-      contributingSignals: contributing,
+      contributingAssessments: contributing,
     );
   }
 
-  static RiskLevel _levelFromScore(int score) {
-    if (score >= 40) return RiskLevel.high;
-    if (score >= 15) return RiskLevel.medium;
-    return RiskLevel.low;
+  int _scoreAssessment(DetectionAssessment assessment) {
+    final signature = assessment.matchedSignature;
+    final hasAddressOnly = signature == null &&
+        assessment.evidence.any(
+          (e) => e.kind == DetectionEvidenceKind.addressPrefixHint,
+        );
+    if (signature == null && !hasAddressOnly) return 0;
+
+    var score = 0;
+    final kind = assessment.primaryMatchKind;
+
+    if (signature != null) {
+      score += switch (kind) {
+        SignatureMatchKind.name ||
+        SignatureMatchKind.serviceUuid =>
+          signature.confidenceWeight,
+        SignatureMatchKind.macPrefix => signature.confidenceWeight >= 5
+            ? signature.confidenceWeight - 5
+            : signature.confidenceWeight,
+        null => signature.confidenceWeight,
+      };
+    } else {
+      score += 20;
+    }
+
+    final rssi =
+        assessment.signal.smoothedRssi?.round() ?? assessment.signal.lastRssi;
+    if (rssi != null && signature != null) {
+      if (rssi >= _policy.strongRssiThreshold) {
+        score += _policy.strongRssiPoints;
+      } else if (rssi >= _policy.moderateRssiThreshold) {
+        score += _policy.moderateRssiPoints;
+      }
+    }
+
+    if (assessment.signal.everConnectable && signature != null) {
+      score += _policy.connectablePoints;
+    }
+
+    final sightings = assessment.signal.sightingCount;
+    if (signature != null) {
+      if (sightings >= 4) {
+        score += _policy.repeatBoostFourPlus;
+      } else if (sightings >= 2) {
+        score += _policy.repeatBoostTwoToThree;
+      }
+    }
+
+    final macOnly = kind == SignatureMatchKind.macPrefix &&
+        !assessment.evidence.any(
+          (e) =>
+              e.kind == DetectionEvidenceKind.nameMatch ||
+              e.kind == DetectionEvidenceKind.serviceUuidHint,
+        );
+
+    if (macOnly && score > _policy.macOnlyMaxScore) {
+      score = _policy.macOnlyMaxScore;
+    }
+
+    return score;
   }
+
+  List<String> _reasonsFor(DetectionAssessment assessment, int score) {
+    final reasons = <String>[];
+    for (final e in assessment.evidence) {
+      if (e.kind == DetectionEvidenceKind.benignName ||
+          e.kind == DetectionEvidenceKind.unknown) {
+        continue;
+      }
+      reasons.add(e.label);
+    }
+    if (score > 0 && reasons.isEmpty && assessment.matchedSignature != null) {
+      reasons.add(assessment.matchedSignature!.matchExplanation);
+    }
+    return reasons;
+  }
+}
+
+// Keep contributing DetectedSignal access for migration adapters.
+extension ScoringResultSignals on ScoringResult {
+  List<DetectedSignal> get contributingSignals =>
+      contributingAssessments.map((a) => a.signal.toDetectedSignal()).toList();
 }

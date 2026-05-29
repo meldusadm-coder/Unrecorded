@@ -78,10 +78,31 @@ class AlertExplanationScreen extends StatelessWidget {
               theme,
               'Why detection is probabilistic',
               'Bluetooth signals can be hidden, randomised, or spoofed. '
-                  'Smart glasses may not advertise recognisable names. Signal '
-                  'strength varies with distance and environment. For these '
-                  'reasons, Unrecorded can only provide risk indicators — '
-                  'never certainty.',
+                  'Address prefix hints are weak and are not proof of a '
+                  'specific device. Signal strength (RSSI) is noisy. Smart '
+                  'glasses may not advertise recognisable names. Unrecorded '
+                  'can only provide risk indicators — never certainty.',
+            ),
+            const SizedBox(height: 12),
+            _section(
+              theme,
+              'Scanning on Android',
+              'On Android 12 and later, Unrecorded requests Bluetooth scan '
+                  'permission without using your location for scanning '
+                  '(neverForLocation). Some BLE advertisements may still be '
+                  'filtered by the system for privacy.\n\n'
+                  'Scanning runs in short foreground windows with rest '
+                  'periods. Keep the app open for the most reliable results. '
+                  'Background scanning is limited and there is no always-on '
+                  'protection service in this version.',
+            ),
+            const SizedBox(height: 12),
+            _section(
+              theme,
+              'Repeated sightings',
+              'If the same possible-risk signal is seen more than once in a '
+                  'session, confidence may increase modestly. Stale signals '
+                  'expire after about a minute without a new observation.',
             ),
             const SizedBox(height: 24),
           ],
