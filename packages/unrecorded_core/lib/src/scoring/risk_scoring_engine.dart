@@ -1,8 +1,9 @@
+import '../detection/signature_matcher.dart';
 import '../models/detected_signal.dart';
 import '../models/risk_level.dart';
 import '../models/scan_snapshot.dart';
-import 'scoring_rule.dart';
 import 'default_scoring_rules.dart';
+import 'scoring_rule.dart';
 
 /// Result of scoring a [ScanSnapshot].
 class ScoringResult {
@@ -35,9 +36,14 @@ class RiskScoringEngine {
   final List<ScoringRule> _rules;
 
   /// Creates an engine with default rules unless custom [rules] are supplied.
-  RiskScoringEngine({List<ScoringRule>? rules})
-      : _rules = rules ??
-            [SuspiciousNameRule(), StrongSignalRule(), ConnectableDeviceRule()];
+  RiskScoringEngine({List<ScoringRule>? rules, SignatureMatcher? matcher})
+      : _rules = rules ?? _defaultRules(matcher ?? const SignatureMatcher());
+
+  static List<ScoringRule> _defaultRules(SignatureMatcher matcher) => [
+        SignatureMatchRule(matcher: matcher),
+        StrongSignalRule(matcher: matcher),
+        ConnectableDeviceRule(matcher: matcher),
+      ];
 
   List<ScoringRule> get rules => List.unmodifiable(_rules);
 

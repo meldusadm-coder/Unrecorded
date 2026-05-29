@@ -6,6 +6,9 @@ library;
 
 export 'src/classification/device_signal_category.dart';
 export 'src/classification/device_signal_classifier.dart';
+export 'src/detection/detection_signature.dart';
+export 'src/detection/detection_signatures.dart';
+export 'src/detection/signature_matcher.dart';
 export 'src/models/detected_signal.dart';
 export 'src/models/risk_level.dart';
 export 'src/models/scan_snapshot.dart';

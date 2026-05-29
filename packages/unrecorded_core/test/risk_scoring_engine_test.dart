@@ -193,5 +193,41 @@ void main() {
         expect(reason.length, greaterThan(10));
       }
     });
+
+    test('MAC-only prefix match can reach medium risk', () {
+      final snapshot = ScanSnapshot(
+        signals: [
+          DetectedSignal(
+            id: '00:0B:9A:12:34:56',
+            rssi: -70,
+            seenAt: DateTime.now(),
+          ),
+        ],
+        capturedAt: DateTime.now(),
+      );
+      final result = engine.evaluate(snapshot);
+
+      expect(result.level, RiskLevel.medium);
+      expect(result.totalScore, greaterThanOrEqualTo(15));
+      expect(result.reasons, isNotEmpty);
+    });
+
+    test('generic glasses name stays medium without strong modifiers', () {
+      final snapshot = ScanSnapshot(
+        signals: [
+          DetectedSignal(
+            id: 'aa:bb:cc:dd:ee:ff',
+            displayName: 'My Smart Glasses',
+            rssi: -85,
+            seenAt: DateTime.now(),
+          ),
+        ],
+        capturedAt: DateTime.now(),
+      );
+      final result = engine.evaluate(snapshot);
+
+      expect(result.level, RiskLevel.medium);
+      expect(result.totalScore, lessThan(40));
+    });
   });
 }

@@ -14,7 +14,15 @@ Unrecorded detects possible nearby smart glasses or wearable recording devices. 
 ## What the app can detect
 
 - BLE advertisements from nearby devices.
-- Device names and signal patterns that match a curated list of known smart-glasses identifiers.
+- Device names, optional BLE service UUID hints, and Bluetooth address prefixes that match a local catalogue of known smart-glasses signatures.
+- Each catalogue entry includes a confidence weight and a plain-English explanation. Matches are risk signals, not proof of recording.
+
+## Catalogue limitations
+
+- The catalogue is maintained locally in the app. It cannot cover every device or future firmware rename.
+- Generic name phrases (for example “smart glasses”) are weighted lower than brand-specific matches to reduce false positives.
+- Service UUID and address-prefix hints are optional and may be missing even for known devices.
+- Benign device names (headphones, speakers, fitness trackers) are filtered before catalogue matching where possible.
 
 ## What the app cannot detect
 
