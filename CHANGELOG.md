@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.4.0+9
+
+### Added
+- Detection signature catalogue with signature matching to improve wearable/smart-glasses risk scoring.
+- Scan UI risk level handling and clearer scan-state presentation during active detection.
+- App version display on the about/settings surfaces via `package_info_plus`.
+- AdMob configuration and `app-ads.txt` documentation for store compliance.
+
+### Changed
+- Android release workflow enhancements for Play internal publishing and release summaries.
+
+### Fixed
+- Ad UI is hidden when the user has removed ads (verified in widget tests).
+
+
 ## 0.3.1+8
 
 ### Added
