@@ -10,6 +10,7 @@ on:
   push:
     branches: [dev, main]
 
+# Least-privilege token for all jobs (CodeQL / branch protection).
 permissions:
   contents: read
 
@@ -29,6 +30,9 @@ jobs:
       mobile: ${{ steps.resolve.outputs.mobile }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Required for dorny/paths-filter to diff PRs against the base branch.
+          fetch-depth: 0
 
       - name: Full suite vs path-scoped
         id: mode
@@ -63,6 +67,7 @@ jobs:
               - 'packages/**/pubspec.yaml'
               - 'apps/**/pubspec.yaml'
               - '.github/workflows/**'
+              - 'tool/**'
 
       - name: Resolve package flags
         id: resolve
