@@ -47,7 +47,10 @@ void main() {
           connectable: true,
         ),
         makeTrackedSignal(
-            id: 'aa:bb:cc:dd:ee:ff', name: 'smart glasses', rssi: -84),
+          id: 'aa:bb:cc:dd:ee:ff',
+          name: 'smart glasses',
+          rssi: -84,
+        ),
       ]);
       final result = engine.evaluate(
         DetectionSnapshot(
