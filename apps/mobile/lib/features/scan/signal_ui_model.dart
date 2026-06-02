@@ -1,6 +1,7 @@
 /// UI-facing model for one nearby signal (no raw BLE complexity).
 class SignalUiModel {
   const SignalUiModel({
+    required this.stableKey,
     required this.title,
     required this.categoryLabel,
     required this.confidenceLabel,
@@ -10,6 +11,7 @@ class SignalUiModel {
     required this.contributesToRisk,
   });
 
+  final String stableKey;
   final String title;
   final String categoryLabel;
   final String confidenceLabel;

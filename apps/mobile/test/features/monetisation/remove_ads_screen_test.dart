@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:unrecorded_core/unrecorded_core.dart';
+import 'package:unrecorded_mobile/copy/monetisation_copy.dart';
 import 'package:unrecorded_mobile/features/monetisation/remove_ads_screen.dart';
 import 'package:unrecorded_mobile/services/ads_service.dart';
 import 'package:unrecorded_mobile/services/entitlement_service.dart';
@@ -35,7 +35,7 @@ void main() {
 
     expect(find.byKey(const Key('remove_ads_amount_slider')), findsOneWidget);
     expect(find.text('£2.00'), findsWidgets);
-    expect(find.text(AppCopy.removeAdsAmountLabel), findsOneWidget);
+    expect(find.text(MonetisationCopy.removeAdsAmountLabel), findsOneWidget);
   });
 
   testWidgets('slider changes displayed amount', (tester) async {

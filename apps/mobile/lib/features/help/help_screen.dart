@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:unrecorded_core/unrecorded_core.dart';
+import 'package:unrecorded_mobile/services/scanner_provider.dart';
 import 'package:unrecorded_ui/unrecorded_ui.dart';
+
+import '../../copy/feedback_copy.dart';
 
 class HelpScreen extends ConsumerWidget {
   const HelpScreen({super.key});
@@ -10,6 +13,7 @@ class HelpScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final isAndroid = ref.watch(scanRuntimeProvider).isAndroid;
 
     return Scaffold(
       appBar: AppBar(
@@ -75,6 +79,43 @@ class HelpScreen extends ConsumerWidget {
               ),
               trailing: const UnrecordedListTrailing(),
               onTap: () => context.push('/alert-info'),
+            ),
+            if (isAndroid) ...[
+              const Divider(height: 32),
+              Row(
+                children: [
+                  const UnrecordedIcon(
+                    asset: UnrecordedIconAsset.widgetIcon,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      AppCopy.widgetHelpTitle,
+                      style: theme.textTheme.titleMedium,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              const HelperText(text: AppCopy.widgetHelpBody),
+              const SizedBox(height: 8),
+              const HelperText(text: AppCopy.widgetHelpLimitations),
+            ],
+            const Divider(height: 32),
+            ListTile(
+              key: const Key('help_feedback_tile'),
+              contentPadding: EdgeInsets.zero,
+              leading: const UnrecordedIcon(
+                asset: UnrecordedIconAsset.share,
+                size: 24,
+              ),
+              title: const Text(FeedbackCopy.sendFeedbackButton),
+              subtitle: const Text(
+                'Tell us what was confusing, broken, or missing',
+              ),
+              trailing: const UnrecordedListTrailing(),
+              onTap: () => context.push('/feedback'),
             ),
             const Divider(height: 32),
             const HelperText(

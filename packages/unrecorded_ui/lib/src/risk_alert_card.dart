@@ -6,6 +6,9 @@ import 'risk_badge.dart';
 import 'unrecorded_icon.dart';
 
 /// Cautious alert card for possible recording risk (live or example).
+///
+/// Set [isExample] to `true` in help/onboarding contexts to render a small
+/// "Example" label so users understand the card is illustrative, not live.
 class RiskAlertCard extends StatelessWidget {
   const RiskAlertCard({
     super.key,
@@ -43,6 +46,29 @@ class RiskAlertCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (isExample) ...[
+              Align(
+                alignment: Alignment.centerRight,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: scheme.onSurface.withValues(alpha: 0.08),
+                    borderRadius:
+                        BorderRadius.circular(AppThemeConstants.cardRadius),
+                  ),
+                  child: Text(
+                    'Example',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

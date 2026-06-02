@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unrecorded_core/unrecorded_core.dart';
 import 'package:unrecorded_mobile/app.dart';
+import 'package:unrecorded_mobile/copy/monetisation_copy.dart';
 import 'package:unrecorded_mobile/app_bootstrap.dart';
 import 'package:unrecorded_mobile/services/ad_consent_service.dart';
 import 'package:unrecorded_mobile/services/ads_service.dart';
@@ -104,6 +105,6 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
     expect(find.byKey(const Key('ad_privacy_choices_tile')), findsOneWidget);
-    expect(find.text(AppCopy.adPrivacyChoicesTitle), findsOneWidget);
+    expect(find.text(MonetisationCopy.adPrivacyChoicesTitle), findsOneWidget);
   });
 }

@@ -13,7 +13,7 @@ Unrecorded detects **possible** nearby smart-glass-style BLE signals. It does no
 | Risk notification toggle | Settings → **Alerts** → **Risk alerts** |
 | Notification risk level | Settings → **Alerts** → **Notify me for** (when alerts on) |
 | Developer testing UI | **Debug/profile builds only** — hidden in release (`kReleaseMode`) |
-| Automated regression | `cd packages/unrecorded_core && flutter test` (and radio + mobile tests) |
+| Automated regression | `cd packages/unrecorded_core && dart test` (and radio + mobile tests) |
 
 ## Demo mode (scripted BLE)
 
@@ -126,10 +126,13 @@ In **debug**, a failed SVG shows a small broken-image icon and logs `Unrecorded 
 
 ## CI and unit tests
 
+CI tiers (feature PR vs integration vs release): [ci-testing.md](ci-testing.md).
+
 ```bash
 flutter pub get
-cd packages/unrecorded_core && flutter test
+cd packages/unrecorded_core && dart test
 cd packages/unrecorded_radio && flutter test
+cd packages/unrecorded_ui && flutter test
 cd apps/mobile && flutter test
 ```
 

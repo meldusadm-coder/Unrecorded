@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:unrecorded_core/unrecorded_core.dart';
 import 'package:unrecorded_ui/unrecorded_ui.dart';
 
+import '../../copy/feedback_copy.dart';
+import '../../copy/monetisation_copy.dart';
 import '../../services/app_version.dart';
 import '../../services/ad_consent_service.dart';
 import '../../services/entitlement_service.dart';
@@ -229,8 +231,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     size: 24,
                     color: theme.colorScheme.primary,
                   ),
-                  title: const Text(AppCopy.adPrivacyChoicesTitle),
-                  subtitle: const Text(AppCopy.adPrivacyChoicesSubtitle),
+                  title: const Text(MonetisationCopy.adPrivacyChoicesTitle),
+                  subtitle:
+                      const Text(MonetisationCopy.adPrivacyChoicesSubtitle),
                   trailing: const UnrecordedListTrailing(),
                   onTap: _showAdPrivacyChoices,
                 );
@@ -241,8 +244,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const AppLogo(size: 24),
-              title: const Text(AppCopy.removeAdsTitle),
-              subtitle: const Text(AppCopy.removeAdsBody),
+              title: const Text(MonetisationCopy.removeAdsTitle),
+              subtitle: const Text(MonetisationCopy.removeAdsBody),
               trailing: const UnrecordedListTrailing(),
               onTap: () => context.push('/remove-ads'),
             ),
@@ -252,6 +255,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             Text(
               PrivacyDisclaimer.fundingNote,
               style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
+            ),
+            const SizedBox(height: 32),
+            Text('Feedback', style: theme.textTheme.titleMedium),
+            const SizedBox(height: 4),
+            ListTile(
+              key: const Key('settings_feedback_tile'),
+              contentPadding: EdgeInsets.zero,
+              leading: UnrecordedIcon(
+                asset: UnrecordedIconAsset.share,
+                size: 24,
+                color: theme.colorScheme.primary,
+              ),
+              title: const Text(FeedbackCopy.sendFeedbackButton),
+              subtitle: const Text(
+                'Report bugs, confusion, or suggestions',
+              ),
+              trailing: const UnrecordedListTrailing(),
+              onTap: () => context.push('/feedback'),
             ),
             const SizedBox(height: 32),
             const DebugTestingSection(),

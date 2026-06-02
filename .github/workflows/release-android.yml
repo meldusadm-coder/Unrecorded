@@ -124,20 +124,13 @@ jobs:
         if: env.SKIP_BUMP != 'true'
         run: bash tool/release/bump_version.sh "${VERSION_NAME}" "${VERSION_CODE}" --allow-dirty
 
+      # Unit/widget tests and copy guardrails run on release/*|hotfix/* PRs (CI
+      # release-gate job). This workflow assumes that gate passed before merge.
       - name: Format check
         run: dart format --set-exit-if-changed .
 
       - name: Analyze
         run: dart analyze --fatal-infos
-
-      - name: Core tests
-        run: cd packages/unrecorded_core && dart test
-
-      - name: Radio tests
-        run: cd packages/unrecorded_radio && flutter test
-
-      - name: App tests
-        run: cd apps/mobile && flutter test
 
       - name: Release copy guardrails
         run: bash tool/release/check_release_copy.sh

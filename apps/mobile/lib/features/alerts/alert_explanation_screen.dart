@@ -46,7 +46,7 @@ class AlertExplanationScreen extends StatelessWidget {
               RiskLevel.medium,
               'One or more signals match patterns that may be associated '
               'with smart glasses or recording devices. This is a '
-              'possible risk, not a confirmed threat.',
+              'possible risk, not a proven threat.',
             ),
             const SizedBox(height: 8),
             _riskRow(

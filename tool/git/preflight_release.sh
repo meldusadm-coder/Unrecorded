@@ -42,6 +42,7 @@ run_step "Analyze" dart analyze --fatal-infos
 if [[ "${SKIP_TESTS}" != "true" ]]; then
   run_step "Core tests" bash -c 'cd packages/unrecorded_core && dart test'
   run_step "Radio tests" bash -c 'cd packages/unrecorded_radio && flutter test'
+  run_step "UI package tests" bash -c 'cd packages/unrecorded_ui && flutter test'
   run_step "App tests" bash -c 'cd apps/mobile && flutter test'
 else
   echo ""

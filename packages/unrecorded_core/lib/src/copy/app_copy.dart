@@ -1,4 +1,8 @@
 /// Centralised user-facing copy for calm, plain-English UX.
+///
+/// Monetisation copy (remove-ads / IAP) lives in
+/// `apps/mobile/lib/copy/monetisation_copy.dart` — it is app-specific and
+/// does not belong in the pure-Dart core library.
 class AppCopy {
   AppCopy._();
 
@@ -70,35 +74,6 @@ class AppCopy {
   static const String turnOnProtection = 'Turn on protection';
   static const String pauseProtection = 'Pause protection';
 
-  // Monetisation
-  static const String removeAdsTitle = 'Remove ads';
-
-  static const String removeAdsBody =
-      'Unrecorded is free to use. If you find it useful, you can choose '
-      'what to pay to remove the small ads and support ongoing development.';
-
-  static const String removeAdsFreeNote =
-      'Core scanning stays free. Payment only removes ads.';
-
-  static const String adPrivacyChoicesTitle = 'Ad privacy choices';
-  static const String adPrivacyChoicesSubtitle =
-      'Change or withdraw consent for advertising cookies and data use.';
-
-  static const String maybeLater = 'Maybe later';
-  static const String restorePurchase = 'Restore purchase';
-  static const String restorePurchaseHint =
-      'Restore requested. If you previously paid, ads will be removed.';
-
-  static const String removeAdsAmountLabel = 'Choose your amount';
-  static const String removeAdsAmountHint =
-      'Slide to pick what you’d like to pay, from £0.25 to £20.00 in 25p steps. '
-      'Default is £2.00.';
-
-  /// Shown when the store has no product for the selected tier.
-  static String removeAdsAmountUnavailable(String formattedAmount) =>
-      '$formattedAmount isn’t available for payment right now. '
-      'Try another amount on the slider, or check back after the store is updated.';
-
   // Notifications
   static const String riskNotificationsTitle = 'Risk alerts';
   static const String riskNotificationsSubtitle =
@@ -118,4 +93,20 @@ class AppCopy {
   static const String widgetPermissionsNeeded = 'Permissions needed';
   static const String widgetScanningPaused = 'Scanning paused';
   static const String widgetCheckingShortly = 'Checking again shortly';
+
+  // Widget help
+  static const String widgetHelpTitle = 'Use the Unrecorded widget';
+
+  static const String widgetHelpBody =
+      'Add the Unrecorded widget to your home screen for a quick view of '
+      'your current scan status, last checked time, and nearby privacy risk '
+      'level. The widget is optional — it helps you keep an eye on possible '
+      'nearby smart-glasses signals without opening the app every time. '
+      'Add it from your home screen like any other widget.';
+
+  static const String widgetHelpLimitations =
+      'Widget updates can depend on your phone\'s battery settings and '
+      'operating system limits. Scan data stays on your device. A higher '
+      'risk level means nearby signals may match known privacy risk '
+      'indicators — it is not proof that anyone is recording.';
 }

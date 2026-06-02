@@ -5,8 +5,11 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:unrecorded_core/unrecorded_core.dart';
 import 'package:unrecorded_ui/unrecorded_ui.dart';
 
+import '../../copy/feedback_copy.dart';
+
 import '../../services/scanner_provider.dart';
 import '../../services/widget_sync_service.dart';
+import '../../utils/time_format.dart';
 import 'scan_state.dart';
 import 'signal_ui_model.dart';
 
@@ -151,6 +154,16 @@ class ScanScreen extends ConsumerWidget {
                     ),
               ),
             ],
+            if (!showAlert) ...[
+              const SizedBox(height: 8),
+              Center(
+                child: TextButton(
+                  key: const Key('scan_feedback_link'),
+                  onPressed: () => context.push('/feedback'),
+                  child: const Text(FeedbackCopy.sendFeedbackButton),
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
           ],
         ),
@@ -242,17 +255,10 @@ class ScanScreen extends ConsumerWidget {
   }
 
   String? _lastCheckedText(ScanState state) {
-    final t = state.lastCheckedAt;
-    if (t == null) return null;
     if (state.status == ScanStatus.idle || state.status == ScanStatus.paused) {
       return null;
     }
-    final diff = DateTime.now().difference(t);
-    if (diff.inSeconds < 60) return 'Last checked: just now';
-    if (diff.inMinutes < 60) {
-      return 'Last checked: ${diff.inMinutes} min ago';
-    }
-    return 'Last checked: ${diff.inHours} h ago';
+    return relativeLastChecked(state.lastCheckedAt);
   }
 
   Widget _iconWidgetForStatus(ScanStatus status, RiskLevel riskLevel) {
