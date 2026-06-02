@@ -4,6 +4,8 @@ GitHub Actions runs **tiered** checks so feature work stays fast while releases 
 
 Workflow: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml). Android ship: [`.github/workflows/release-android.yml`](../.github/workflows/release-android.yml).
 
+The **`dev` branch ruleset** requires the GitHub status context **`Analyze & Test`**. CI reports that via a final aggregator job after lint and package tests (individual jobs keep descriptive names).
+
 ## When each tier runs
 
 | Event | Format + analyze | Package tests | Release gate (copy + debug APK) |

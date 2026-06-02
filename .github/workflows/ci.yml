@@ -245,3 +245,29 @@ jobs:
         run: flutter build apk --debug
 
       # TODO: Add iOS build job when signing is set up.
+
+  # Required by the Dev branch ruleset (context name must stay "Analyze & Test").
+  ci-complete:
+    name: Analyze & Test
+    runs-on: ubuntu-latest
+    needs: [scope, lint, test-core, test-radio, test-ui, test-mobile]
+    if: always()
+    steps:
+      - name: Aggregate CI results
+        run: |
+          set -euo pipefail
+          check() {
+            local label="$1"
+            local result="$2"
+            if [[ "${result}" == "failure" || "${result}" == "cancelled" ]]; then
+              echo "::error::${label} ${result}"
+              exit 1
+            fi
+          }
+          check "Resolve test scope" "${{ needs.scope.result }}"
+          check "Format & analyze" "${{ needs.lint.result }}"
+          check "Core tests" "${{ needs.test-core.result }}"
+          check "Radio tests" "${{ needs.test-radio.result }}"
+          check "UI package tests" "${{ needs.test-ui.result }}"
+          check "Mobile tests" "${{ needs.test-mobile.result }}"
+          echo "CI passed (skipped test jobs are allowed for path-scoped PRs)."
