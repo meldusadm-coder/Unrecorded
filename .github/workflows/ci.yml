@@ -38,6 +38,10 @@ jobs:
         working-directory: apps/mobile
         run: flutter test
 
+      - name: Run shared UI tests
+        working-directory: packages/unrecorded_ui
+        run: flutter test
+
   build-android:
     name: Build Android debug APK
     runs-on: ubuntu-latest

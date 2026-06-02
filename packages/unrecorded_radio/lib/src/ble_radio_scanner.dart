@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
+import 'ble_scan_result_mapper.dart';
 import 'radio_scan_result.dart';
 import 'radio_scanner.dart';
 import 'radio_scanner_exception.dart';
@@ -20,6 +21,7 @@ class BleRadioScanner implements RadioScanner {
   StreamController<List<RadioScanResult>>? _controller;
   StreamSubscription<List<ScanResult>>? _subscription;
   bool _scanning = false;
+  bool _stopping = false;
 
   @override
   bool get isScanning => _scanning;
@@ -88,6 +90,8 @@ class BleRadioScanner implements RadioScanner {
 
   @override
   Future<void> stop() async {
+    if (_stopping) return;
+    _stopping = true;
     _scanning = false;
     try {
       await FlutterBluePlus.stopScan();
@@ -96,17 +100,25 @@ class BleRadioScanner implements RadioScanner {
     }
     await _subscription?.cancel();
     _subscription = null;
-    await _controller?.close();
+    final controller = _controller;
+    if (controller != null && !controller.isClosed) {
+      await controller.close();
+    }
     _controller = null;
+    _stopping = false;
   }
 
   static RadioScanResult _mapResult(ScanResult r) {
-    return RadioScanResult(
-      id: r.device.remoteId.str,
-      name: r.device.platformName.isNotEmpty ? r.device.platformName : null,
-      rssi: r.rssi,
-      serviceUuids: r.advertisementData.serviceUuids.map((e) => e.str).toList(),
-      isConnectable: r.advertisementData.connectable,
+    return mapBleAdvertisement(
+      BleAdvertisement(
+        id: r.device.remoteId.str,
+        advertisedName: r.advertisementData.advName,
+        platformName: r.device.platformName,
+        rssi: r.rssi,
+        serviceUuids:
+            r.advertisementData.serviceUuids.map((e) => e.str).toList(),
+        isConnectable: r.advertisementData.connectable,
+      ),
       observedAt: DateTime.now(),
     );
   }

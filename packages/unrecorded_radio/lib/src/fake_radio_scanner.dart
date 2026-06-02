@@ -9,13 +9,19 @@ import 'radio_scanner.dart';
 ///
 /// Use this when BLE hardware is unavailable (emulator, tests, demo mode).
 class FakeRadioScanner implements RadioScanner {
-  FakeRadioScanner({this.scenario = FakeDemoScenario.random});
+  FakeRadioScanner({
+    this.scenario = FakeDemoScenario.random,
+    Random? random,
+    this.tickInterval = const Duration(seconds: 3),
+  }) : _random = random ?? Random();
 
   final FakeDemoScenario scenario;
+  final Duration tickInterval;
 
   StreamController<List<RadioScanResult>>? _controller;
   Timer? _timer;
-  final _random = Random();
+  final Random _random;
+  bool _stopping = false;
 
   @override
   bool get isScanning => _controller != null && !_controller!.isClosed;
@@ -31,14 +37,20 @@ class FakeRadioScanner implements RadioScanner {
 
   @override
   Future<void> stop() async {
+    if (_stopping) return;
+    _stopping = true;
     _timer?.cancel();
     _timer = null;
-    await _controller?.close();
+    final controller = _controller;
+    if (controller != null && !controller.isClosed) {
+      await controller.close();
+    }
     _controller = null;
+    _stopping = false;
   }
 
   void _startEmitting() {
-    _timer = Timer.periodic(const Duration(seconds: 3), (_) {
+    _timer = Timer.periodic(tickInterval, (_) {
       if (_controller == null || _controller!.isClosed) return;
       _controller!.add(_generateBatch());
     });

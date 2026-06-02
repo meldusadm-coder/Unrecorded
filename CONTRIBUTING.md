@@ -25,8 +25,9 @@ cd unrecorded
 flutter pub get
 
 # Run tests
-dart test --reporter expanded           # core package tests
-flutter test                            # app + radio widget tests (from apps/mobile)
+cd packages/unrecorded_core && dart test --reporter expanded
+cd packages/unrecorded_radio && flutter test
+cd apps/mobile && flutter test
 
 # Check formatting and analysis
 dart format --set-exit-if-changed .
