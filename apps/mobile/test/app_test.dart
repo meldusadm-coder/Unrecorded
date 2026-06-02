@@ -59,6 +59,20 @@ void main() {
     expect(find.text(AppCopy.alertCardTitle), findsOneWidget);
   });
 
+  testWidgets('help screen can navigate back to scan screen', (tester) async {
+    await tester.pumpWidget(testApp());
+    await tester.pump();
+
+    await tester.tap(find.byTooltip('Help'));
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+    expect(find.text('Help'), findsOneWidget);
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+    expect(find.text('Unrecorded'), findsOneWidget);
+    expect(find.text(AppCopy.turnOnProtection), findsOneWidget);
+  });
+
   testWidgets('navigates to settings screen', (tester) async {
     tester.view.physicalSize = const Size(1080, 1920);
     tester.view.devicePixelRatio = 1.0;
@@ -79,6 +93,20 @@ void main() {
         tester.getTopLeft(find.text(AppCopy.riskNotificationsTitle)).dy;
     final localFirstY = tester.getTopLeft(find.text('Local-first')).dy;
     expect(alertsY, lessThan(localFirstY));
+  });
+
+  testWidgets('settings screen can navigate back to scan screen',
+      (tester) async {
+    await tester.pumpWidget(testApp());
+    await tester.pump();
+
+    await tester.tap(find.byKey(const Key('settings_button')));
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+    expect(find.text('Settings & Privacy'), findsOneWidget);
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+    expect(find.text('Unrecorded'), findsOneWidget);
   });
 
   testWidgets('shows a single bottom ad slot when navigating to help',

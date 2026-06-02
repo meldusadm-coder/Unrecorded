@@ -82,6 +82,10 @@ If tests are slow and the user agrees:
 
 Fix failures before opening the PR. Re-run preflight after fixes.
 
+CI on the release PR will run the **full** test suite plus the **release gate** job (copy guardrails, `verify_version`, debug APK). That gate must be green before merge. See [docs/ci-testing.md](../../docs/ci-testing.md).
+
+Do **not** use `preflight_release.sh --skip-tests` unless the user explicitly agrees and the same commit already passed full CI.
+
 ## Step 5 — Open PR to `main`
 
 ```bash
@@ -93,8 +97,8 @@ If `gh` is missing, give the user the printed compare URL and suggested PR title
 Checklist for the PR body (ensure covered):
 
 - [ ] CHANGELOG updated
-- [ ] Preflight passed
-- [ ] CI will run on the PR
+- [ ] `./tool/git/preflight_release.sh` passed locally (full tests + copy)
+- [ ] CI **release gate** green on the PR (full tests + debug APK)
 
 Tell the user: **merge is human/maintainer action** unless they explicitly ask you to merge and you have permission. When merging the release PR into `main`, use **Create a merge commit** only — never squash.
 

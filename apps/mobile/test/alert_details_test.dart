@@ -55,6 +55,10 @@ void main() {
     expect(find.text('Ray-Ban Meta'), findsOneWidget);
     expect(find.text('Possible recording wearable'), findsOneWidget);
     expect(find.byType(RiskBadge), findsWidgets);
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+    expect(find.text('Unrecorded'), findsOneWidget);
   });
 }
 

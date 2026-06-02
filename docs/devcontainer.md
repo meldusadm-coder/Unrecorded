@@ -69,14 +69,17 @@ Develop Unrecorded inside a reproducible Linux container with Flutter, Dart, Jav
 
 ## CI parity commands (inside container)
 
+Full suite (matches push to `dev` and release PR CI — see [ci-testing.md](ci-testing.md)):
+
 ```bash
 flutter pub get
 dart format --set-exit-if-changed .
 dart analyze --fatal-infos
 cd packages/unrecorded_core && dart test
 cd packages/unrecorded_radio && flutter test
+cd packages/unrecorded_ui && flutter test
 cd apps/mobile && flutter test
-cd apps/mobile && flutter build apk --debug
+cd apps/mobile && flutter build apk --debug   # release PR gate only in CI
 ```
 
 VS Code task **CI: format + analyze + all tests** runs the test subset.

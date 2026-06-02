@@ -23,13 +23,13 @@ git pull origin main
 
 Confirm `pubspec.yaml` version matches what the user intends to ship (`version_name` + `build_number`).
 
-## Step 1 — Preflight on `main` (recommended)
+## Step 1 — Preflight on `main` (optional)
 
 ```bash
 ./tool/git/preflight_release.sh
 ```
 
-Skip only if the same commit already passed preflight on the release PR and nothing changed since merge.
+Skip if the **release PR** already passed CI **release gate** (full tests + copy + debug APK) on the same commit and nothing changed since merge. **Release Android** on `main` does not re-run unit tests — the release PR gate is the test authority.
 
 ## Step 2 — GitHub Actions: Release Android
 
@@ -54,7 +54,7 @@ gh run list --workflow=release-android.yml --limit 3
 # gh run watch <run-id>
 ```
 
-Report: format/analyze/tests, AAB artifact, Play upload result, GitHub Release link.
+Report: format/analyze/copy checks, AAB artifact, Play upload result, GitHub Release link.
 
 ## Step 4 — Store follow-up (human)
 

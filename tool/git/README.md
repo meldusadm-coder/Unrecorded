@@ -1,6 +1,6 @@
 # Git workflow helpers
 
-Scripts for the branching model in [docs/git-flow.md](../../docs/git-flow.md).
+Scripts for the branching model in [docs/git-flow.md](../../docs/git-flow.md). CI tiers: [docs/ci-testing.md](../../docs/ci-testing.md).
 
 **AI playbooks** (step-by-step for “create release”, “branch for issue N”, etc.): [skills/README.md](../../skills/README.md).
 
