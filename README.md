@@ -83,6 +83,9 @@ cd packages/unrecorded_core && dart test
 # Radio package tests
 cd packages/unrecorded_radio && flutter test
 
+# Shared UI widget tests
+cd packages/unrecorded_ui && flutter test
+
 # App widget tests
 cd apps/mobile && flutter test
 

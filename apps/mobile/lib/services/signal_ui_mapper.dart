@@ -33,6 +33,7 @@ class SignalUiMapper {
         : 'Nearby device';
 
     return SignalUiModel(
+      stableKey: signal.stableKey,
       title: title,
       categoryLabel: assessment.category.displayLabel,
       confidenceLabel: assessment.confidenceBand.label,

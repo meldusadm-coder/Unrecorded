@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
-import 'package:unrecorded_core/unrecorded_core.dart';
 import 'package:unrecorded_ui/unrecorded_ui.dart';
 
+import '../../copy/monetisation_copy.dart';
 import '../../services/entitlement_service.dart';
 import '../../services/remove_ads_pricing.dart';
 
@@ -47,7 +47,7 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
       _previewProduct = product;
       _loading = false;
       if (product == null) {
-        _message = AppCopy.removeAdsAmountUnavailable(
+        _message = MonetisationCopy.removeAdsAmountUnavailable(
           RemoveAdsPricing.formatGbp(amount),
         );
       }
@@ -71,7 +71,7 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
     if (product == null) {
       setState(() {
         _loading = false;
-        _message = AppCopy.removeAdsAmountUnavailable(
+        _message = MonetisationCopy.removeAdsAmountUnavailable(
           RemoveAdsPricing.formatGbp(amount),
         );
       });
@@ -95,7 +95,7 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
     final service = await ref.read(entitlementServiceProvider.future);
     await service.restorePurchases();
     if (mounted) {
-      setState(() => _message = AppCopy.restorePurchaseHint);
+      setState(() => _message = MonetisationCopy.restorePurchaseHint);
     }
   }
 
@@ -116,17 +116,17 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
           padding: EdgeInsets.only(left: 12),
           child: AppLogo(size: 26),
         ),
-        title: const Text(AppCopy.removeAdsTitle),
+        title: const Text(MonetisationCopy.removeAdsTitle),
       ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           children: [
-            const HelperText(text: AppCopy.removeAdsBody),
+            const HelperText(text: MonetisationCopy.removeAdsBody),
             const SizedBox(height: 8),
-            const HelperText(text: AppCopy.removeAdsFreeNote),
+            const HelperText(text: MonetisationCopy.removeAdsFreeNote),
             const SizedBox(height: 8),
-            const HelperText(text: AppCopy.removeAdsAmountHint),
+            const HelperText(text: MonetisationCopy.removeAdsAmountHint),
             if (adsRemoved) ...[
               const SizedBox(height: 20),
               Card(
@@ -150,7 +150,7 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
             ],
             const SizedBox(height: 24),
             Text(
-              AppCopy.removeAdsAmountLabel,
+              MonetisationCopy.removeAdsAmountLabel,
               style: theme.textTheme.titleSmall,
             ),
             const SizedBox(height: 8),
@@ -212,12 +212,12 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
             const SizedBox(height: 16),
             OutlinedButton(
               onPressed: _restore,
-              child: const Text(AppCopy.restorePurchase),
+              child: const Text(MonetisationCopy.restorePurchase),
             ),
             const SizedBox(height: 8),
             TextButton(
               onPressed: () => context.pop(),
-              child: const Text(AppCopy.maybeLater),
+              child: const Text(MonetisationCopy.maybeLater),
             ),
           ],
         ),

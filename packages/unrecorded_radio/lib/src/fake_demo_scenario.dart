@@ -6,7 +6,7 @@ enum FakeDemoScenario {
   /// Only benign device names; risk stays low.
   low,
 
-  /// Strong nearby signal without a suspicious name.
+  /// Suspicious-sounding device name at weak signal — typically scores medium risk.
   medium,
 
   /// Suspicious smart-glasses-style name every batch.

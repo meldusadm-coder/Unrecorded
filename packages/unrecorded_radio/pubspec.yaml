@@ -13,8 +13,6 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_blue_plus: ^1.35.0
-  unrecorded_core:
-    path: ../unrecorded_core
 
 dev_dependencies:
   flutter_test:

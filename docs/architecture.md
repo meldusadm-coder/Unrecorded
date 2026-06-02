@@ -12,7 +12,7 @@ The Flutter mobile app targeting Android and iOS. Uses Riverpod for state manage
 
 Pure Dart library with no Flutter dependency. Contains:
 
-- **Models** — `DetectedSignal`, `RiskLevel`, `ScanSnapshot`
+- **Models** — `DetectedSignal`, `RiskLevel`, `DetectionAssessment`
 - **Scoring** — deterministic rule-based `RiskScoringEngine` that evaluates scan snapshots and returns a risk level with plain-English reasons
 - **Privacy** — centralised disclaimer text
 

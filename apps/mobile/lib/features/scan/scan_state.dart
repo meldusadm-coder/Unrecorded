@@ -32,6 +32,9 @@ class ScanState {
   final bool isDemoMode;
   final bool alertDismissed;
 
+  /// Stable keys of [possibleRiskSignals] when the user last dismissed the alert.
+  final List<String> dismissedRiskStableKeys;
+
   const ScanState({
     this.status = ScanStatus.idle,
     this.riskLevel = RiskLevel.low,
@@ -45,6 +48,7 @@ class ScanState {
     this.protectionRequested = false,
     this.isDemoMode = false,
     this.alertDismissed = false,
+    this.dismissedRiskStableKeys = const [],
   });
 
   bool get canStart =>
@@ -88,6 +92,7 @@ class ScanState {
     bool? protectionRequested,
     bool? isDemoMode,
     bool? alertDismissed,
+    List<String>? dismissedRiskStableKeys,
     bool clearStatusMessage = false,
     bool clearNextScanAt = false,
   }) {
@@ -105,6 +110,8 @@ class ScanState {
       protectionRequested: protectionRequested ?? this.protectionRequested,
       isDemoMode: isDemoMode ?? this.isDemoMode,
       alertDismissed: alertDismissed ?? this.alertDismissed,
+      dismissedRiskStableKeys:
+          dismissedRiskStableKeys ?? this.dismissedRiskStableKeys,
     );
   }
 }
