@@ -374,8 +374,7 @@ void main() {
     await controller.pauseProtection(persist: false);
   });
 
-  test(
-      'dismissed alert reappears when contributing risky devices change',
+  test('dismissed alert reappears when contributing risky devices change',
       () async {
     final streamController =
         StreamController<List<RadioScanResult>>.broadcast();
