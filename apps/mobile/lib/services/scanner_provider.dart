@@ -175,19 +175,26 @@ class ScanController extends StateNotifier<ScanState> {
     final (risk, other) =
         _mapper.partition(pipelineResult.snapshot.assessments);
 
-    // `alertDismissed` is a UI-only field the coordinator never sets, so a
-    // partial update would otherwise reset it to false. Preserve the user's
-    // dismissal while the same alert stays active; a fresh transition into the
-    // alert state (after risk clears) resets it so new alerts can show.
+    // `alertDismissed` is UI-only; preserve it only while the same risky
+    // device(s) remain — not merely while status stays possibleRiskDetected.
+    final newRiskKeys = _contributingRiskStableKeys(
+      pipelineResult.snapshot.assessments,
+    );
     final stillSameAlert = state.status == ScanStatus.possibleRiskDetected &&
         partial.status == ScanStatus.possibleRiskDetected;
-    final alertDismissed = stillSameAlert && state.alertDismissed;
+    final sameRiskEvidence = stillSameAlert &&
+        state.alertDismissed &&
+        _sameRiskKeySet(state.dismissedRiskStableKeys, newRiskKeys);
+    final alertDismissed = sameRiskEvidence;
+    final dismissedRiskStableKeys =
+        sameRiskEvidence ? state.dismissedRiskStableKeys : const <String>[];
 
     _emit(
       partial.copyWith(
         possibleRiskSignals: risk,
         otherNearbySignals: other,
         alertDismissed: alertDismissed,
+        dismissedRiskStableKeys: dismissedRiskStableKeys,
       ),
     );
   }
@@ -206,13 +213,43 @@ class ScanController extends StateNotifier<ScanState> {
   void simulateHighRiskAlert() {
     _coordinator.simulateHighRiskBatch(FakeRadioScanner.highRiskBatch());
     if (state.status == ScanStatus.possibleRiskDetected) {
-      _emit(state.copyWith(alertDismissed: false));
+      _emit(
+        state.copyWith(
+          alertDismissed: false,
+          dismissedRiskStableKeys: const [],
+        ),
+      );
     }
   }
 
   void dismissRiskAlert() {
     if (state.status != ScanStatus.possibleRiskDetected) return;
-    _emit(state.copyWith(alertDismissed: true));
+    final keys = state.possibleRiskSignals.map((s) => s.stableKey).toList()
+      ..sort();
+    _emit(
+      state.copyWith(
+        alertDismissed: true,
+        dismissedRiskStableKeys: keys,
+      ),
+    );
+  }
+
+  static Set<String> _contributingRiskStableKeys(
+    List<DetectionAssessment> assessments,
+  ) {
+    return {
+      for (final a in assessments)
+        if (a.contributesToRisk) a.signal.stableKey,
+    };
+  }
+
+  static bool _sameRiskKeySet(List<String> dismissed, Set<String> current) {
+    if (dismissed.length != current.length) return false;
+    final sortedCurrent = current.toList()..sort();
+    for (var i = 0; i < dismissed.length; i++) {
+      if (dismissed[i] != sortedCurrent[i]) return false;
+    }
+    return true;
   }
 
   Future<void> onScannerConfigChanged() async {
@@ -254,6 +291,7 @@ class ScanController extends StateNotifier<ScanState> {
           riskLevel: RiskLevel.low,
           score: 0,
           alertDismissed: false,
+          dismissedRiskStableKeys: const [],
           clearStatusMessage: false,
         ),
       );

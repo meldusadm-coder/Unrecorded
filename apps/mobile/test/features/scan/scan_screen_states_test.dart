@@ -59,6 +59,7 @@ void main() {
         reasons: ['Potential nearby match'],
         possibleRiskSignals: [
           SignalUiModel(
+            stableKey: 'ray-ban-meta',
             title: 'Ray-Ban Meta',
             categoryLabel: 'Possible recording wearable',
             confidenceLabel: 'Elevated confidence',

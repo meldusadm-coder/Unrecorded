@@ -374,6 +374,56 @@ void main() {
     await controller.pauseProtection(persist: false);
   });
 
+  test(
+      'dismissed alert reappears when contributing risky devices change',
+      () async {
+    final streamController =
+        StreamController<List<RadioScanResult>>.broadcast();
+    final scanner = _StreamScanner(streamController.stream);
+    final controller = _controller(
+      scanner: scanner,
+      runtime: _TestRuntime(const ScanPreflightResult.ok()),
+      startupGraceDuration: Duration.zero,
+      requiredElevatedScans: 1,
+    );
+
+    await controller.startProtection(persist: false);
+
+    streamController.add([
+      RadioScanResult(
+        id: 'glasses-a',
+        name: 'Ray-Ban Meta',
+        rssi: -40,
+        isConnectable: true,
+        observedAt: DateTime.now(),
+      ),
+    ]);
+    await Future<void>.delayed(const Duration(milliseconds: 30));
+    expect(controller.state.showsRiskAlert, isTrue);
+
+    controller.dismissRiskAlert();
+    expect(controller.state.alertDismissed, isTrue);
+    expect(controller.state.showsRiskAlert, isFalse);
+
+    streamController.add([
+      RadioScanResult(
+        id: 'glasses-b',
+        name: 'Meta Smart Glasses',
+        rssi: -42,
+        isConnectable: true,
+        observedAt: DateTime.now(),
+      ),
+    ]);
+    await Future<void>.delayed(const Duration(milliseconds: 30));
+
+    expect(controller.state.status, ScanStatus.possibleRiskDetected);
+    expect(controller.state.alertDismissed, isFalse);
+    expect(controller.state.showsRiskAlert, isTrue);
+
+    await streamController.close();
+    await controller.pauseProtection(persist: false);
+  });
+
   test('a fresh alert after risk clears resets dismissal', () async {
     final streamController =
         StreamController<List<RadioScanResult>>.broadcast();
