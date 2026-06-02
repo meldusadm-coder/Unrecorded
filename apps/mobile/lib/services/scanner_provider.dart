@@ -175,10 +175,19 @@ class ScanController extends StateNotifier<ScanState> {
     final (risk, other) =
         _mapper.partition(pipelineResult.snapshot.assessments);
 
+    // `alertDismissed` is a UI-only field the coordinator never sets, so a
+    // partial update would otherwise reset it to false. Preserve the user's
+    // dismissal while the same alert stays active; a fresh transition into the
+    // alert state (after risk clears) resets it so new alerts can show.
+    final stillSameAlert = state.status == ScanStatus.possibleRiskDetected &&
+        partial.status == ScanStatus.possibleRiskDetected;
+    final alertDismissed = stillSameAlert && state.alertDismissed;
+
     _emit(
       partial.copyWith(
         possibleRiskSignals: risk,
         otherNearbySignals: other,
+        alertDismissed: alertDismissed,
       ),
     );
   }
@@ -264,7 +273,7 @@ class ScanController extends StateNotifier<ScanState> {
       _emit(
         state.copyWith(
           status: ScanStatus.scanning,
-          isDemoMode: _coordinator.scannerMode == ScannerMode.demo,
+          isDemoMode: _coordinator.isDemoMode,
           clearStatusMessage: true,
         ),
       );

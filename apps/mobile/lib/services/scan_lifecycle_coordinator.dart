@@ -44,6 +44,13 @@ class ScanLifecycleCoordinator {
   ScannerMode get scannerMode => _scannerModeFactory();
   bool get protectionRequested => _protectionRequested;
 
+  /// Whether scanning is effectively fake/demo data rather than real BLE.
+  ///
+  /// True for explicit demo mode and for the non-Android auto-mode fallback,
+  /// which uses [FakeRadioScanner] because real BLE scanning is Android-only.
+  /// UI must disclose this so fake scans are never presented as live data.
+  bool get isDemoMode => scannerMode == ScannerMode.demo || !_runtime.isAndroid;
+
   void _wireManager() {
     _manager.onBatch = _onBatch;
     _manager.onScanWindowEnd = () {
@@ -193,7 +200,7 @@ class ScanLifecycleCoordinator {
         score: alertConfirmed && rawElevated ? scoring.totalScore : 0,
         reasons: alertConfirmed && rawElevated ? scoring.reasons : const [],
         protectionRequested: _protectionRequested,
-        isDemoMode: scannerMode == ScannerMode.demo,
+        isDemoMode: isDemoMode,
         lastCheckedAt: now,
       ),
       result,

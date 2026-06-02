@@ -12,12 +12,13 @@ import 'package:unrecorded_mobile/services/signal_ui_mapper.dart';
 import 'package:unrecorded_radio/unrecorded_radio.dart';
 
 class _TestRuntime extends ScanRuntime {
-  _TestRuntime(this.result);
+  _TestRuntime(this.result, {bool isAndroid = true}) : _isAndroid = isAndroid;
 
   final ScanPreflightResult result;
+  final bool _isAndroid;
 
   @override
-  bool get isAndroid => true;
+  bool get isAndroid => _isAndroid;
 
   @override
   Future<ScanPreflightResult> ensureAndroidReady() async => result;
@@ -326,6 +327,119 @@ void main() {
     controller.dismissRiskAlert();
     expect(controller.state.status, ScanStatus.possibleRiskDetected);
     expect(controller.state.alertDismissed, isTrue);
+  });
+
+  test('dismissed alert stays dismissed across coordinator updates', () async {
+    final streamController =
+        StreamController<List<RadioScanResult>>.broadcast();
+    final scanner = _StreamScanner(streamController.stream);
+    final controller = _controller(
+      scanner: scanner,
+      runtime: _TestRuntime(const ScanPreflightResult.ok()),
+      startupGraceDuration: Duration.zero,
+      requiredElevatedScans: 1,
+    );
+
+    await controller.startProtection(persist: false);
+
+    final batch = [
+      RadioScanResult(
+        id: '1',
+        name: 'Ray-Ban Meta',
+        rssi: -40,
+        isConnectable: true,
+        observedAt: DateTime.now(),
+      ),
+    ];
+
+    streamController.add(batch);
+    await Future<void>.delayed(const Duration(milliseconds: 30));
+    expect(controller.state.status, ScanStatus.possibleRiskDetected);
+    expect(controller.state.showsRiskAlert, isTrue);
+
+    controller.dismissRiskAlert();
+    expect(controller.state.alertDismissed, isTrue);
+    expect(controller.state.showsRiskAlert, isFalse);
+
+    // A later coordinator update for the same still-elevated risk must not
+    // resurrect the dismissed alert.
+    streamController.add(batch);
+    await Future<void>.delayed(const Duration(milliseconds: 30));
+
+    expect(controller.state.status, ScanStatus.possibleRiskDetected);
+    expect(controller.state.alertDismissed, isTrue);
+    expect(controller.state.showsRiskAlert, isFalse);
+
+    await streamController.close();
+    await controller.pauseProtection(persist: false);
+  });
+
+  test('a fresh alert after risk clears resets dismissal', () async {
+    final streamController =
+        StreamController<List<RadioScanResult>>.broadcast();
+    final scanner = _StreamScanner(streamController.stream);
+    final controller = _controller(
+      scanner: scanner,
+      runtime: _TestRuntime(const ScanPreflightResult.ok()),
+      startupGraceDuration: Duration.zero,
+      requiredElevatedScans: 1,
+    );
+
+    await controller.startProtection(persist: false);
+
+    final riskBatch = [
+      RadioScanResult(
+        id: '1',
+        name: 'Ray-Ban Meta',
+        rssi: -40,
+        isConnectable: true,
+        observedAt: DateTime.now(),
+      ),
+    ];
+    final benignBatch = [
+      RadioScanResult(
+        id: '1',
+        name: 'AirPods Pro',
+        rssi: -40,
+        isConnectable: true,
+        observedAt: DateTime.now(),
+      ),
+    ];
+
+    streamController.add(riskBatch);
+    await Future<void>.delayed(const Duration(milliseconds: 30));
+    expect(controller.state.status, ScanStatus.possibleRiskDetected);
+
+    controller.dismissRiskAlert();
+    expect(controller.state.alertDismissed, isTrue);
+
+    streamController.add(benignBatch);
+    await Future<void>.delayed(const Duration(milliseconds: 30));
+    expect(controller.state.status, isNot(ScanStatus.possibleRiskDetected));
+
+    streamController.add(riskBatch);
+    await Future<void>.delayed(const Duration(milliseconds: 30));
+    expect(controller.state.status, ScanStatus.possibleRiskDetected);
+    expect(controller.state.alertDismissed, isFalse);
+    expect(controller.state.showsRiskAlert, isTrue);
+
+    await streamController.close();
+    await controller.pauseProtection(persist: false);
+  });
+
+  test('non-Android auto mode is exposed as demo mode', () async {
+    final controller = _controller(
+      scanner: FakeRadioScanner(),
+      runtime: _TestRuntime(const ScanPreflightResult.ok(), isAndroid: false),
+      scannerMode: ScannerMode.auto,
+    );
+
+    await controller.startProtection(persist: false);
+
+    expect(controller.state.status, ScanStatus.scanning);
+    expect(controller.state.isDemoMode, isTrue);
+
+    await controller.pauseProtection(persist: false);
   });
 
   test('duplicate startProtection does not create duplicate scan loops',
