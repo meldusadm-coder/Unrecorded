@@ -7,6 +7,7 @@ import 'package:unrecorded_ui/unrecorded_ui.dart';
 
 import '../../services/scanner_provider.dart';
 import '../../services/widget_sync_service.dart';
+import '../../utils/time_format.dart';
 import 'scan_state.dart';
 import 'signal_ui_model.dart';
 
@@ -242,17 +243,10 @@ class ScanScreen extends ConsumerWidget {
   }
 
   String? _lastCheckedText(ScanState state) {
-    final t = state.lastCheckedAt;
-    if (t == null) return null;
     if (state.status == ScanStatus.idle || state.status == ScanStatus.paused) {
       return null;
     }
-    final diff = DateTime.now().difference(t);
-    if (diff.inSeconds < 60) return 'Last checked: just now';
-    if (diff.inMinutes < 60) {
-      return 'Last checked: ${diff.inMinutes} min ago';
-    }
-    return 'Last checked: ${diff.inHours} h ago';
+    return relativeLastChecked(state.lastCheckedAt);
   }
 
   Widget _iconWidgetForStatus(ScanStatus status, RiskLevel riskLevel) {

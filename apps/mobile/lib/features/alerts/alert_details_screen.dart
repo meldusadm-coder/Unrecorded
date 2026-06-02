@@ -6,6 +6,7 @@ import 'package:unrecorded_ui/unrecorded_ui.dart';
 
 import '../../router.dart';
 import '../../services/scanner_provider.dart';
+import '../../utils/time_format.dart';
 import '../scan/signal_ui_model.dart';
 
 /// Live alert context: risk level, possible devices, and evidence from the session.
@@ -56,10 +57,10 @@ class AlertDetailsScreen extends ConsumerWidget {
                 ),
               ],
             ),
-            if (state.lastCheckedAt != null) ...[
+            if (relativeLastChecked(state.lastCheckedAt) != null) ...[
               const SizedBox(height: 12),
               Text(
-                _lastCheckedLine(state.lastCheckedAt!),
+                relativeLastChecked(state.lastCheckedAt)!,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -173,14 +174,5 @@ class AlertDetailsScreen extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  String _lastCheckedLine(DateTime t) {
-    final diff = DateTime.now().difference(t);
-    if (diff.inSeconds < 60) return 'Last checked: just now';
-    if (diff.inMinutes < 60) {
-      return 'Last checked: ${diff.inMinutes} min ago';
-    }
-    return 'Last checked: ${diff.inHours} h ago';
   }
 }

@@ -60,8 +60,6 @@ Use the Play Developer API script (same service account as CI upload):
 
 See [tool/play/README.md](../tool/play/README.md) (`python3` + venv; not `python` / `pip`).
 
-See [tool/play/README.md](../tool/play/README.md).
-
 **Play Console (manual):** Monetize → Products → create **non-consumable** products with IDs and prices matching the table above. At minimum ship `remove_ads_200` before wider tiers.
 
 Legacy tier IDs (`remove_ads_1`, `remove_ads_3`, `remove_ads_5`, `remove_ads_10`) still work for restore if you already shipped them.

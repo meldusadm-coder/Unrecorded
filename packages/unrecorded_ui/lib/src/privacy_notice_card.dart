@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'app_theme.dart';
 import 'unrecorded_icon.dart';
 
 /// A calm, informational card for displaying privacy-related notices.
@@ -25,7 +26,9 @@ class PrivacyNoticeCard extends StatelessWidget {
     return Card(
       elevation: 0,
       color: theme.colorScheme.surfaceContainerHighest.withAlpha(80),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppThemeConstants.cardRadius),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Row(
