@@ -1,5 +1,3 @@
-import 'detection_signatures.dart';
-
 /// Phrase-level benign categories for safe-device classification.
 class BenignPhrase {
   const BenignPhrase(this.phrase, this.category);
@@ -60,16 +58,6 @@ const List<BenignPhrase> benignPhrases = [
   BenignPhrase('android auto', BenignDeviceCategory.vehicle),
   BenignPhrase('infotainment', BenignDeviceCategory.vehicle),
 ];
-
-/// Legacy substring list — prefer [matchBenignCategory] for new code.
-bool isBenignNameLegacy(String? name) {
-  final lower = name?.toLowerCase();
-  if (lower == null) return false;
-  for (final kw in benignNameKeywords) {
-    if (lower.contains(kw)) return true;
-  }
-  return false;
-}
 
 /// Returns benign category when name matches a safe phrase (not when suspicious).
 BenignDeviceCategory? matchBenignCategory(String? name) {

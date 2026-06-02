@@ -3,22 +3,7 @@ import 'dart:math';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:unrecorded_radio/unrecorded_radio.dart';
 
-const _forbiddenWording = <String>[
-  'recording detected',
-  'confirmed threat',
-  'spy detected',
-  'surveillance found',
-  'recording confirmed',
-  'we know someone is recording',
-  'device is recording',
-];
-
-void _expectNoCertaintyWording(String? text) {
-  final lower = text?.toLowerCase() ?? '';
-  for (final phrase in _forbiddenWording) {
-    expect(lower, isNot(contains(phrase)));
-  }
-}
+import 'support/certainty_language.dart';
 
 void main() {
   group('FakeRadioScanner', () {
@@ -113,7 +98,7 @@ void main() {
       expect(first, isNotEmpty);
       expect(first.every((r) => r.id.isNotEmpty), isTrue);
       for (final result in first) {
-        _expectNoCertaintyWording(result.name);
+        expectNoCertaintyLanguage(result.name);
       }
     });
 
@@ -123,7 +108,7 @@ void main() {
       expect(batch.map((r) => r.id), ['fake:aa:bb:cc:01', 'fake:dd:ee:ff:03']);
       expect(batch.every((r) => r.observedAt == now), isTrue);
       for (final result in batch) {
-        _expectNoCertaintyWording(result.name);
+        expectNoCertaintyLanguage(result.name);
       }
     });
 

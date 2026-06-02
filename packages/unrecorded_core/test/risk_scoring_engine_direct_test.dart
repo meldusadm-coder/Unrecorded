@@ -2,35 +2,14 @@ import 'package:test/test.dart';
 import 'package:unrecorded_core/unrecorded_core.dart';
 
 import 'support/certainty_language.dart';
-
-TrackedSignal _tracked({
-  required String id,
-  String? name,
-  int? rssi,
-  int sightings = 1,
-  bool connectable = false,
-}) {
-  final now = DateTime(2025, 1, 1);
-  return TrackedSignal(
-    stableKey: id,
-    id: id,
-    firstSeenAt: now,
-    lastSeenAt: now,
-    displayName: name,
-    lastRssi: rssi,
-    smoothedRssi: rssi?.toDouble(),
-    sightingCount: sightings,
-    everConnectable: connectable,
-    normalizedMac: id.replaceAll(':', '').toLowerCase(),
-  );
-}
+import 'support/signal_fixtures.dart';
 
 DetectionAssessment _addressOnlyAssessment({
   required String id,
   int? rssi,
 }) {
   return DetectionAssessment(
-    signal: _tracked(id: id, rssi: rssi),
+    signal: makeTrackedSignal(id: id, rssi: rssi),
     category: DeviceSignalCategory.possibleRecordingWearable,
     matchedSignature: null,
     primaryMatchKind: null,
@@ -60,14 +39,15 @@ void main() {
     test('best signal score wins among contributors', () {
       final engine = RiskScoringEngine();
       final assessments = DetectionEngine().assessAll([
-        _tracked(
+        makeTrackedSignal(
           id: '11:22:33:44:55:66',
           name: 'Ray-Ban Meta',
           rssi: -42,
           sightings: 4,
           connectable: true,
         ),
-        _tracked(id: 'aa:bb:cc:dd:ee:ff', name: 'smart glasses', rssi: -84),
+        makeTrackedSignal(
+            id: 'aa:bb:cc:dd:ee:ff', name: 'smart glasses', rssi: -84),
       ]);
       final result = engine.evaluate(
         DetectionSnapshot(
@@ -96,7 +76,7 @@ void main() {
 
     test('mac-only matches are capped below high', () {
       final assessments = DetectionEngine().assessAll([
-        _tracked(
+        makeTrackedSignal(
           id: '00:0B:9A:12:34:56',
           rssi: -35,
           sightings: 5,
@@ -115,7 +95,7 @@ void main() {
 
     test('reasons avoid certainty language', () {
       final assessments = DetectionEngine().assessAll([
-        _tracked(
+        makeTrackedSignal(
           id: '11:22:33:44:55:66',
           name: 'Meta Smart Glasses',
           rssi: -40,
