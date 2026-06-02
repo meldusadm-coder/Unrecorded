@@ -30,6 +30,7 @@ dependencies:
     path: ../../packages/unrecorded_ui
   flutter_svg: ^2.0.17
   flutter_local_notifications: ^21.0.0
+  url_launcher: ^6.3.0
 
 dev_dependencies:
   flutter_test:

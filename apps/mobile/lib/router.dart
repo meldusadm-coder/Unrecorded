@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import 'features/alerts/alert_details_screen.dart';
 import 'features/alerts/alert_explanation_screen.dart';
+import 'features/feedback/feedback_screen.dart';
 import 'features/help/help_screen.dart';
 import 'features/monetisation/remove_ads_screen.dart';
 import 'features/scan/scan_screen.dart';
@@ -41,6 +42,10 @@ GoRouter buildAppRouter() => GoRouter(
             GoRoute(
               path: '/settings',
               builder: (context, state) => const SettingsScreen(),
+            ),
+            GoRoute(
+              path: '/feedback',
+              builder: (context, state) => const FeedbackScreen(),
             ),
           ],
         ),

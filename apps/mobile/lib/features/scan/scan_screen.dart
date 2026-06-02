@@ -5,6 +5,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:unrecorded_core/unrecorded_core.dart';
 import 'package:unrecorded_ui/unrecorded_ui.dart';
 
+import '../../copy/feedback_copy.dart';
+
 import '../../services/scanner_provider.dart';
 import '../../services/widget_sync_service.dart';
 import '../../utils/time_format.dart';
@@ -150,6 +152,16 @@ class ScanScreen extends ConsumerWidget {
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
+              ),
+            ],
+            if (!showAlert) ...[
+              const SizedBox(height: 8),
+              Center(
+                child: TextButton(
+                  key: const Key('scan_feedback_link'),
+                  onPressed: () => context.push('/feedback'),
+                  child: const Text(FeedbackCopy.sendFeedbackButton),
+                ),
               ),
             ],
             const SizedBox(height: 16),

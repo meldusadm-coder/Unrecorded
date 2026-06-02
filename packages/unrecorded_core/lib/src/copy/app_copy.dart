@@ -93,4 +93,20 @@ class AppCopy {
   static const String widgetPermissionsNeeded = 'Permissions needed';
   static const String widgetScanningPaused = 'Scanning paused';
   static const String widgetCheckingShortly = 'Checking again shortly';
+
+  // Widget help
+  static const String widgetHelpTitle = 'Use the Unrecorded widget';
+
+  static const String widgetHelpBody =
+      'Add the Unrecorded widget to your home screen for a quick view of '
+      'your current scan status, last checked time, and nearby privacy risk '
+      'level. The widget is optional — it helps you keep an eye on possible '
+      'nearby smart-glasses signals without opening the app every time. '
+      'Add it from your home screen like any other widget.';
+
+  static const String widgetHelpLimitations =
+      'Widget updates can depend on your phone\'s battery settings and '
+      'operating system limits. Scan data stays on your device. A higher '
+      'risk level means nearby signals may match known privacy risk '
+      'indicators — it is not proof that anyone is recording.';
 }

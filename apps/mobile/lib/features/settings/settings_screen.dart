@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:unrecorded_core/unrecorded_core.dart';
 import 'package:unrecorded_ui/unrecorded_ui.dart';
 
+import '../../copy/feedback_copy.dart';
 import '../../copy/monetisation_copy.dart';
 import '../../services/app_version.dart';
 import '../../services/ad_consent_service.dart';
@@ -254,6 +255,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             Text(
               PrivacyDisclaimer.fundingNote,
               style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
+            ),
+            const SizedBox(height: 32),
+            Text('Feedback', style: theme.textTheme.titleMedium),
+            const SizedBox(height: 4),
+            ListTile(
+              key: const Key('settings_feedback_tile'),
+              contentPadding: EdgeInsets.zero,
+              leading: UnrecordedIcon(
+                asset: UnrecordedIconAsset.share,
+                size: 24,
+                color: theme.colorScheme.primary,
+              ),
+              title: const Text(FeedbackCopy.sendFeedbackButton),
+              subtitle: const Text(
+                'Report bugs, confusion, or suggestions',
+              ),
+              trailing: const UnrecordedListTrailing(),
+              onTap: () => context.push('/feedback'),
             ),
             const SizedBox(height: 32),
             const DebugTestingSection(),

@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:unrecorded_core/unrecorded_core.dart';
+import 'package:unrecorded_mobile/copy/feedback_copy.dart';
 
 import 'support/certainty_language.dart';
 
@@ -27,9 +28,27 @@ void main() {
       AppCopy.riskNotificationsSubtitle,
       AppCopy.riskNotificationLevelSubtitle,
       AppCopy.widgetPossibleRisk,
+      AppCopy.widgetHelpTitle,
+      AppCopy.widgetHelpBody,
+      AppCopy.widgetHelpLimitations,
     ];
 
     for (final text in copyStrings) {
+      expectNoCertaintyLanguage(text);
+    }
+  });
+
+  test('feedback copy avoids certainty wording', () {
+    final feedbackStrings = <String>[
+      FeedbackCopy.intro,
+      FeedbackCopy.privacyNote,
+      FeedbackCopy.messageHelper,
+      FeedbackCopy.diagnosticsSubtitle,
+      FeedbackCopy.submitSuccess,
+      FeedbackCopy.fallbackBody,
+    ];
+
+    for (final text in feedbackStrings) {
       expectNoCertaintyLanguage(text);
     }
   });
