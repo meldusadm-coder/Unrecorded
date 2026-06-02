@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.5.0+10
+
+### Added
+- In-app feedback from settings and help: optional email, category, and message sent via the device mail app with local diagnostics (no cloud backend).
+- Scan screen dismissed-risk tracking so cleared alerts stay dismissed until signals change.
+- Relative time labels on alert and scan surfaces for recent activity.
+- Demo-mode banner and clearer scan lifecycle handling when demo protection is active.
+
+### Changed
+- Monetisation and feedback copy moved into dedicated copy modules for consistency and copy-guard tests.
+- CI path filters, dev branch status checks, and testing/contributing documentation updates.
+
+### Fixed
+- No additional fixes in this release.
+
+
 ## 0.4.0+9
 
 ### Added
