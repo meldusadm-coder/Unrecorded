@@ -24,9 +24,10 @@ cd unrecorded
 # Install dependencies (requires Flutter SDK >=3.22)
 flutter pub get
 
-# Run tests
+# Run tests (full suite — matches push to dev and release PR CI)
 cd packages/unrecorded_core && dart test --reporter expanded
 cd packages/unrecorded_radio && flutter test
+cd packages/unrecorded_ui && flutter test
 cd apps/mobile && flutter test
 
 # Check formatting and analysis
@@ -63,9 +64,13 @@ Project-wide rules for humans and AI tools live in **[AGENTS.md](AGENTS.md)**. U
 - Helpers: `./tool/git/start_release_branch.sh`, `./tool/git/preflight_release.sh`, etc. ([tool/git/README.md](tool/git/README.md)).
 - AI assistants: step-by-step playbooks in [skills/README.md](skills/README.md) (e.g. “create release”, “branch for issue 42”).
 
+### CI
+
+GitHub Actions uses **tiered** checks: fast path-scoped tests on feature PRs to `dev`, full tests on push to `dev`, and a **release gate** (full tests + copy + debug APK) on `release/*` / `hotfix/*` PRs to `main`. See [docs/ci-testing.md](docs/ci-testing.md).
+
 ### Releases
 
-Maintainers shipping app versions: [docs/git-flow.md](docs/git-flow.md) (branching) and [docs/release.md](docs/release.md) (versioning, signing, Android workflow).
+Maintainers shipping app versions: [docs/git-flow.md](docs/git-flow.md) (branching) and [docs/release.md](docs/release.md) (versioning, signing, Android workflow). Before a release PR: `./tool/git/preflight_release.sh`.
 
 ### Keep changes focused
 

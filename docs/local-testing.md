@@ -126,10 +126,13 @@ In **debug**, a failed SVG shows a small broken-image icon and logs `Unrecorded 
 
 ## CI and unit tests
 
+CI tiers (feature PR vs integration vs release): [ci-testing.md](ci-testing.md).
+
 ```bash
 flutter pub get
 cd packages/unrecorded_core && dart test
 cd packages/unrecorded_radio && flutter test
+cd packages/unrecorded_ui && flutter test
 cd apps/mobile && flutter test
 ```
 

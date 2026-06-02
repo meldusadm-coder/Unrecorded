@@ -1,14 +1,126 @@
+# Tiered CI: fast path-scoped tests on feature PRs → dev; full suite on dev
+# integration and release/*|hotfix/* PRs → main; release gate adds copy checks + debug APK.
+# Push to main runs lint only (tests already passed on the release PR). Ship builds run
+# in release-android.yml. See docs/ci-testing.md.
 name: CI
 
 on:
-  push:
-    branches: [main, dev]
   pull_request:
-    branches: [main, dev]
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  analyze-and-test:
-    name: Analyze & Test
+  scope:
+    name: Resolve test scope
+    runs-on: ubuntu-latest
+    outputs:
+      run_all: ${{ steps.resolve.outputs.run_all }}
+      core: ${{ steps.resolve.outputs.core }}
+      radio: ${{ steps.resolve.outputs.radio }}
+      ui: ${{ steps.resolve.outputs.ui }}
+      mobile: ${{ steps.resolve.outputs.mobile }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Full suite vs path-scoped
+        id: mode
+        run: |
+          run_all=false
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/dev" ]]; then
+            run_all=true
+          elif [[ "${{ github.event_name }}" == "pull_request" && "${{ github.base_ref }}" == "main" ]]; then
+            run_all=true
+          fi
+          echo "run_all=${run_all}" >> "$GITHUB_OUTPUT"
+
+      - uses: dorny/paths-filter@v3
+        if: >-
+          steps.mode.outputs.run_all != 'true' &&
+          github.event_name == 'pull_request' &&
+          github.base_ref == 'dev'
+        id: filter
+        with:
+          filters: |
+            core:
+              - 'packages/unrecorded_core/**'
+            radio:
+              - 'packages/unrecorded_radio/**'
+            ui:
+              - 'packages/unrecorded_ui/**'
+            mobile:
+              - 'apps/mobile/**'
+            workspace:
+              - 'pubspec.yaml'
+              - 'pubspec.lock'
+              - 'packages/**/pubspec.yaml'
+              - 'apps/**/pubspec.yaml'
+              - '.github/workflows/**'
+
+      - name: Resolve package flags
+        id: resolve
+        env:
+          RUN_ALL: ${{ steps.mode.outputs.run_all }}
+          FC: ${{ steps.filter.outputs.core }}
+          FR: ${{ steps.filter.outputs.radio }}
+          FU: ${{ steps.filter.outputs.ui }}
+          FM: ${{ steps.filter.outputs.mobile }}
+          FW: ${{ steps.filter.outputs.workspace }}
+        run: |
+          set -euo pipefail
+          core=false
+          radio=false
+          ui=false
+          mobile=false
+          run_all="${RUN_ALL}"
+
+          if [[ "${run_all}" == "true" ]]; then
+            core=true
+            radio=true
+            ui=true
+            mobile=true
+          elif [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+            : # Version-bump merges: lint only; release PR already ran the full gate.
+          elif [[ "${{ github.event_name }}" == "pull_request" && "${{ github.base_ref }}" == "dev" ]]; then
+            if [[ "${FC}" == "true" || "${FW}" == "true" ]]; then
+              core=true
+              radio=true
+              ui=true
+              mobile=true
+            fi
+            if [[ "${FR}" == "true" ]]; then
+              radio=true
+              mobile=true
+            fi
+            if [[ "${FU}" == "true" ]]; then
+              ui=true
+              mobile=true
+            fi
+            if [[ "${FM}" == "true" ]]; then
+              mobile=true
+            fi
+          else
+            echo "Unexpected CI event; running full package tests." >&2
+            core=true
+            radio=true
+            ui=true
+            mobile=true
+          fi
+
+          {
+            echo "run_all=${run_all}"
+            echo "core=${core}"
+            echo "radio=${radio}"
+            echo "ui=${ui}"
+            echo "mobile=${mobile}"
+          } >> "$GITHUB_OUTPUT"
+
+  lint:
+    name: Format & analyze
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,26 +138,85 @@ jobs:
       - name: Analyze
         run: dart analyze --fatal-infos
 
+  test-core:
+    name: Core tests
+    needs: [scope, lint]
+    if: needs.scope.outputs.core == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
       - name: Run core tests
         working-directory: packages/unrecorded_core
         run: dart test --reporter expanded
 
+  test-radio:
+    name: Radio tests
+    needs: [scope, lint]
+    if: needs.scope.outputs.radio == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
       - name: Run radio tests
         working-directory: packages/unrecorded_radio
         run: flutter test
 
-      - name: Run app tests
-        working-directory: apps/mobile
-        run: flutter test
-
+  test-ui:
+    name: UI package tests
+    needs: [scope, lint]
+    if: needs.scope.outputs.ui == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
       - name: Run shared UI tests
         working-directory: packages/unrecorded_ui
         run: flutter test
 
-  build-android:
-    name: Build Android debug APK
+  test-mobile:
+    name: Mobile tests
+    needs: [scope, lint]
+    if: needs.scope.outputs.mobile == 'true'
     runs-on: ubuntu-latest
-    needs: analyze-and-test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+      - name: Run app tests
+        working-directory: apps/mobile
+        run: flutter test
+
+  release-gate:
+    name: Release gate (copy + debug APK)
+    needs: [scope, lint, test-core, test-radio, test-ui, test-mobile]
+    if: |
+      always() &&
+      needs.lint.result == 'success' &&
+      (needs.test-core.result == 'success' || needs.test-core.result == 'skipped') &&
+      (needs.test-radio.result == 'success' || needs.test-radio.result == 'skipped') &&
+      (needs.test-ui.result == 'success' || needs.test-ui.result == 'skipped') &&
+      (needs.test-mobile.result == 'success' || needs.test-mobile.result == 'skipped') &&
+      needs.scope.outputs.run_all == 'true' &&
+      needs.scope.outputs.core == 'true' &&
+      needs.scope.outputs.radio == 'true' &&
+      needs.scope.outputs.ui == 'true' &&
+      needs.scope.outputs.mobile == 'true' &&
+      github.event_name == 'pull_request' &&
+      github.base_ref == 'main' &&
+      (startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'hotfix/'))
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -58,8 +229,13 @@ jobs:
         with:
           channel: stable
 
-      - name: Install dependencies
-        run: flutter pub get
+      - run: flutter pub get
+
+      - name: Verify release version metadata
+        run: bash tool/release/verify_version.sh
+
+      - name: Release copy guardrails
+        run: bash tool/release/check_release_copy.sh
 
       - name: Build debug APK
         working-directory: apps/mobile

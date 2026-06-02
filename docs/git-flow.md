@@ -34,7 +34,7 @@ feature/my-thing  ──PR──►  dev
 ```
 
 1. Branch from latest `dev`: `git fetch origin && git checkout -b feature/my-thing origin/dev`
-2. Open PR into `dev`; wait for CI (see [`.github/workflows/mobile-ci.yml`](../.github/workflows/mobile-ci.yml)).
+2. Open PR into `dev`; wait for CI (fast, path-scoped tests — see [ci-testing.md](ci-testing.md)).
 3. Squash or merge per repo settings; delete the feature branch.
 
 ## Releasing to `main`
@@ -139,8 +139,8 @@ Version bump details: [`tool/release/bump_version.sh`](../tool/release/bump_vers
 
 ## CI
 
-- **Mobile CI:** PRs and pushes to `dev` and `main`.
-- **Release Android:** Auto on **`main`** when `pubspec.yaml` / `CHANGELOG.md` change; manual `workflow_dispatch` optional.
+- **CI** ([`ci.yml`](../.github/workflows/ci.yml)): tiered tests — path-scoped on feature PRs → `dev`, full suite on push to `dev` and on PRs → `main`, **release gate** (copy + debug APK) on `release/*` / `hotfix/*` PRs. Details: [ci-testing.md](ci-testing.md).
+- **Release Android:** Auto on **`main`** when `apps/mobile/pubspec.yaml` / `CHANGELOG.md` change; assumes the release PR passed the full CI gate. Manual `workflow_dispatch` optional.
 
 ## AI assistants
 

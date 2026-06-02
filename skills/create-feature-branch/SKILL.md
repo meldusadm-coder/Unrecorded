@@ -81,6 +81,8 @@ Otherwise stop after branch creation and tell the user the branch is ready.
 
 ## Step 6 — Open PR to `dev`
 
+CI on the PR runs **path-scoped** tests (see [docs/ci-testing.md](../../docs/ci-testing.md)). After merge, push to `dev` runs the **full** suite. For scan/scoring/radio changes, run affected packages locally before pushing.
+
 When work is ready:
 
 ```bash
@@ -94,7 +96,7 @@ gh pr create --base dev --head "$(git branch --show-current)" \
 Fixes #<NUMBER>
 
 ## Test plan
-- [ ] \`./tool/git/preflight_release.sh --skip-tests\` or full test run
+- [ ] Relevant package tests (core/radio/mobile per [ci-testing.md](../../docs/ci-testing.md))
 - [ ] Manual checks if needed"
 ```
 
@@ -113,4 +115,4 @@ PR title examples: `fix: handle BLE timeout (fixes #42)`, `feat: add settings di
 | Script | Purpose |
 |--------|---------|
 | `tool/git/start_feature_branch.sh` | Branch from `origin/dev` + issue slug |
-| `tool/git/preflight_release.sh` | Optional before PR (`--skip-tests` ok for small UI-only changes if user agrees) |
+| `tool/git/preflight_release.sh` | Optional locally; full suite required only for release branches |

@@ -54,6 +54,8 @@ On `hotfix/<version_name>`.
 
 (`open_release_pr.sh` works on `hotfix/*` branches.)
 
+Wait for CI **release gate** (full tests + copy + debug APK) on the PR. See [docs/ci-testing.md](../../docs/ci-testing.md).
+
 ## Step 6 — After merge
 
 Merge the hotfix PR into `main` with **Create a merge commit** only (`gh pr merge <PR> --merge`).
