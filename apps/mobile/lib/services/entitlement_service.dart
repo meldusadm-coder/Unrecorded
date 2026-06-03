@@ -9,13 +9,21 @@ import 'remove_ads_pricing.dart';
 
 const _prefsKeyAdsRemoved = 'ads_removed';
 
+/// Whether a store purchase should grant remove-ads entitlement.
+bool purchaseGrantsRemoveAds(PurchaseDetails purchase) {
+  if (!RemoveAdsPricing.isRemoveAdsProductId(purchase.productID)) return false;
+  return purchase.status == PurchaseStatus.purchased ||
+      purchase.status == PurchaseStatus.restored;
+}
+
 /// Isolated from scan logic — tracks ad-free entitlement only.
 class EntitlementService {
   EntitlementService(this._prefs, {InAppPurchase? iap, this.onChanged})
-      : _iap = iap ?? InAppPurchase.instance;
+      : _iapOverride = iap;
 
   final SharedPreferences _prefs;
-  final InAppPurchase _iap;
+  final InAppPurchase? _iapOverride;
+  InAppPurchase get _iap => _iapOverride ?? InAppPurchase.instance;
   final VoidCallback? onChanged;
 
   static const _devBypass =
@@ -65,20 +73,30 @@ class EntitlementService {
   }
 
   void _onPurchaseUpdate(List<PurchaseDetails> purchases) {
+    unawaited(_handlePurchaseUpdate(purchases));
+  }
+
+  @visibleForTesting
+  Future<void> deliverPurchaseUpdates(List<PurchaseDetails> purchases) {
+    return _handlePurchaseUpdate(purchases, completePurchases: false);
+  }
+
+  Future<void> _handlePurchaseUpdate(
+    List<PurchaseDetails> purchases, {
+    bool completePurchases = true,
+  }) async {
     for (final purchase in purchases) {
-      if (RemoveAdsPricing.isRemoveAdsProductId(purchase.productID)) {
-        if (purchase.status == PurchaseStatus.purchased ||
-            purchase.status == PurchaseStatus.restored) {
-          unawaited(_setAdsRemoved(true));
-        }
+      if (purchaseGrantsRemoveAds(purchase)) {
+        await _setAdsRemoved(true);
       }
-      if (purchase.pendingCompletePurchase) {
-        unawaited(_iap.completePurchase(purchase));
+      if (completePurchases && purchase.pendingCompletePurchase) {
+        await _iap.completePurchase(purchase);
       }
     }
   }
 
   Future<void> _setAdsRemoved(bool value) async {
+    if (adsRemoved == value) return;
     await _prefs.setBool(_prefsKeyAdsRemoved, value);
     onChanged?.call();
   }
@@ -115,6 +133,22 @@ final adsRemovedProvider = Provider<bool>((ref) {
   final async = ref.watch(entitlementServiceProvider);
   return async.maybeWhen(
     data: (s) => s.adsRemoved,
+    orElse: () => false,
+  );
+});
+
+/// Ads may render only after entitlement is known and user has not paid.
+final adsMayShowProvider = Provider<bool>((ref) {
+  ref.watch(entitlementRefreshProvider);
+  if (const bool.fromEnvironment(
+    'UNRECORDED_ADS_REMOVED',
+    defaultValue: false,
+  )) {
+    return false;
+  }
+  final async = ref.watch(entitlementServiceProvider);
+  return async.maybeWhen(
+    data: (s) => !s.adsRemoved,
     orElse: () => false,
   );
 });

@@ -54,8 +54,13 @@ Verify:
    ```bash
    flutter pub get
    cd apps/mobile
-   flutter build appbundle --release   # Play Store artifact (.aab)
-   flutter build apk --release         # optional convenience APK
+   flutter build appbundle --release \
+     --dart-define=ADMOB_BANNER_ID=ca-app-pub-3940256099942544/6300978111 \
+     --obfuscate --split-debug-info=build/symbols-aab
+   # Use a separate symbols dir for the convenience APK so it does not overwrite AAB maps.
+   flutter build apk --release \
+     --dart-define=ADMOB_BANNER_ID=ca-app-pub-3940256099942544/6300978111 \
+     --obfuscate --split-debug-info=build/symbols-apk
    ```
 
 Outputs are under `apps/mobile/build/` (or the dev-container symlink target). **Submit the `.aab` to Google Play**, not the APK.
@@ -81,7 +86,7 @@ Workflow: [`.github/workflows/release-android.yml`](../.github/workflows/release
 
 Ensure the release PR already bumped `pubspec.yaml` on `main` before merge; the automatic run does **not** bump version again.
 
-The workflow runs format, analyze, tests, release copy checks, signed AAB/APK build, artifact upload, Play upload (internal draft by default), and GitHub Release.
+The workflow runs format, analyze, tests, release copy checks, signed AAB/APK build (with `--obfuscate` and `--split-debug-info`), estimated download-size report (`tool/release/report_aab_size.sh`), artifact upload (AAB, APK, and `dart-symbols/` from the **AAB** build for stack-trace deobfuscation), Play upload (internal draft by default), and GitHub Release. AAB symbols are staged before the convenience APK build so obfuscation snapshots are not overwritten.
 
 ### Required GitHub Secrets (signed release)
 
@@ -159,6 +164,28 @@ Source of truth: [`apps/site/privacy.html`](../apps/site/privacy.html) (deploy `
 - Possible privacy risk indicators — not proof of recording
 
 Privacy contact in the policy: **privacy@unrecorded.app** (operator: **Meldlife Ltd**). In AdMob, link the same policy URL to your app.
+
+### Pre-launch report deep links (Android)
+
+After each release AAB, Google Play can crawl up to **three extra entry points** in addition to the default launcher crawl. URIs are defined in [`apps/mobile/lib/router.dart`](../apps/mobile/lib/router.dart) (`playPreLaunchDeepLinks`) and listed in [`store/android/pre_launch_deep_links.txt`](../store/android/pre_launch_deep_links.txt).
+
+1. **Play Console** → your app → **Test and release** → **Testing** → **Pre-launch report** → **Settings**.
+2. Add the three `unrecorded://open/...` URIs from the store file (or router constants).
+3. **Save**, then upload a new bundle (or save a production release) so a fresh pre-launch run uses them.
+
+The launcher crawl already exercises the scan home screen (`/`). Deep links target help, alert-info, and settings so Robo explores more UI without using slots on IAP or external `mailto:` flows.
+
+Verify locally before upload (debug APK on device/emulator):
+
+```bash
+adb shell am start -W -a android.intent.action.VIEW \
+  -d "unrecorded://open/help" \
+  app.unrecorded.unrecorded_mobile/.MainActivity
+```
+
+Repeat for `unrecorded://open/alert-info` and `unrecorded://open/settings`. Each should open that screen, not the scan home.
+
+Google help: [Use a pre-launch report — deep links](https://support.google.com/googleplay/android-developer/answer/9842757#deep_links).
 
 ## iOS (manual / future automation)
 

@@ -28,7 +28,11 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadPreview());
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final service = await ref.read(entitlementServiceProvider.future);
+      if (!mounted || service.adsRemoved) return;
+      await _loadPreview();
+    });
   }
 
   Future<void> _loadPreview() async {
@@ -40,6 +44,11 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
     });
 
     final service = await ref.read(entitlementServiceProvider.future);
+    if (service.adsRemoved) {
+      if (mounted) setState(() => _loading = false);
+      return;
+    }
+
     final product = await service.loadProductForAmount(amount);
 
     if (!mounted) return;
@@ -55,6 +64,9 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
   }
 
   Future<void> _purchase() async {
+    final service = await ref.read(entitlementServiceProvider.future);
+    if (service.adsRemoved) return;
+
     final amount = _amountGbp;
 
     setState(() {
@@ -62,7 +74,6 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
       _message = null;
     });
 
-    final service = await ref.read(entitlementServiceProvider.future);
     final product =
         _previewProduct ?? await service.loadProductForAmount(amount);
 
@@ -105,8 +116,75 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final adsRemoved = ref.watch(adsRemovedProvider);
+    if (adsRemoved) {
+      return _buildEntitledScaffold(context);
+    }
+    return _buildPurchaseScaffold(context);
+  }
+
+  Widget _buildEntitledScaffold(BuildContext context) {
+    final theme = Theme.of(context);
+    return Scaffold(
+      appBar: AppBar(
+        leading: const Padding(
+          padding: EdgeInsets.only(left: 12),
+          child: AppLogo(size: 26),
+        ),
+        title: const Text(MonetisationCopy.removeAdsTitle),
+      ),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          children: [
+            const HelperText(text: MonetisationCopy.removeAdsBody),
+            const SizedBox(height: 8),
+            const HelperText(text: MonetisationCopy.removeAdsFreeNote),
+            const SizedBox(height: 20),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    UnrecordedIcon(
+                      asset: UnrecordedIconAsset.protection,
+                      size: 24,
+                      color: theme.colorScheme.primary,
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Text('Ads are removed on this device.'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            const HelperText(
+              text: 'Thank you for supporting Unrecorded.',
+            ),
+            if (_message != null) ...[
+              const SizedBox(height: 12),
+              Text(_message!, style: theme.textTheme.bodySmall),
+            ],
+            const SizedBox(height: 24),
+            OutlinedButton(
+              onPressed: _restore,
+              child: const Text(MonetisationCopy.restorePurchase),
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: () => context.pop(),
+              child: const Text(MonetisationCopy.maybeLater),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPurchaseScaffold(BuildContext context) {
+    final theme = Theme.of(context);
     final amount = _amountGbp;
     final storePrice = _previewProduct?.price;
 
@@ -127,27 +205,6 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
             const HelperText(text: MonetisationCopy.removeAdsFreeNote),
             const SizedBox(height: 8),
             const HelperText(text: MonetisationCopy.removeAdsAmountHint),
-            if (adsRemoved) ...[
-              const SizedBox(height: 20),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      UnrecordedIcon(
-                        asset: UnrecordedIconAsset.protection,
-                        size: 24,
-                        color: theme.colorScheme.primary,
-                      ),
-                      const SizedBox(width: 12),
-                      const Expanded(
-                        child: Text('Ads are removed on this device.'),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
             const SizedBox(height: 24),
             Text(
               MonetisationCopy.removeAdsAmountLabel,
@@ -178,9 +235,8 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
               max: (RemoveAdsPricing.tierCount - 1).toDouble(),
               divisions: RemoveAdsPricing.tierCount - 1,
               label: RemoveAdsPricing.formatGbp(amount),
-              onChanged:
-                  adsRemoved ? null : (value) => _onTierChanged(value.round()),
-              onChangeEnd: adsRemoved ? null : (_) => _loadPreview(),
+              onChanged: (value) => _onTierChanged(value.round()),
+              onChangeEnd: (_) => _loadPreview(),
             ),
             if (storePrice != null) ...[
               const SizedBox(height: 4),
@@ -199,14 +255,11 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
               const Center(child: CircularProgressIndicator())
             else
               FilledButton(
-                onPressed:
-                    adsRemoved || _previewProduct == null ? null : _purchase,
+                onPressed: _previewProduct == null ? null : _purchase,
                 child: Text(
-                  adsRemoved
-                      ? 'Ads already removed'
-                      : _previewProduct == null
-                          ? 'Store product unavailable'
-                          : 'Pay ${RemoveAdsPricing.formatGbp(amount)} to remove ads',
+                  _previewProduct == null
+                      ? 'Store product unavailable'
+                      : 'Pay ${RemoveAdsPricing.formatGbp(amount)} to remove ads',
                 ),
               ),
             const SizedBox(height: 16),

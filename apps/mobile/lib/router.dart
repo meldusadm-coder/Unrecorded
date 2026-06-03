@@ -21,6 +21,20 @@ const alertDetailsRoute = '/alert-details';
 
 const notificationAlertPayload = 'alert-details';
 
+/// Custom scheme host for Android VIEW intents (`unrecorded://open/...`).
+const deepLinkScheme = 'unrecorded';
+const deepLinkHost = 'open';
+
+/// Play Console pre-launch report deep links (strategy A: secondary screens).
+///
+/// Home (`/`) is already crawled via the launcher. Paste these URIs in
+/// **Test and release → Testing → Pre-launch report → Settings** after upload.
+const playPreLaunchDeepLinks = <String>[
+  '$deepLinkScheme://$deepLinkHost/help',
+  '$deepLinkScheme://$deepLinkHost/alert-info',
+  '$deepLinkScheme://$deepLinkHost/settings',
+];
+
 GoRouter buildAppRouter() => GoRouter(
       navigatorKey: rootNavigatorKey,
       initialLocation: '/',
