@@ -1,9 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unrecorded_mobile/services/ad_consent_service.dart';
 import 'package:unrecorded_mobile/services/ads_service.dart';
 import 'package:unrecorded_mobile/services/entitlement_service.dart';
+import 'package:unrecorded_mobile/services/remove_ads_pricing.dart';
 
 import '../support/fake_in_app_purchase.dart';
 
@@ -80,6 +82,45 @@ void main() {
 
     await container.read(entitlementServiceProvider.future);
     expect(container.read(adsMayShowProvider), isTrue);
+    container.dispose();
+  });
+
+  test('adsMayShowProvider false after purchase grants remove ads', () async {
+    SharedPreferences.setMockInitialValues({});
+    final container = ProviderContainer(
+      overrides: [
+        entitlementServiceProvider.overrideWith((ref) async {
+          final shared = await SharedPreferences.getInstance();
+          final service = EntitlementService(
+            shared,
+            iap: FakeInAppPurchase(),
+            onChanged: () {
+              ref.read(entitlementRefreshProvider.notifier).state++;
+            },
+          );
+          await service.init();
+          return service;
+        }),
+      ],
+    );
+
+    final service = await container.read(entitlementServiceProvider.future);
+    expect(container.read(adsMayShowProvider), isTrue);
+
+    await service.deliverPurchaseUpdates([
+      PurchaseDetails(
+        productID: RemoveAdsPricing.productIdForGbp(2),
+        verificationData: PurchaseVerificationData(
+          localVerificationData: '',
+          serverVerificationData: '',
+          source: 'google_play',
+        ),
+        transactionDate: null,
+        status: PurchaseStatus.purchased,
+      ),
+    ]);
+
+    expect(container.read(adsMayShowProvider), isFalse);
     container.dispose();
   });
 }

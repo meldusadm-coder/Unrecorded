@@ -139,6 +139,7 @@ final adsRemovedProvider = Provider<bool>((ref) {
 
 /// Ads may render only after entitlement is known and user has not paid.
 final adsMayShowProvider = Provider<bool>((ref) {
+  ref.watch(entitlementRefreshProvider);
   if (const bool.fromEnvironment(
     'UNRECORDED_ADS_REMOVED',
     defaultValue: false,
