@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.6.0+11
+
+### Added
+- Android deep links (`unrecorded://open/...`) for help, alert-info, and settings, with Play Console pre-launch URI list in `store/android/pre_launch_deep_links.txt`.
+- Release workflow uploads Dart symbol maps for deobfuscated crash reports and reports estimated Play download size from the release AAB.
+
+### Changed
+- Remove-ads purchase and entitlement handling: clearer UI when ads are removed, stronger tests, and ads hidden consistently after purchase.
+- Feedback mailto launcher builds more reliable URIs on Android.
+- Release Android builds use obfuscation and split debug info; release docs updated accordingly.
+
+### Fixed
+- `tool/play/run.sh` is executable in the repo for Play upload helpers.
+
+
 ## 0.5.0+10
 
 ### Added
