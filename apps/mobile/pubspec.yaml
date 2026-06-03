@@ -41,8 +41,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  assets:
-    - assets/brand/
+  # Launcher PNGs live under assets/brand/ for flutter_launcher_icons only;
+  # they are not bundled as Flutter assets (see docs/brand-review.md).
 
 flutter_launcher_icons:
   android: true

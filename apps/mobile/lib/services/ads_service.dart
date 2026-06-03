@@ -33,6 +33,25 @@ class AdsService {
 
   final VoidCallback? _onBannerStateChanged;
 
+  @visibleForTesting
+  static int platformInitAttemptCount = 0;
+
+  @visibleForTesting
+  static int platformLoadBannerAttemptCount = 0;
+
+  @visibleForTesting
+  static void resetPlatformAttemptCountsForTest() {
+    platformInitAttemptCount = 0;
+    platformLoadBannerAttemptCount = 0;
+  }
+
+  /// When true, [init] and [loadBanner] increment attempt counters but skip platform SDK calls.
+  @visibleForTesting
+  static bool skipPlatformAdCallsForTest = false;
+
+  static bool get _shouldInvokePlatformAds =>
+      !_isFlutterTest && !skipPlatformAdCallsForTest;
+
   BannerAd? _bannerAd;
   bool _loaded = false;
 
@@ -41,10 +60,15 @@ class AdsService {
   void _notifyBannerStateChanged() => _onBannerStateChanged?.call();
 
   Future<void> init() async {
+    platformInitAttemptCount++;
+    if (!_shouldInvokePlatformAds) return;
     await MobileAds.instance.initialize();
   }
 
   Future<void> loadBanner() async {
+    platformLoadBannerAttemptCount++;
+    if (!_shouldInvokePlatformAds) return;
+
     await _bannerAd?.dispose();
     _bannerAd = null;
     _loaded = false;
@@ -84,8 +108,8 @@ class AdsService {
 }
 
 final adsServiceProvider = FutureProvider<AdsService>((ref) async {
-  final adsRemoved = ref.watch(adsRemovedProvider);
-  if (adsRemoved || _isFlutterTest) {
+  final entitlement = await ref.watch(entitlementServiceProvider.future);
+  if (entitlement.adsRemoved) {
     return AdsService();
   }
 
@@ -105,7 +129,7 @@ final adsServiceProvider = FutureProvider<AdsService>((ref) async {
 
 /// Banner widget for [BottomAdSlot], or null when ads removed / not loaded.
 final bannerAdWidgetProvider = Provider<Widget?>((ref) {
-  if (ref.watch(adsRemovedProvider)) return null;
+  if (!ref.watch(adsMayShowProvider)) return null;
   ref.watch(bannerAdRevisionProvider);
 
   final async = ref.watch(adsServiceProvider);
