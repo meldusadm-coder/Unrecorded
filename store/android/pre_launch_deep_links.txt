@@ -1,0 +1,9 @@
+# Google Play pre-launch report deep links (max 3)
+# Paste into Play Console: Test and release → Testing → Pre-launch report → Settings
+# Source of truth: apps/mobile/lib/router.dart (playPreLaunchDeepLinks)
+# Takes effect on the next app bundle upload after Save.
+# https://support.google.com/googleplay/android-developer/answer/9842757#deep_links
+
+unrecorded://open/help
+unrecorded://open/alert-info
+unrecorded://open/settings

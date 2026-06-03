@@ -160,6 +160,28 @@ Source of truth: [`apps/site/privacy.html`](../apps/site/privacy.html) (deploy `
 
 Privacy contact in the policy: **privacy@unrecorded.app** (operator: **Meldlife Ltd**). In AdMob, link the same policy URL to your app.
 
+### Pre-launch report deep links (Android)
+
+After each release AAB, Google Play can crawl up to **three extra entry points** in addition to the default launcher crawl. URIs are defined in [`apps/mobile/lib/router.dart`](../apps/mobile/lib/router.dart) (`playPreLaunchDeepLinks`) and listed in [`store/android/pre_launch_deep_links.txt`](../store/android/pre_launch_deep_links.txt).
+
+1. **Play Console** → your app → **Test and release** → **Testing** → **Pre-launch report** → **Settings**.
+2. Add the three `unrecorded://open/...` URIs from the store file (or router constants).
+3. **Save**, then upload a new bundle (or save a production release) so a fresh pre-launch run uses them.
+
+The launcher crawl already exercises the scan home screen (`/`). Deep links target help, alert-info, and settings so Robo explores more UI without using slots on IAP or external `mailto:` flows.
+
+Verify locally before upload (debug APK on device/emulator):
+
+```bash
+adb shell am start -W -a android.intent.action.VIEW \
+  -d "unrecorded://open/help" \
+  app.unrecorded.unrecorded_mobile/.MainActivity
+```
+
+Repeat for `unrecorded://open/alert-info` and `unrecorded://open/settings`. Each should open that screen, not the scan home.
+
+Google help: [Use a pre-launch report — deep links](https://support.google.com/googleplay/android-developer/answer/9842757#deep_links).
+
 ## iOS (manual / future automation)
 
 No iOS release workflow yet. For local builds on macOS:
