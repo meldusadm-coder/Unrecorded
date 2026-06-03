@@ -13,6 +13,7 @@
 
 ### Fixed
 - `tool/play/run.sh` is executable in the repo for Play upload helpers.
+- Release workflow stages AAB Dart symbol maps before the convenience APK build so Play crash deobfuscation matches the uploaded bundle.
 
 
 ## 0.5.0+10
