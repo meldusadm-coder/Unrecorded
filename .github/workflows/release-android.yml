@@ -174,7 +174,7 @@ jobs:
         working-directory: apps/mobile
         run: |
           set -euo pipefail
-          args=(--release)
+          args=(--release --obfuscate --split-debug-info=build/symbols)
           if [[ -z "${{ steps.admob.outputs.banner_id }}" ]]; then
             echo "::error::Set repository variable or secret ADMOB_BANNER_ID before running a release build."
             exit 1
@@ -200,11 +200,14 @@ jobs:
           fi
           echo "Release AAB is signed: ${AAB}"
 
+      - name: Report estimated download size
+        run: bash tool/release/report_aab_size.sh apps/mobile/build/app/outputs/bundle/release/app-release.aab
+
       - name: Build release APK (convenience)
         working-directory: apps/mobile
         run: |
           set -euo pipefail
-          args=(--release)
+          args=(--release --obfuscate --split-debug-info=build/symbols)
           args+=(--dart-define=ADMOB_BANNER_ID="${{ steps.admob.outputs.banner_id }}")
           flutter build apk "${args[@]}"
 
@@ -221,6 +224,10 @@ jobs:
           if [[ -f "${APK}" ]]; then
             cp "${APK}" "${RUNNER_TEMP}/app-release.apk"
           fi
+          SYMBOLS="apps/mobile/build/symbols"
+          if [[ -d "${SYMBOLS}" ]]; then
+            cp -a "${SYMBOLS}" "${RUNNER_TEMP}/dart-symbols"
+          fi
 
       - name: Extract release notes
         run: bash tool/release/extract_release_notes.sh "${FULL_VERSION}" "${RUNNER_TEMP}/release-notes.md"
@@ -232,6 +239,7 @@ jobs:
           path: |
             ${{ runner.temp }}/app-release.aab
             ${{ runner.temp }}/app-release.apk
+            ${{ runner.temp }}/dart-symbols
             ${{ runner.temp }}/release-notes.md
           if-no-files-found: warn
 

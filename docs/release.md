@@ -54,8 +54,12 @@ Verify:
    ```bash
    flutter pub get
    cd apps/mobile
-   flutter build appbundle --release   # Play Store artifact (.aab)
-   flutter build apk --release         # optional convenience APK
+   flutter build appbundle --release \
+     --dart-define=ADMOB_BANNER_ID=ca-app-pub-3940256099942544/6300978111 \
+     --obfuscate --split-debug-info=build/symbols
+   flutter build apk --release \
+     --dart-define=ADMOB_BANNER_ID=ca-app-pub-3940256099942544/6300978111 \
+     --obfuscate --split-debug-info=build/symbols
    ```
 
 Outputs are under `apps/mobile/build/` (or the dev-container symlink target). **Submit the `.aab` to Google Play**, not the APK.
@@ -81,7 +85,7 @@ Workflow: [`.github/workflows/release-android.yml`](../.github/workflows/release
 
 Ensure the release PR already bumped `pubspec.yaml` on `main` before merge; the automatic run does **not** bump version again.
 
-The workflow runs format, analyze, tests, release copy checks, signed AAB/APK build, artifact upload, Play upload (internal draft by default), and GitHub Release.
+The workflow runs format, analyze, tests, release copy checks, signed AAB/APK build (with `--obfuscate` and `--split-debug-info`), estimated download-size report (`tool/release/report_aab_size.sh`), artifact upload (AAB, APK, and `dart-symbols/` for stack-trace deobfuscation), Play upload (internal draft by default), and GitHub Release.
 
 ### Required GitHub Secrets (signed release)
 
