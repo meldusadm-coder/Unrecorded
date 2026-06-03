@@ -20,7 +20,7 @@ class MainShell extends ConsumerWidget {
   final Widget child;
 
   bool _showAdSlot(WidgetRef ref) {
-    if (ref.watch(adsRemovedProvider)) return false;
+    if (!ref.watch(adsMayShowProvider)) return false;
 
     if (location != '/') return true;
 
