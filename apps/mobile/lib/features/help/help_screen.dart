@@ -67,6 +67,13 @@ class HelpScreen extends ConsumerWidget {
             const SizedBox(height: 12),
             const HelperText(text: AppCopy.alertExampleFooter),
             const Divider(height: 32),
+            Text(
+              AppCopy.recentRiskMissedAlertTitle,
+              style: theme.textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            const HelperText(text: AppCopy.recentRiskMissedAlertBody),
+            const Divider(height: 32),
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const UnrecordedIcon(

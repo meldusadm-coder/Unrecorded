@@ -9,6 +9,7 @@ import 'package:unrecorded_radio/unrecorded_radio.dart';
 import '../features/scan/scan_state.dart';
 import 'dev_testing_prefs.dart';
 import 'protection_prefs.dart';
+import 'recent_risk_controller.dart';
 import 'risk_notification_service.dart';
 import 'scan_lifecycle_coordinator.dart';
 import 'scan_runtime.dart';
@@ -75,6 +76,16 @@ final scanControllerProvider =
 
       if (!backgroundOwns) {
         unawaited(notifications.syncProtectionStatusNotification(state));
+      }
+
+      if (previous.status != ScanStatus.possibleRiskDetected &&
+          state.status == ScanStatus.possibleRiskDetected) {
+        unawaited(
+          ref.read(recentRiskControllerProvider.notifier).recordPossibleRisk(
+                riskLevel: state.riskLevel,
+                reasons: state.safeReasonKeys,
+              ),
+        );
       }
 
       if (!backgroundOwns &&
@@ -198,12 +209,19 @@ class ScanController extends StateNotifier<ScanState> {
     final dismissedRiskStableKeys =
         sameRiskEvidence ? state.dismissedRiskStableKeys : const <String>[];
 
+    final safeReasonKeys = partial.status == ScanStatus.possibleRiskDetected
+        ? recentRiskReasonsForAssessments(
+            pipelineResult.snapshot.assessments,
+          )
+        : const <RecentRiskReason>[];
+
     _emit(
       partial.copyWith(
         possibleRiskSignals: risk,
         otherNearbySignals: other,
         alertDismissed: alertDismissed,
         dismissedRiskStableKeys: dismissedRiskStableKeys,
+        safeReasonKeys: safeReasonKeys,
       ),
     );
   }

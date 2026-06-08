@@ -51,6 +51,22 @@ void main() {
       AppCopy.widgetHelpTitle,
       AppCopy.widgetHelpBody,
       AppCopy.widgetHelpLimitations,
+      AppCopy.recentRiskCardTitle,
+      AppCopy.recentRiskCardBody('30 minutes'),
+      AppCopy.recentRiskScreenTitle,
+      AppCopy.recentRiskScreenBody,
+      AppCopy.recentRiskPrivacyNote,
+      AppCopy.recentRiskGenericReason,
+      AppCopy.recentRiskReminderTitle,
+      AppCopy.recentRiskReminderSubtitle,
+      AppCopy.recentRiskReminderHelp,
+      AppCopy.recentRiskMissedAlertTitle,
+      AppCopy.recentRiskMissedAlertBody,
+      AppCopy.recentRiskExplanationSectionTitle,
+      AppCopy.recentRiskExplanationSectionBody,
+      AppCopy.widgetPossibleRiskRecent,
+      AppCopy.widgetOpenAppToView,
+      ...RecentRiskReason.values.map(AppCopy.recentRiskReasonLabel),
     ];
 
     for (final text in copyStrings) {

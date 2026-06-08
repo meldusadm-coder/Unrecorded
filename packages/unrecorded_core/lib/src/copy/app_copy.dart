@@ -1,3 +1,5 @@
+import '../models/recent_risk_reason.dart';
+
 /// Centralised user-facing copy for calm, plain-English UX.
 ///
 /// Monetisation copy (remove-ads / IAP) lives in
@@ -180,4 +182,70 @@ class AppCopy {
       'operating system limits. Scan data stays on your device. A higher '
       'risk level means nearby signals may match known privacy risk '
       'indicators — it is not proof that anyone is recording.';
+
+  // Recent possible-risk reminder
+  static const String recentRiskCardTitle = 'Possible risk noticed recently';
+
+  static String recentRiskCardBody(String windowLabel) =>
+      'Unrecorded saw nearby signals matching recording-risk indicators '
+      'within the last $windowLabel. This is not proof of recording.';
+
+  static const String recentRiskScreenTitle = 'Recent possible risk';
+
+  static const String recentRiskScreenBody =
+      'Unrecorded noticed nearby Bluetooth signals that matched possible '
+      'recording-risk indicators recently. The signals are no longer '
+      'available, so details may be limited. This is not proof that '
+      'anyone was recording.';
+
+  static const String recentRiskPrivacyNote =
+      'No device names, addresses, or scan data are stored.';
+
+  static const String recentRiskGenericReason =
+      'Matched possible recording-risk indicators.';
+
+  static const String recentRiskReminderTitle = 'Recent risk reminder';
+
+  static const String recentRiskReminderSubtitle =
+      'Show a short-lived reminder if you miss a possible-risk alert.';
+
+  static const String recentRiskReminderHelp =
+      'This is not a full history. Unrecorded only stores the latest '
+      'possible-risk time locally and automatically hides it after your '
+      'chosen window.';
+
+  static const String recentRiskMissedAlertTitle = 'What if I miss an alert?';
+
+  static const String recentRiskMissedAlertBody =
+      'If Unrecorded notices a possible recording-risk signal and you miss '
+      'the notification, the app can show a short-lived reminder on the main '
+      'screen. This is not a full history and does not store device names, '
+      'addresses, or raw scan data. You can choose how long reminders stay '
+      'visible in Settings. A possible-risk reminder means nearby Bluetooth '
+      'signals matched risk indicators. It is not proof that anyone was recording.';
+
+  static const String recentRiskExplanationSectionTitle =
+      'What if I miss an alert?';
+
+  static const String recentRiskExplanationSectionBody =
+      'If you miss a possible-risk notification, Unrecorded can show a '
+      'short-lived reminder on the main screen. This is not a full history. '
+      'A reminder means nearby signals matched risk indicators — it is not '
+      'proof that anyone was recording.';
+
+  static const String widgetPossibleRiskRecent =
+      'Possible risk noticed recently';
+
+  static const String widgetOpenAppToView = 'Open app to view';
+
+  static String recentRiskReasonLabel(RecentRiskReason reason) =>
+      switch (reason) {
+        RecentRiskReason.matchedKnownPattern =>
+          'Matched a known recording-risk pattern',
+        RecentRiskReason.repeatedSighting => 'Seen more than once nearby',
+        RecentRiskReason.strongSignal => 'Strong nearby signal',
+        RecentRiskReason.connectable => 'Connectable device nearby',
+        RecentRiskReason.addressPrefixHint =>
+          'Address prefix matched a known pattern',
+      };
 }

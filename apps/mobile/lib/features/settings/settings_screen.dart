@@ -11,6 +11,7 @@ import '../../services/app_version.dart';
 import '../../services/ad_consent_service.dart';
 import '../../services/entitlement_service.dart';
 import '../../services/notification_prefs.dart';
+import '../../services/recent_risk_controller.dart';
 import '../../services/notification_risk_threshold.dart';
 import '../../services/notification_status_provider.dart';
 import '../../services/risk_notification_service.dart';
@@ -105,6 +106,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final theme = Theme.of(context);
     final adsRemoved = ref.watch(adsRemovedProvider);
     final privacyOptionsRequired = ref.watch(adPrivacyOptionsRequiredProvider);
+    final recentRiskWindow = ref.watch(recentRiskControllerProvider).window;
 
     return Scaffold(
       appBar: AppBar(
@@ -168,6 +170,34 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onSelected: _setNotificationRiskThreshold,
               ),
             ],
+            const SizedBox(height: 16),
+            DropdownMenu<RecentRiskWindow>(
+              key: ValueKey(recentRiskWindow),
+              label: const Text(AppCopy.recentRiskReminderTitle),
+              helperText: AppCopy.recentRiskReminderSubtitle,
+              initialSelection: recentRiskWindow,
+              trailingIcon: UnrecordedIcon(
+                asset: UnrecordedIconAsset.more,
+                size: 24,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              dropdownMenuEntries: RecentRiskWindow.values
+                  .map(
+                    (window) => DropdownMenuEntry(
+                      value: window,
+                      label: window.label,
+                    ),
+                  )
+                  .toList(),
+              onSelected: (value) {
+                if (value == null) return;
+                ref
+                    .read(recentRiskControllerProvider.notifier)
+                    .setWindow(value);
+              },
+            ),
+            const SizedBox(height: 8),
+            const HelperText(text: AppCopy.recentRiskReminderHelp),
             const SizedBox(height: 16),
             const BackgroundProtectionToggle(),
             const SizedBox(height: 24),

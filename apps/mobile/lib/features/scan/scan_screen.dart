@@ -9,7 +9,10 @@ import '../../copy/feedback_copy.dart';
 import 'background_protection_stopped_banner.dart';
 import 'background_protection_toggle.dart';
 import 'notification_mode_banner.dart';
+import '../../router.dart';
 import '../../services/background_protection_controller.dart';
+import '../../services/recent_risk_controller.dart';
+import '../../services/recent_risk_visibility.dart';
 import '../../services/scanner_provider.dart';
 import '../../services/widget_sync_service.dart';
 import '../../utils/time_format.dart';
@@ -26,6 +29,8 @@ class ScanScreen extends ConsumerWidget {
     final state = ref.watch(scanControllerProvider);
     final controller = ref.read(scanControllerProvider.notifier);
     final showAlert = state.showsRiskAlert;
+    final recentRisk = ref.watch(recentRiskVisibleProvider);
+    final recentWindow = ref.watch(recentRiskControllerProvider).window.label;
     final topRisk = state.possibleRiskSignals.isEmpty
         ? null
         : state.possibleRiskSignals.first;
@@ -86,6 +91,17 @@ class ScanScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             _buildNextStep(context, state, controller),
+            if (recentRisk != null) ...[
+              const SizedBox(height: 16),
+              RiskAlertCard(
+                title: AppCopy.recentRiskCardTitle,
+                body: AppCopy.recentRiskCardBody(recentWindow),
+                onViewDetails: () => context.push(recentRiskRoute),
+                onDismiss: () => ref
+                    .read(recentRiskControllerProvider.notifier)
+                    .acknowledge(),
+              ),
+            ],
             if (showAlert) ...[
               const SizedBox(height: 16),
               if (topRisk != null)

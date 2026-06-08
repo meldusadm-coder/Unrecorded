@@ -5,6 +5,7 @@ export 'services/notification_payloads.dart';
 
 import 'features/alerts/alert_details_screen.dart';
 import 'features/alerts/alert_explanation_screen.dart';
+import 'features/alerts/recent_risk_screen.dart';
 import 'features/feedback/feedback_screen.dart';
 import 'features/help/help_screen.dart';
 import 'features/monetisation/remove_ads_screen.dart';
@@ -20,6 +21,9 @@ const alertInfoRoute = '/alert-info';
 
 /// Live alert context (devices, level, reasons) from the current scan.
 const alertDetailsRoute = '/alert-details';
+
+/// Short-lived recent possible-risk reminder details.
+const recentRiskRoute = '/recent-risk';
 
 /// Custom scheme host for Android VIEW intents (`unrecorded://open/...`).
 const deepLinkScheme = 'unrecorded';
@@ -70,6 +74,10 @@ GoRouter buildAppRouter() => GoRouter(
         GoRoute(
           path: alertInfoRoute,
           builder: (context, state) => const AlertExplanationScreen(),
+        ),
+        GoRoute(
+          path: recentRiskRoute,
+          builder: (context, state) => const RecentRiskScreen(),
         ),
         GoRoute(
           path: '/remove-ads',

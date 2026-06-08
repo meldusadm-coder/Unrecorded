@@ -11,6 +11,7 @@ import 'background_protection_snapshot.dart';
 import 'background_risk_alert_notifier.dart';
 import 'background_scan_runtime.dart';
 import 'protection_status_notification.dart';
+import 'recent_risk_recording.dart';
 import 'scan_lifecycle_coordinator.dart';
 import 'scan_runtime.dart';
 import 'signal_ui_mapper.dart';
@@ -93,6 +94,12 @@ class _BackgroundScanTaskHandler extends TaskHandler {
 
     if (_previousStatus != ScanStatus.possibleRiskDetected &&
         state.status == ScanStatus.possibleRiskDetected) {
+      unawaited(
+        recordRecentRiskFromBackground(
+          riskLevel: pipelineResult.scoring.level,
+          assessments: pipelineResult.snapshot.assessments,
+        ),
+      );
       unawaited(
         _riskNotifier.showRiskAlertIfEnabled(
           riskLevel: pipelineResult.scoring.level,
