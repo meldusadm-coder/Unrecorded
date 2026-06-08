@@ -6,7 +6,7 @@ import 'package:unrecorded_core/unrecorded_core.dart';
 import 'package:unrecorded_ui/unrecorded_ui.dart';
 
 import '../../copy/feedback_copy.dart';
-
+import 'notification_mode_banner.dart';
 import '../../services/scanner_provider.dart';
 import '../../services/widget_sync_service.dart';
 import '../../utils/time_format.dart';
@@ -71,6 +71,8 @@ class ScanScreen extends ConsumerWidget {
               subtitle: _subtitleForStatus(state),
               lastCheckedText: _lastCheckedText(state),
             ),
+            const SizedBox(height: 12),
+            NotificationModeBanner(state: state),
             const SizedBox(height: 12),
             const HelperText(
               text: AppCopy.scanHelper,

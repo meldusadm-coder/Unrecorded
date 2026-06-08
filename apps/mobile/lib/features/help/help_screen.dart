@@ -103,6 +103,13 @@ class HelpScreen extends ConsumerWidget {
               const HelperText(text: AppCopy.widgetHelpLimitations),
             ],
             const Divider(height: 32),
+            Text(
+              AppCopy.notificationsHelpTitle,
+              style: theme.textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            const HelperText(text: AppCopy.notificationsHelpBody),
+            const Divider(height: 32),
             ListTile(
               key: const Key('help_feedback_tile'),
               contentPadding: EdgeInsets.zero,

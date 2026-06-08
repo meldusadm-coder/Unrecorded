@@ -21,6 +21,9 @@ const alertDetailsRoute = '/alert-details';
 
 const notificationAlertPayload = 'alert-details';
 
+/// Payload for taps on the ongoing protection-status notification.
+const notificationProtectionStatusPayload = 'protection-status';
+
 /// Custom scheme host for Android VIEW intents (`unrecorded://open/...`).
 const deepLinkScheme = 'unrecorded';
 const deepLinkHost = 'open';
@@ -83,6 +86,13 @@ void navigateToAlertDetails() {
   final context = rootNavigatorKey.currentContext;
   if (context == null) return;
   GoRouter.of(context).push(alertDetailsRoute);
+}
+
+/// Navigate to the main protection / scan screen (status notification tap).
+void navigateToProtectionScreen() {
+  final context = rootNavigatorKey.currentContext;
+  if (context == null) return;
+  GoRouter.of(context).go('/');
 }
 
 /// @deprecated Use [navigateToAlertDetails]. Kept for tests migrating off old name.

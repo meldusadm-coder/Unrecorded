@@ -69,6 +69,8 @@ final scanControllerProvider =
       ref.read(widgetSyncTriggerProvider.notifier).state++;
       final notifications = ref.read(riskNotificationServiceProvider);
 
+      unawaited(notifications.syncProtectionStatusNotification(state));
+
       if (previous.status != ScanStatus.possibleRiskDetected &&
           state.status == ScanStatus.possibleRiskDetected) {
         unawaited(

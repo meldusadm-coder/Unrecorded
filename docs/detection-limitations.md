@@ -12,6 +12,34 @@ Unrecorded detects **possible** nearby smart glasses or wearable recording indic
 - While protection is on, scanning runs in **short windows** with **rest periods** between them to reduce battery use.
 - **Keep the app open** for the most reliable scanning. There is no always-on background protection service in this version.
 - Risk notifications may appear while protection is active, but Android may limit behaviour when the app is not in the foreground.
+- An ongoing **protection status** notification appears in the Android notification shade while protection is active and notification permission is granted. It means the app process is still running — not that recording was detected.
+- **Possible-risk alert** notifications are separate, higher-priority alerts when nearby signals match risk indicators. They are not proof of recording.
+
+## Notifications (Android)
+
+| Notification | Meaning |
+|---|---|
+| Protection status (ongoing) | Protection is active while the app is running. Tap to open the main screen. |
+| Possible-risk alert | Nearby Bluetooth signals matched risk indicators. Tap for details. Not proof of recording. |
+
+Scanning reliability depends on Android version, battery settings, Bluetooth state, permissions, and whether the app can keep running. There is no always-on foreground service in this version — if Android stops the app, protection and notifications stop too.
+
+### Manual UAT checklist
+
+1. Fresh install on Android 13+ physical device.
+2. Grant Bluetooth and notification permissions.
+3. Enable protection.
+4. Confirm notification shade shows “Unrecorded protection is active”.
+5. Press Home / lock screen / switch apps.
+6. Confirm notification remains visible while protection is active.
+7. Tap notification and confirm app opens to main protection screen.
+8. Trigger demo high-risk alert.
+9. Confirm a separate possible-risk alert appears.
+10. Pause protection.
+11. Confirm status notification is removed.
+12. Repeat with notification permission denied and confirm in-app explanation is clear.
+13. Repeat with battery saver enabled if practical.
+14. Test on at least one physical Android device, not only emulator.
 
 ## Why detection is probabilistic
 

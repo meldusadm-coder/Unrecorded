@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:unrecorded_core/unrecorded_core.dart';
 import 'package:unrecorded_ui/unrecorded_ui.dart';
 
@@ -11,6 +12,7 @@ import '../../services/ad_consent_service.dart';
 import '../../services/entitlement_service.dart';
 import '../../services/notification_prefs.dart';
 import '../../services/notification_risk_threshold.dart';
+import '../../services/notification_status_provider.dart';
 import '../../services/risk_notification_service.dart';
 import 'debug_testing_section.dart';
 
@@ -47,12 +49,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           .requestPermissionIfNeeded();
       if (!granted && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Notification permission was denied. Enable it in system settings.',
+          // SnackBarAction callback prevents a fully const SnackBar.
+          // ignore: prefer_const_constructors
+          SnackBar(
+            content: const Text(AppCopy.notificationPermissionDeniedHelper),
+            // ignore: prefer_const_constructors
+            action: SnackBarAction(
+              label: 'Settings',
+              onPressed: openAppSettings,
             ),
           ),
         );
+        ref.invalidate(notificationsOsEnabledProvider);
         return;
       }
     } else {
@@ -61,6 +69,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     final prefs = await NotificationPrefs.load();
     await prefs.setRiskNotificationsEnabled(enabled);
+    ref.invalidate(riskNotificationsEnabledProvider);
+    ref.invalidate(notificationsOsEnabledProvider);
     if (!mounted) return;
     setState(() => _riskNotificationsEnabled = enabled);
   }
@@ -125,6 +135,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ? null
                   : _setRiskNotifications,
             ),
+            const SizedBox(height: 8),
+            const HelperText(text: AppCopy.notificationsHelpBody),
             if (_riskNotificationsEnabled == true) ...[
               const SizedBox(height: 8),
               DropdownMenu<NotificationRiskThreshold>(

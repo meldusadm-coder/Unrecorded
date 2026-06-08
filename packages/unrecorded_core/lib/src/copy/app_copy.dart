@@ -86,6 +86,41 @@ class AppCopy {
       'Choose the minimum risk level before a notification is sent. '
       'The in-app alert on the scan screen is unchanged.';
 
+  static const String protectionStatusNotificationTitle =
+      'Unrecorded protection is active';
+
+  static const String protectionStatusNotificationDefaultBody =
+      'Watching for possible nearby recording-risk signals.';
+
+  static const String protectionStatusNotificationScanningBody =
+      'Scanning is most reliable while the app remains open.';
+
+  static const String notificationModeRiskAlertsOn =
+      'Risk alerts on: you\'ll see notifications for possible risk.';
+
+  static const String notificationModeProtectionStatusOn =
+      'Protection status on: Android shows Unrecorded while protection is active.';
+
+  static const String notificationModeNotificationsOff =
+      'Notifications off: alerts only appear in the app.';
+
+  static const String notificationModeScanningReliability =
+      'Scanning is most reliable while the app remains open.';
+
+  static const String notificationPermissionDeniedHelper =
+      'Notification permission is off. Enable notifications in system settings '
+      'to see protection status and possible-risk alerts outside the app.';
+
+  static const String notificationsHelpTitle = 'What notifications mean';
+
+  static const String notificationsHelpBody =
+      'The protection status notification means protection is active while '
+      'the app is running — it is not proof that someone is recording. '
+      'A possible-risk notification means nearby Bluetooth signals matched '
+      'risk indicators, which is also not proof of recording. Scanning '
+      'reliability depends on Android, permissions, Bluetooth, and whether '
+      'the app can keep running.';
+
   // Widget lines
   static const String widgetScanningActive = 'Scanning active';
   static const String widgetNoObviousRisk = 'No obvious risk';
