@@ -12,6 +12,7 @@ import 'protection_prefs.dart';
 import 'recent_risk_controller.dart';
 import 'risk_notification_service.dart';
 import 'scan_lifecycle_coordinator.dart';
+import 'scan_preflight_mapping.dart';
 import 'scan_runtime.dart';
 import 'scanner_config.dart';
 import 'signal_ui_mapper.dart';
@@ -69,8 +70,8 @@ final scanControllerProvider =
     ),
     pipeline: pipeline,
     mapper: ref.read(signalUiMapperProvider),
+    isBackgroundOwnsScanning: () => ref.read(backgroundOwnsScanningProvider),
     onStateChanged: (previous, state) {
-      ref.read(widgetSyncTriggerProvider.notifier).state++;
       final notifications = ref.read(riskNotificationServiceProvider);
       final backgroundOwns = ref.read(backgroundOwnsScanningProvider);
 
@@ -78,7 +79,8 @@ final scanControllerProvider =
         unawaited(notifications.syncProtectionStatusNotification(state));
       }
 
-      if (previous.status != ScanStatus.possibleRiskDetected &&
+      if (!backgroundOwns &&
+          previous.status != ScanStatus.possibleRiskDetected &&
           state.status == ScanStatus.possibleRiskDetected) {
         unawaited(
           ref.read(recentRiskControllerProvider.notifier).recordPossibleRisk(
@@ -86,11 +88,6 @@ final scanControllerProvider =
                 reasons: state.safeReasonKeys,
               ),
         );
-      }
-
-      if (!backgroundOwns &&
-          previous.status != ScanStatus.possibleRiskDetected &&
-          state.status == ScanStatus.possibleRiskDetected) {
         unawaited(
           notifications.showRiskAlertIfEnabled(riskLevel: state.riskLevel),
         );
@@ -116,8 +113,6 @@ final scanControllerProvider =
 
   return controller;
 });
-
-final widgetSyncTriggerProvider = StateProvider<int>((ref) => 0);
 
 final scannerConfigControllerProvider =
     Provider<ScannerConfigController>((ref) {
@@ -174,11 +169,13 @@ class ScanController extends StateNotifier<ScanState> {
     required ScanLifecycleCoordinator coordinator,
     required DetectionPipeline pipeline,
     required SignalUiMapper mapper,
+    required bool Function() isBackgroundOwnsScanning,
     void Function(ScanState previous, ScanState next)? onStateChanged,
     Duration startupGraceDuration = const Duration(seconds: 5),
     int requiredElevatedScans = 2,
   })  : _coordinator = coordinator,
         _mapper = mapper,
+        _isBackgroundOwnsScanning = isBackgroundOwnsScanning,
         _onStateChanged = onStateChanged,
         super(const ScanState()) {
     _coordinator.onStateChanged = _onCoordinatorState;
@@ -186,6 +183,7 @@ class ScanController extends StateNotifier<ScanState> {
 
   final ScanLifecycleCoordinator _coordinator;
   final SignalUiMapper _mapper;
+  final bool Function() _isBackgroundOwnsScanning;
   final void Function(ScanState previous, ScanState next)? _onStateChanged;
 
   bool _startInFlight = false;
@@ -290,19 +288,13 @@ class ScanController extends StateNotifier<ScanState> {
     }
   }
 
-  bool _backgroundOwnsScanning = false;
-
-  void setBackgroundOwnsScanning(bool value) {
-    _backgroundOwnsScanning = value;
-  }
-
   /// Applies state mirrored from the foreground-service task isolate.
   void applyMirroredState(ScanState mirrored) {
     _emit(mirrored);
   }
 
   Future<void> startProtection({bool persist = true}) async {
-    if (_backgroundOwnsScanning) return;
+    if (_isBackgroundOwnsScanning()) return;
 
     if (_startInFlight ||
         state.status == ScanStatus.scanning ||
@@ -340,8 +332,8 @@ class ScanController extends StateNotifier<ScanState> {
       if (failure != null) {
         _emit(
           state.copyWith(
-            status: _statusForPreflight(failure),
-            statusMessage: _messageForPreflight(failure),
+            status: scanStatusForPreflightFailure(failure),
+            statusMessage: preflightMessageFor(failure),
             protectionRequested: true,
           ),
         );
@@ -375,27 +367,5 @@ class ScanController extends StateNotifier<ScanState> {
         clearStatusMessage: true,
       ),
     );
-  }
-
-  ScanStatus _statusForPreflight(ScanPreflightFailure failure) {
-    return switch (failure) {
-      ScanPreflightFailure.permissionDenied => ScanStatus.permissionDenied,
-      ScanPreflightFailure.permissionPermanentlyDenied =>
-        ScanStatus.permissionPermanentlyDenied,
-      ScanPreflightFailure.bluetoothOff => ScanStatus.bluetoothOff,
-      ScanPreflightFailure.bluetoothUnsupported =>
-        ScanStatus.bluetoothUnsupported,
-    };
-  }
-
-  String _messageForPreflight(ScanPreflightFailure failure) {
-    return switch (failure) {
-      ScanPreflightFailure.permissionDenied => AppCopy.permissionHelper,
-      ScanPreflightFailure.permissionPermanentlyDenied =>
-        AppCopy.permissionPermanentlyDeniedHelper,
-      ScanPreflightFailure.bluetoothUnsupported =>
-        AppCopy.bluetoothUnsupportedMessage,
-      ScanPreflightFailure.bluetoothOff => AppCopy.bluetoothOffMessage,
-    };
   }
 }

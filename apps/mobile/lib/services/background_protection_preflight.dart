@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:unrecorded_core/unrecorded_core.dart';
 
 import 'risk_notification_service.dart';
+import 'scan_preflight_mapping.dart';
 import 'scan_runtime.dart';
 
 /// Result of preflight checks before starting background protection.
@@ -68,26 +69,11 @@ class BackgroundProtectionPreflight {
     final bleResult = await _runtime.ensureAndroidReady();
     if (!bleResult.isOk) {
       return BackgroundProtectionPreflightResult.fail(
-        _mapBleFailure(bleResult.failure!),
+        backgroundPreflightFailureFor(bleResult.failure!),
       );
     }
 
     return const BackgroundProtectionPreflightResult.ok();
-  }
-
-  BackgroundProtectionPreflightFailure _mapBleFailure(
-    ScanPreflightFailure failure,
-  ) {
-    return switch (failure) {
-      ScanPreflightFailure.permissionDenied =>
-        BackgroundProtectionPreflightFailure.permissionDenied,
-      ScanPreflightFailure.permissionPermanentlyDenied =>
-        BackgroundProtectionPreflightFailure.permissionPermanentlyDenied,
-      ScanPreflightFailure.bluetoothOff =>
-        BackgroundProtectionPreflightFailure.bluetoothOff,
-      ScanPreflightFailure.bluetoothUnsupported =>
-        BackgroundProtectionPreflightFailure.bluetoothUnsupported,
-    };
   }
 
   String messageFor(BackgroundProtectionPreflightFailure failure) {
@@ -99,11 +85,11 @@ class BackgroundProtectionPreflight {
       BackgroundProtectionPreflightFailure.bluetoothUnsupported =>
         AppCopy.bluetoothUnsupportedMessage,
       BackgroundProtectionPreflightFailure.permissionDenied =>
-        AppCopy.permissionHelper,
+        preflightMessageFor(ScanPreflightFailure.permissionDenied),
       BackgroundProtectionPreflightFailure.permissionPermanentlyDenied =>
-        AppCopy.permissionPermanentlyDeniedHelper,
+        preflightMessageFor(ScanPreflightFailure.permissionPermanentlyDenied),
       BackgroundProtectionPreflightFailure.bluetoothOff =>
-        AppCopy.bluetoothOffMessage,
+        preflightMessageFor(ScanPreflightFailure.bluetoothOff),
       BackgroundProtectionPreflightFailure.serviceStartFailed =>
         AppCopy.backgroundProtectionServiceStartFailed,
     };

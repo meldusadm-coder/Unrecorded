@@ -2,8 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Thin interface over [FlutterForegroundTask] so Phase 1 can be
-/// exercised from the UI and future phases can inject fakes in tests.
+/// Thin interface over [FlutterForegroundTask] for UI control and test fakes.
 abstract class ForegroundServiceController {
   /// Set up IPC port and plugin options. Call once from main().
   void init();

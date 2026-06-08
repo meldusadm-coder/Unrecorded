@@ -73,6 +73,7 @@ ScanController _controllerWithNotifications(
     coordinator: coordinator,
     pipeline: pipeline,
     mapper: const SignalUiMapper(),
+    isBackgroundOwnsScanning: () => false,
     onStateChanged: (previous, state) {
       unawaited(notifications.syncProtectionStatusNotification(state));
 

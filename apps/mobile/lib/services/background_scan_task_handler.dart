@@ -13,6 +13,7 @@ import 'background_scan_runtime.dart';
 import 'protection_status_notification.dart';
 import 'recent_risk_recording.dart';
 import 'scan_lifecycle_coordinator.dart';
+import 'scan_preflight_mapping.dart';
 import 'scan_runtime.dart';
 import 'signal_ui_mapper.dart';
 
@@ -35,12 +36,20 @@ class _BackgroundScanTaskHandler extends TaskHandler {
   @override
   Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
     _log('task started (starter=${starter.name})');
+
+    final prefs = await BackgroundProtectionPrefs.load();
+    if (prefs.explicitlyStopped || !prefs.backgroundProtectionEnabled) {
+      _log('opt-in off; stopping task');
+      await FlutterForegroundTask.stopService();
+      return;
+    }
+
     _serviceRunning = true;
 
     final runtime = const BackgroundScanRuntime();
     final preflight = await runtime.ensureAndroidReady();
     if (!preflight.isOk) {
-      _sendSnapshot(_blockedSnapshot(preflight.failure!));
+      await _sendBlockedAndStop(preflight.failure!);
       return;
     }
 
@@ -54,7 +63,7 @@ class _BackgroundScanTaskHandler extends TaskHandler {
 
     final startFailure = await _coordinator!.startProtection();
     if (startFailure != null) {
-      _sendSnapshot(_blockedSnapshot(startFailure));
+      await _sendBlockedAndStop(startFailure);
       return;
     }
 
@@ -109,19 +118,9 @@ class _BackgroundScanTaskHandler extends TaskHandler {
     _previousStatus = state.status;
   }
 
-  BackgroundProtectionSnapshot _blockedSnapshot(Object failure) {
-    final status = switch (failure) {
-      ScanPreflightFailure.permissionDenied => ScanStatus.permissionDenied,
-      ScanPreflightFailure.permissionPermanentlyDenied =>
-        ScanStatus.permissionPermanentlyDenied,
-      ScanPreflightFailure.bluetoothOff => ScanStatus.bluetoothOff,
-      ScanPreflightFailure.bluetoothUnsupported =>
-        ScanStatus.bluetoothUnsupported,
-      _ => ScanStatus.error,
-    };
-
+  BackgroundProtectionSnapshot _blockedSnapshot(ScanPreflightFailure failure) {
     return BackgroundProtectionSnapshot(
-      status: status,
+      status: scanStatusForPreflightFailure(failure),
       riskLevel: RiskLevel.low,
       score: 0,
       reasonLabels: const [],
@@ -131,6 +130,12 @@ class _BackgroundScanTaskHandler extends TaskHandler {
       serviceRunning: false,
       stoppedReason: BackgroundProtectionStoppedReason.blocked,
     );
+  }
+
+  Future<void> _sendBlockedAndStop(ScanPreflightFailure failure) async {
+    _serviceRunning = false;
+    _sendSnapshot(_blockedSnapshot(failure));
+    await FlutterForegroundTask.stopService();
   }
 
   Future<void> _updateForegroundNotification(ScanStatus status) async {
@@ -160,16 +165,25 @@ class _BackgroundScanTaskHandler extends TaskHandler {
     _serviceRunning = false;
     await _coordinator?.pauseProtection();
     _coordinator = null;
+
+    final prefs = await BackgroundProtectionPrefs.load();
+    final stoppedReason = prefs.explicitlyStopped
+        ? BackgroundProtectionStoppedReason.none
+        : (prefs.backgroundProtectionEnabled
+            ? BackgroundProtectionStoppedReason.stoppedByAndroid
+            : BackgroundProtectionStoppedReason.none);
+
     _sendSnapshot(
-      const BackgroundProtectionSnapshot(
+      BackgroundProtectionSnapshot(
         status: ScanStatus.paused,
         riskLevel: RiskLevel.low,
         score: 0,
-        reasonLabels: [],
+        reasonLabels: const [],
         possibleRiskCount: 0,
         otherNearbyCount: 0,
         isDemoMode: false,
         serviceRunning: false,
+        stoppedReason: stoppedReason,
       ),
     );
   }

@@ -55,6 +55,9 @@ class BackgroundProtectionState {
 }
 
 /// Coordinates opt-in Android background protection.
+///
+/// Risk alerts and recent-risk recording while the foreground service runs are
+/// owned by the task isolate; this controller only mirrors safe scan state.
 class BackgroundProtectionController
     extends StateNotifier<BackgroundProtectionState> {
   BackgroundProtectionController({
@@ -63,7 +66,6 @@ class BackgroundProtectionController
     required void Function(ScanState state) applyMirroredScanState,
     required Future<void> Function() pauseMainProtection,
     required void Function(bool running) onServiceRunningChanged,
-    required RiskNotificationService notifications,
     bool? isAndroidPlatform,
   })  : _isAndroid = isAndroidPlatform ?? Platform.isAndroid,
         _foregroundService = foregroundService,
@@ -71,7 +73,6 @@ class BackgroundProtectionController
         _applyMirroredScanState = applyMirroredScanState,
         _pauseMainProtection = pauseMainProtection,
         _onServiceRunningChanged = onServiceRunningChanged,
-        _notifications = notifications,
         super(const BackgroundProtectionState()) {
     _foregroundService.addDataCallback(_onTaskData);
   }
@@ -82,9 +83,6 @@ class BackgroundProtectionController
   final void Function(ScanState state) _applyMirroredScanState;
   final Future<void> Function() _pauseMainProtection;
   final void Function(bool running) _onServiceRunningChanged;
-  final RiskNotificationService _notifications;
-
-  ScanStatus? _previousMirroredStatus;
 
   void disposeController() {
     _foregroundService.removeDataCallback(_onTaskData);
@@ -94,28 +92,28 @@ class BackgroundProtectionController
     final snapshot = BackgroundProtectionSnapshot.fromJson(data);
     if (snapshot == null) return;
 
-    state = state.copyWith(
+    var next = state.copyWith(
       serviceRunning: snapshot.serviceRunning,
       stoppedReason: snapshot.stoppedReason,
       clearLastFailureMessage: true,
     );
 
+    if (!snapshot.serviceRunning &&
+        snapshot.stoppedReason ==
+            BackgroundProtectionStoppedReason.stoppedByAndroid) {
+      next = next.copyWith(enabled: true);
+    }
+
+    state = next;
     _onServiceRunningChanged(snapshot.serviceRunning);
 
     if (snapshot.serviceRunning) {
       _applyMirroredScanState(snapshot.toScanState());
-      if (_previousMirroredStatus != ScanStatus.possibleRiskDetected &&
-          snapshot.status == ScanStatus.possibleRiskDetected) {
-        unawaited(
-          _notifications.showRiskAlertIfEnabled(riskLevel: snapshot.riskLevel),
-        );
-      }
-      _previousMirroredStatus = snapshot.status;
     }
   }
 
-  /// Called on app start when [BackgroundProtectionPrefs.backgroundProtectionEnabled].
-  Future<void> reconcileOnResume() async {
+  /// Reconciles persisted user intent with the foreground-service process.
+  Future<void> reconcileBackgroundProtection() async {
     if (!_isAndroid) return;
 
     final prefs = await BackgroundProtectionPrefs.load();
@@ -124,6 +122,7 @@ class BackgroundProtectionController
     if (prefs.explicitlyStopped) {
       await prefs.clearExplicitlyStopped();
       state = const BackgroundProtectionState();
+      _onServiceRunningChanged(false);
       return;
     }
 
@@ -133,6 +132,7 @@ class BackgroundProtectionController
         serviceRunning: running,
         stoppedReason: BackgroundProtectionStoppedReason.none,
       );
+      _onServiceRunningChanged(running);
       return;
     }
 
@@ -147,6 +147,7 @@ class BackgroundProtectionController
       return;
     }
 
+    _onServiceRunningChanged(false);
     state = state.copyWith(
       enabled: true,
       serviceRunning: false,
@@ -205,7 +206,6 @@ class BackgroundProtectionController
       stoppedReason: BackgroundProtectionStoppedReason.none,
       clearLastFailureMessage: true,
     );
-    _previousMirroredStatus = null;
     return true;
   }
 
@@ -221,10 +221,9 @@ class BackgroundProtectionController
 
     _onServiceRunningChanged(false);
     state = const BackgroundProtectionState();
-    _previousMirroredStatus = null;
   }
 
-  /// Phase 2a: ask the task isolate to post a test risk notification.
+  /// Debug UAT: ask the task isolate to post a test risk notification.
   Future<void> requestTestRiskNotification() async {
     if (!state.serviceRunning) return;
     FlutterForegroundTask.sendDataToTask(const {'type': 'test_risk_alert'});
@@ -254,11 +253,7 @@ final backgroundProtectionControllerProvider = StateNotifierProvider<
     },
     onServiceRunningChanged: (running) {
       ref.read(backgroundOwnsScanningProvider.notifier).state = running;
-      ref.read(scanControllerProvider.notifier).setBackgroundOwnsScanning(
-            running,
-          );
     },
-    notifications: ref.watch(riskNotificationServiceProvider),
   );
 
   ref.onDispose(controller.disposeController);

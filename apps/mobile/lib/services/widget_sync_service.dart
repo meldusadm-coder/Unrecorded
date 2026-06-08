@@ -111,7 +111,6 @@ final widgetSyncServiceProvider = Provider<WidgetSyncService>((ref) {
 
   ref.listen(scanControllerProvider, (_, __) => syncWidget());
   ref.listen(recentRiskControllerProvider, (_, __) => syncWidget());
-  ref.listen(widgetSyncTriggerProvider, (_, __) => syncWidget());
 
   return service;
 });

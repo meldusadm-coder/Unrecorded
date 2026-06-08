@@ -56,6 +56,7 @@ ScanController _controllerWithRecentRiskRecording({
     coordinator: coordinator,
     pipeline: pipeline,
     mapper: const SignalUiMapper(),
+    isBackgroundOwnsScanning: () => false,
     onStateChanged: (previous, state) {
       if (previous.status != ScanStatus.possibleRiskDetected &&
           state.status == ScanStatus.possibleRiskDetected) {

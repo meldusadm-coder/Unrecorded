@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -39,6 +41,11 @@ class _AppBootstrapState extends ConsumerState<AppBootstrap>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       ref.read(recentRiskControllerProvider.notifier).reload();
+      unawaited(
+        ref
+            .read(backgroundProtectionControllerProvider.notifier)
+            .reconcileBackgroundProtection(),
+      );
     }
   }
 
@@ -53,7 +60,7 @@ class _AppBootstrapState extends ConsumerState<AppBootstrap>
     if (bgPrefs.backgroundProtectionEnabled) {
       await ref
           .read(backgroundProtectionControllerProvider.notifier)
-          .reconcileOnResume();
+          .reconcileBackgroundProtection();
       return;
     }
 

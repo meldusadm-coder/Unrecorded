@@ -23,18 +23,20 @@ class DebugTestingSection extends ConsumerStatefulWidget {
 
 class _DebugTestingSectionState extends ConsumerState<DebugTestingSection> {
   String _taskStatus = 'idle';
-  late final ForegroundServiceController _fgs;
+  ForegroundServiceController? _fgs;
 
   @override
   void initState() {
     super.initState();
-    _fgs = ref.read(foregroundServiceControllerProvider);
-    _fgs.addDataCallback(_onTaskData);
+    if (kReleaseMode) return;
+    final fgs = ref.read(foregroundServiceControllerProvider);
+    fgs.addDataCallback(_onTaskData);
+    _fgs = fgs;
   }
 
   @override
   void dispose() {
-    _fgs.removeDataCallback(_onTaskData);
+    _fgs?.removeDataCallback(_onTaskData);
     super.dispose();
   }
 
@@ -176,7 +178,7 @@ class _DebugTestingSectionState extends ConsumerState<DebugTestingSection> {
                       .read(backgroundProtectionControllerProvider.notifier)
                       .requestTestRiskNotification()
                   : null,
-          child: const Text('Post test risk notification (Phase 2a)'),
+          child: const Text('Post test risk notification'),
         ),
       ],
     );
