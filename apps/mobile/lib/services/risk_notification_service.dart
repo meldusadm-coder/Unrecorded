@@ -2,16 +2,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:unrecorded_core/unrecorded_core.dart';
-import 'package:unrecorded_ui/unrecorded_ui.dart';
-
 import '../features/scan/scan_state.dart';
 import '../router.dart';
 import 'notification_prefs.dart';
 import 'notification_risk_threshold.dart';
 import 'protection_status_notification.dart';
-
-const _riskAlertChannelId = 'possible_recording_risk';
-const _riskAlertNotificationId = 1;
+import 'risk_alert_notification.dart';
 
 /// Shows local (on-device) notifications for protection status and possible risk.
 class RiskNotificationService {
@@ -49,7 +45,7 @@ class RiskNotificationService {
 
       await androidPlugin?.createNotificationChannel(
         const AndroidNotificationChannel(
-          _riskAlertChannelId,
+          riskAlertChannelId,
           'Possible recording risk',
           description:
               'Alerts when Unrecorded detects a possible nearby recording risk.',
@@ -233,33 +229,13 @@ class RiskNotificationService {
       return;
     }
 
-    final levelLabel = RiskBadge.labelFor(riskLevel);
-    final title = '$levelLabel — ${AppCopy.possibleRiskTitle}';
-
-    const details = NotificationDetails(
-      android: AndroidNotificationDetails(
-        _riskAlertChannelId,
-        'Possible recording risk',
-        channelDescription:
-            'Alerts when Unrecorded detects a possible nearby recording risk.',
-        importance: Importance.high,
-        priority: Priority.high,
-        visibility: NotificationVisibility.public,
-      ),
-      iOS: DarwinNotificationDetails(
-        presentAlert: true,
-        presentBadge: true,
-        presentSound: true,
-      ),
-    );
-
     try {
       await _plugin.show(
-        id: _riskAlertNotificationId,
-        title: title,
-        body: AppCopy.possibleRiskBody,
-        notificationDetails: details,
-        payload: notificationAlertPayload,
+        id: riskAlertNotificationId,
+        title: riskAlertTitleFor(riskLevel),
+        body: riskAlertBody,
+        notificationDetails: riskAlertNotificationDetails,
+        payload: riskAlertPayload,
       );
       _logDebug('risk alert shown: $riskLevel');
     } catch (e) {
@@ -270,7 +246,7 @@ class RiskNotificationService {
   Future<void> cancelRiskAlert() async {
     if (!_initialized) return;
     try {
-      await _plugin.cancel(id: _riskAlertNotificationId);
+      await _plugin.cancel(id: riskAlertNotificationId);
       _logDebug('risk alert cancelled');
     } catch (_) {}
   }

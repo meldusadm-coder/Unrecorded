@@ -2,12 +2,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:unrecorded_core/unrecorded_core.dart';
 import 'package:unrecorded_mobile/features/scan/scan_state.dart';
 import 'package:unrecorded_mobile/router.dart';
+import 'package:unrecorded_mobile/services/foreground_service_controller.dart';
 import 'package:unrecorded_mobile/services/protection_status_notification.dart';
+import 'package:unrecorded_mobile/services/risk_alert_notification.dart';
 
 void main() {
   test('protection status and risk alert use different ids and channels', () {
-    expect(protectionStatusNotificationId, isNot(1));
-    expect(protectionStatusChannelId, isNot('possible_recording_risk'));
+    expect(protectionStatusNotificationId, isNot(riskAlertNotificationId));
+    expect(protectionStatusChannelId, isNot(riskAlertChannelId));
+    expect(backgroundProtectionFgsChannelId, isNot(protectionStatusChannelId));
+    expect(backgroundProtectionFgsChannelId, isNot(riskAlertChannelId));
     expect(
       notificationProtectionStatusPayload,
       isNot(notificationAlertPayload),

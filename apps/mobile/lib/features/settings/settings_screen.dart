@@ -14,6 +14,7 @@ import '../../services/notification_prefs.dart';
 import '../../services/notification_risk_threshold.dart';
 import '../../services/notification_status_provider.dart';
 import '../../services/risk_notification_service.dart';
+import '../scan/background_protection_toggle.dart';
 import 'debug_testing_section.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -167,6 +168,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onSelected: _setNotificationRiskThreshold,
               ),
             ],
+            const SizedBox(height: 16),
+            const BackgroundProtectionToggle(),
             const SizedBox(height: 24),
             PrivacyNoticeCard(
               text: PrivacyDisclaimer.privacyModel,

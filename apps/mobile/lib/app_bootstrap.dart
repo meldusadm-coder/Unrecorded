@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'features/scan/scan_state.dart';
+import 'services/background_protection_controller.dart';
+import 'services/background_protection_prefs.dart';
 import 'services/protection_prefs.dart';
 import 'services/risk_notification_service.dart';
 import 'services/scanner_provider.dart';
@@ -30,6 +32,14 @@ class _AppBootstrapState extends ConsumerState<AppBootstrap> {
     await notifications.handleNotificationLaunch();
     ref.read(widgetSyncServiceProvider);
     await ref.read(scannerConfigInitProvider.future);
+
+    final bgPrefs = await BackgroundProtectionPrefs.load();
+    if (bgPrefs.backgroundProtectionEnabled) {
+      await ref
+          .read(backgroundProtectionControllerProvider.notifier)
+          .reconcileOnResume();
+      return;
+    }
 
     final prefs = await ProtectionPrefs.load();
     if (prefs.protectionEnabled) {

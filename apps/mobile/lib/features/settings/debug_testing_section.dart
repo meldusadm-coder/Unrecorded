@@ -4,17 +4,51 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:unrecorded_radio/unrecorded_radio.dart';
 import 'package:unrecorded_ui/unrecorded_ui.dart';
 
+import '../../services/background_protection_controller.dart';
+import '../../services/background_protection_snapshot.dart';
+import '../../services/foreground_service_controller.dart';
 import '../../services/risk_notification_service.dart';
 import '../../services/scan_runtime.dart';
 import '../../services/scanner_provider.dart';
 import '../scan/scan_state.dart';
 
 /// Debug-only controls for local UAT and BLE vs demo scanning.
-class DebugTestingSection extends ConsumerWidget {
+class DebugTestingSection extends ConsumerStatefulWidget {
   const DebugTestingSection({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DebugTestingSection> createState() =>
+      _DebugTestingSectionState();
+}
+
+class _DebugTestingSectionState extends ConsumerState<DebugTestingSection> {
+  String _taskStatus = 'idle';
+  late final ForegroundServiceController _fgs;
+
+  @override
+  void initState() {
+    super.initState();
+    _fgs = ref.read(foregroundServiceControllerProvider);
+    _fgs.addDataCallback(_onTaskData);
+  }
+
+  @override
+  void dispose() {
+    _fgs.removeDataCallback(_onTaskData);
+    super.dispose();
+  }
+
+  void _onTaskData(Object data) {
+    final snapshot = BackgroundProtectionSnapshot.fromJson(data);
+    if (snapshot == null || !mounted) return;
+    setState(() {
+      _taskStatus = '${snapshot.status.name} • risk=${snapshot.riskLevel.name} '
+          '• devices=${snapshot.possibleRiskCount + snapshot.otherNearbyCount}';
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     if (kReleaseMode) return const SizedBox.shrink();
 
     final config = ref.watch(scannerConfigProvider);
@@ -121,6 +155,28 @@ class DebugTestingSection extends ConsumerWidget {
             }
           },
           child: const Text('Reset scanner defaults'),
+        ),
+        const Divider(height: 32),
+        Text(
+          'Background service (developer UAT)',
+          style: theme.textTheme.titleSmall,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Use the Background protection toggle above for the full flow. '
+          'Task isolate status: $_taskStatus. Check logcat for '
+          '[BackgroundScanTask] lines on a physical device.',
+          style: theme.textTheme.bodySmall?.copyWith(height: 1.4),
+        ),
+        const SizedBox(height: 8),
+        FilledButton.tonal(
+          onPressed:
+              ref.watch(backgroundProtectionControllerProvider).serviceRunning
+                  ? () => ref
+                      .read(backgroundProtectionControllerProvider.notifier)
+                      .requestTestRiskNotification()
+                  : null,
+          child: const Text('Post test risk notification (Phase 2a)'),
         ),
       ],
     );

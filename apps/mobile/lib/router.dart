@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+export 'services/notification_payloads.dart';
+
 import 'features/alerts/alert_details_screen.dart';
 import 'features/alerts/alert_explanation_screen.dart';
 import 'features/feedback/feedback_screen.dart';
@@ -18,11 +20,6 @@ const alertInfoRoute = '/alert-info';
 
 /// Live alert context (devices, level, reasons) from the current scan.
 const alertDetailsRoute = '/alert-details';
-
-const notificationAlertPayload = 'alert-details';
-
-/// Payload for taps on the ongoing protection-status notification.
-const notificationProtectionStatusPayload = 'protection-status';
 
 /// Custom scheme host for Android VIEW intents (`unrecorded://open/...`).
 const deepLinkScheme = 'unrecorded';

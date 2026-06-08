@@ -10,10 +10,21 @@ Unrecorded detects **possible** nearby smart glasses or wearable recording indic
 ## Foreground-first scan cadence
 
 - While protection is on, scanning runs in **short windows** with **rest periods** between them to reduce battery use.
-- **Keep the app open** for the most reliable scanning. There is no always-on background protection service in this version.
+- **Keep the app open** for the most reliable scanning when background protection is off.
 - Risk notifications may appear while protection is active, but Android may limit behaviour when the app is not in the foreground.
-- An ongoing **protection status** notification appears in the Android notification shade while protection is active and notification permission is granted. It means the app process is still running — not that recording was detected.
+- An ongoing **protection status** notification appears in the Android notification shade while protection is active and notification permission is granted. It means protection is running — not that recording was detected.
 - **Possible-risk alert** notifications are separate, higher-priority alerts when nearby signals match risk indicators. They are not proof of recording.
+
+## Background protection (Android, opt-in)
+
+- **Off by default.** Users can turn on **Background protection** from the scan screen or Settings.
+- When on, Unrecorded runs a foreground service with a persistent notification and keeps the scan/rest loop running while the app is minimised or locked, where Android allows.
+- **Notification permission is required** so the persistent notification is visible and includes a Stop action.
+- Clearing the app from recents may not stop the service on all devices; Android or battery settings may still stop it.
+- If Android stops background protection while your setting is still on, the app explains this honestly on next open and lets you restart — it does not claim protection is still active.
+- Tapping **Stop** on the notification stops protection and is recorded as an explicit user stop (not “stopped by Android”).
+- Background protection does **not** auto-start after reboot in this version.
+- Not proof of recording. Not guaranteed on all devices or battery policies.
 
 ## Notifications (Android)
 
@@ -22,7 +33,19 @@ Unrecorded detects **possible** nearby smart glasses or wearable recording indic
 | Protection status (ongoing) | Protection is active while the app is running. Tap to open the main screen. |
 | Possible-risk alert | Nearby Bluetooth signals matched risk indicators. Tap for details. Not proof of recording. |
 
-Scanning reliability depends on Android version, battery settings, Bluetooth state, permissions, and whether the app can keep running. There is no always-on foreground service in this version — if Android stops the app, protection and notifications stop too.
+Scanning reliability depends on Android version, battery settings, Bluetooth state, permissions, and whether the app can keep running. Without background protection, if Android stops the app, protection and notifications stop too.
+
+### Background protection UAT (physical Android 13+/14+)
+
+1. Fresh install; grant Bluetooth and notification permissions.
+2. Confirm background protection is **off** by default.
+3. Turn it **on** → persistent notification with Stop appears.
+4. Minimise and lock the device → scan cadence continues where Android allows.
+5. Clear app from recents → service may continue (device-dependent).
+6. Tap **Stop** on the notification → reopening shows OFF (not “stopped by Android”).
+7. Turn background protection on again; trigger demo high risk → separate risk alert appears.
+8. Force-stop or enable battery saver → reopening shows “stopped by Android” with restart option.
+9. Reboot → background protection does **not** auto-start.
 
 ### Manual UAT checklist
 

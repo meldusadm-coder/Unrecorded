@@ -27,6 +27,9 @@ final scannerConfigInitProvider = FutureProvider<void>((ref) async {
 
 final scanRuntimeProvider = Provider<ScanRuntime>((ref) => const ScanRuntime());
 
+/// True while the foreground service owns the scan loop (main isolate mirrors only).
+final backgroundOwnsScanningProvider = StateProvider<bool>((ref) => false);
+
 RadioScanner _scannerForConfig(ScannerConfig config) {
   if (config.mode == ScannerMode.demo) {
     return FakeRadioScanner(scenario: config.scenario);
@@ -68,10 +71,14 @@ final scanControllerProvider =
     onStateChanged: (previous, state) {
       ref.read(widgetSyncTriggerProvider.notifier).state++;
       final notifications = ref.read(riskNotificationServiceProvider);
+      final backgroundOwns = ref.read(backgroundOwnsScanningProvider);
 
-      unawaited(notifications.syncProtectionStatusNotification(state));
+      if (!backgroundOwns) {
+        unawaited(notifications.syncProtectionStatusNotification(state));
+      }
 
-      if (previous.status != ScanStatus.possibleRiskDetected &&
+      if (!backgroundOwns &&
+          previous.status != ScanStatus.possibleRiskDetected &&
           state.status == ScanStatus.possibleRiskDetected) {
         unawaited(
           notifications.showRiskAlertIfEnabled(riskLevel: state.riskLevel),
@@ -265,7 +272,20 @@ class ScanController extends StateNotifier<ScanState> {
     }
   }
 
+  bool _backgroundOwnsScanning = false;
+
+  void setBackgroundOwnsScanning(bool value) {
+    _backgroundOwnsScanning = value;
+  }
+
+  /// Applies state mirrored from the foreground-service task isolate.
+  void applyMirroredState(ScanState mirrored) {
+    _emit(mirrored);
+  }
+
   Future<void> startProtection({bool persist = true}) async {
+    if (_backgroundOwnsScanning) return;
+
     if (_startInFlight ||
         state.status == ScanStatus.scanning ||
         state.status == ScanStatus.resting ||

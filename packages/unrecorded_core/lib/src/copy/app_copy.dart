@@ -121,6 +121,42 @@ class AppCopy {
       'reliability depends on Android, permissions, Bluetooth, and whether '
       'the app can keep running.';
 
+  // Background protection (Android foreground service, opt-in)
+  static const String backgroundProtectionTitle = 'Background protection';
+
+  static const String backgroundProtectionSubtitle =
+      'Keep scanning while protection is active. Runs with a persistent '
+      'notification. Android or battery settings may stop background '
+      'protection. Not proof of recording.';
+
+  static const String backgroundProtectionNotificationTitle =
+      'Unrecorded protection is active';
+
+  static const String backgroundProtectionNotificationDefaultBody =
+      'Watching for possible nearby recording-risk signals.';
+
+  static const String backgroundProtectionStopAction = 'Stop';
+
+  static const String backgroundProtectionNotificationRequired =
+      'Notification permission is required for background protection so you '
+      'can see and control the persistent notification. Enable notifications '
+      'in system settings to turn this on.';
+
+  static const String backgroundProtectionStoppedByAndroid =
+      'Background protection was stopped by Android or battery settings. '
+      'Tap to restart if you still want protection.';
+
+  static const String backgroundProtectionRestart =
+      'Restart background protection';
+
+  static const String backgroundProtectionServiceStartFailed =
+      'Could not start background protection. Check Bluetooth and '
+      'notification permissions, then try again.';
+
+  static const String backgroundProtectionOnHelper =
+      'Background protection on: scanning continues with a persistent '
+      'notification while the app is minimised or locked, where Android allows.';
+
   // Widget lines
   static const String widgetScanningActive = 'Scanning active';
   static const String widgetNoObviousRisk = 'No obvious risk';
