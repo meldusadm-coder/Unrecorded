@@ -9,8 +9,10 @@ import 'package:unrecorded_radio/unrecorded_radio.dart';
 import '../features/scan/scan_state.dart';
 import 'dev_testing_prefs.dart';
 import 'protection_prefs.dart';
+import 'recent_risk_controller.dart';
 import 'risk_notification_service.dart';
 import 'scan_lifecycle_coordinator.dart';
+import 'scan_preflight_mapping.dart';
 import 'scan_runtime.dart';
 import 'scanner_config.dart';
 import 'signal_ui_mapper.dart';
@@ -26,6 +28,9 @@ final scannerConfigInitProvider = FutureProvider<void>((ref) async {
 });
 
 final scanRuntimeProvider = Provider<ScanRuntime>((ref) => const ScanRuntime());
+
+/// True while the foreground service owns the scan loop (main isolate mirrors only).
+final backgroundOwnsScanningProvider = StateProvider<bool>((ref) => false);
 
 RadioScanner _scannerForConfig(ScannerConfig config) {
   if (config.mode == ScannerMode.demo) {
@@ -65,12 +70,24 @@ final scanControllerProvider =
     ),
     pipeline: pipeline,
     mapper: ref.read(signalUiMapperProvider),
+    isBackgroundOwnsScanning: () => ref.read(backgroundOwnsScanningProvider),
     onStateChanged: (previous, state) {
-      ref.read(widgetSyncTriggerProvider.notifier).state++;
       final notifications = ref.read(riskNotificationServiceProvider);
+      final backgroundOwns = ref.read(backgroundOwnsScanningProvider);
 
-      if (previous.status != ScanStatus.possibleRiskDetected &&
+      if (!backgroundOwns) {
+        unawaited(notifications.syncProtectionStatusNotification(state));
+      }
+
+      if (!backgroundOwns &&
+          previous.status != ScanStatus.possibleRiskDetected &&
           state.status == ScanStatus.possibleRiskDetected) {
+        unawaited(
+          ref.read(recentRiskControllerProvider.notifier).recordPossibleRisk(
+                riskLevel: state.riskLevel,
+                reasons: state.safeReasonKeys,
+              ),
+        );
         unawaited(
           notifications.showRiskAlertIfEnabled(riskLevel: state.riskLevel),
         );
@@ -96,8 +113,6 @@ final scanControllerProvider =
 
   return controller;
 });
-
-final widgetSyncTriggerProvider = StateProvider<int>((ref) => 0);
 
 final scannerConfigControllerProvider =
     Provider<ScannerConfigController>((ref) {
@@ -154,11 +169,13 @@ class ScanController extends StateNotifier<ScanState> {
     required ScanLifecycleCoordinator coordinator,
     required DetectionPipeline pipeline,
     required SignalUiMapper mapper,
+    required bool Function() isBackgroundOwnsScanning,
     void Function(ScanState previous, ScanState next)? onStateChanged,
     Duration startupGraceDuration = const Duration(seconds: 5),
     int requiredElevatedScans = 2,
   })  : _coordinator = coordinator,
         _mapper = mapper,
+        _isBackgroundOwnsScanning = isBackgroundOwnsScanning,
         _onStateChanged = onStateChanged,
         super(const ScanState()) {
     _coordinator.onStateChanged = _onCoordinatorState;
@@ -166,6 +183,7 @@ class ScanController extends StateNotifier<ScanState> {
 
   final ScanLifecycleCoordinator _coordinator;
   final SignalUiMapper _mapper;
+  final bool Function() _isBackgroundOwnsScanning;
   final void Function(ScanState previous, ScanState next)? _onStateChanged;
 
   bool _startInFlight = false;
@@ -189,12 +207,19 @@ class ScanController extends StateNotifier<ScanState> {
     final dismissedRiskStableKeys =
         sameRiskEvidence ? state.dismissedRiskStableKeys : const <String>[];
 
+    final safeReasonKeys = partial.status == ScanStatus.possibleRiskDetected
+        ? recentRiskReasonsForAssessments(
+            pipelineResult.snapshot.assessments,
+          )
+        : const <RecentRiskReason>[];
+
     _emit(
       partial.copyWith(
         possibleRiskSignals: risk,
         otherNearbySignals: other,
         alertDismissed: alertDismissed,
         dismissedRiskStableKeys: dismissedRiskStableKeys,
+        safeReasonKeys: safeReasonKeys,
       ),
     );
   }
@@ -263,7 +288,14 @@ class ScanController extends StateNotifier<ScanState> {
     }
   }
 
+  /// Applies state mirrored from the foreground-service task isolate.
+  void applyMirroredState(ScanState mirrored) {
+    _emit(mirrored);
+  }
+
   Future<void> startProtection({bool persist = true}) async {
+    if (_isBackgroundOwnsScanning()) return;
+
     if (_startInFlight ||
         state.status == ScanStatus.scanning ||
         state.status == ScanStatus.resting ||
@@ -300,8 +332,8 @@ class ScanController extends StateNotifier<ScanState> {
       if (failure != null) {
         _emit(
           state.copyWith(
-            status: _statusForPreflight(failure),
-            statusMessage: _messageForPreflight(failure),
+            status: scanStatusForPreflightFailure(failure),
+            statusMessage: preflightMessageFor(failure),
             protectionRequested: true,
           ),
         );
@@ -335,27 +367,5 @@ class ScanController extends StateNotifier<ScanState> {
         clearStatusMessage: true,
       ),
     );
-  }
-
-  ScanStatus _statusForPreflight(ScanPreflightFailure failure) {
-    return switch (failure) {
-      ScanPreflightFailure.permissionDenied => ScanStatus.permissionDenied,
-      ScanPreflightFailure.permissionPermanentlyDenied =>
-        ScanStatus.permissionPermanentlyDenied,
-      ScanPreflightFailure.bluetoothOff => ScanStatus.bluetoothOff,
-      ScanPreflightFailure.bluetoothUnsupported =>
-        ScanStatus.bluetoothUnsupported,
-    };
-  }
-
-  String _messageForPreflight(ScanPreflightFailure failure) {
-    return switch (failure) {
-      ScanPreflightFailure.permissionDenied => AppCopy.permissionHelper,
-      ScanPreflightFailure.permissionPermanentlyDenied =>
-        AppCopy.permissionPermanentlyDeniedHelper,
-      ScanPreflightFailure.bluetoothUnsupported =>
-        AppCopy.bluetoothUnsupportedMessage,
-      ScanPreflightFailure.bluetoothOff => AppCopy.bluetoothOffMessage,
-    };
   }
 }

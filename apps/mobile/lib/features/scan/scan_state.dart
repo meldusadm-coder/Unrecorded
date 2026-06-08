@@ -35,6 +35,9 @@ class ScanState {
   /// Stable keys of [possibleRiskSignals] when the user last dismissed the alert.
   final List<String> dismissedRiskStableKeys;
 
+  /// Privacy-safe reason keys for recent-risk persistence (enum only).
+  final List<RecentRiskReason> safeReasonKeys;
+
   const ScanState({
     this.status = ScanStatus.idle,
     this.riskLevel = RiskLevel.low,
@@ -49,6 +52,7 @@ class ScanState {
     this.isDemoMode = false,
     this.alertDismissed = false,
     this.dismissedRiskStableKeys = const [],
+    this.safeReasonKeys = const [],
   });
 
   bool get canStart =>
@@ -93,6 +97,7 @@ class ScanState {
     bool? isDemoMode,
     bool? alertDismissed,
     List<String>? dismissedRiskStableKeys,
+    List<RecentRiskReason>? safeReasonKeys,
     bool clearStatusMessage = false,
     bool clearNextScanAt = false,
   }) {
@@ -112,6 +117,7 @@ class ScanState {
       alertDismissed: alertDismissed ?? this.alertDismissed,
       dismissedRiskStableKeys:
           dismissedRiskStableKeys ?? this.dismissedRiskStableKeys,
+      safeReasonKeys: safeReasonKeys ?? this.safeReasonKeys,
     );
   }
 }

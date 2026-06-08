@@ -6,7 +6,13 @@ import 'package:unrecorded_core/unrecorded_core.dart';
 import 'package:unrecorded_ui/unrecorded_ui.dart';
 
 import '../../copy/feedback_copy.dart';
-
+import 'background_protection_stopped_banner.dart';
+import 'background_protection_toggle.dart';
+import 'notification_mode_banner.dart';
+import '../../router.dart';
+import '../../services/background_protection_controller.dart';
+import '../../services/recent_risk_controller.dart';
+import '../../services/recent_risk_visibility.dart';
 import '../../services/scanner_provider.dart';
 import '../../services/widget_sync_service.dart';
 import '../../utils/time_format.dart';
@@ -23,6 +29,8 @@ class ScanScreen extends ConsumerWidget {
     final state = ref.watch(scanControllerProvider);
     final controller = ref.read(scanControllerProvider.notifier);
     final showAlert = state.showsRiskAlert;
+    final recentRisk = ref.watch(recentRiskVisibleProvider);
+    final recentWindow = ref.watch(recentRiskControllerProvider).window.label;
     final topRisk = state.possibleRiskSignals.isEmpty
         ? null
         : state.possibleRiskSignals.first;
@@ -72,12 +80,28 @@ class ScanScreen extends ConsumerWidget {
               lastCheckedText: _lastCheckedText(state),
             ),
             const SizedBox(height: 12),
+            const BackgroundProtectionStoppedBanner(),
+            NotificationModeBanner(state: state),
+            const SizedBox(height: 12),
+            const BackgroundProtectionToggle(),
+            const SizedBox(height: 12),
             const HelperText(
               text: AppCopy.scanHelper,
               expandableDetail: PrivacyDisclaimer.detectionDisclaimer,
             ),
             const SizedBox(height: 12),
             _buildNextStep(context, state, controller),
+            if (recentRisk != null) ...[
+              const SizedBox(height: 16),
+              RiskAlertCard(
+                title: AppCopy.recentRiskCardTitle,
+                body: AppCopy.recentRiskCardBody(recentWindow),
+                onViewDetails: () => context.push(recentRiskRoute),
+                onDismiss: () => ref
+                    .read(recentRiskControllerProvider.notifier)
+                    .acknowledge(),
+              ),
+            ],
             if (showAlert) ...[
               const SizedBox(height: 16),
               if (topRisk != null)
@@ -113,6 +137,14 @@ class ScanScreen extends ConsumerWidget {
               color: state.protectionActive ? UnrecordedColors.danger : null,
               onPressed: () async {
                 if (state.protectionActive) {
+                  final bgOwns = ref
+                      .read(backgroundProtectionControllerProvider)
+                      .ownsScanning;
+                  if (bgOwns) {
+                    await ref
+                        .read(backgroundProtectionControllerProvider.notifier)
+                        .disable();
+                  }
                   await controller.pauseProtection();
                 } else {
                   await controller.startProtection();

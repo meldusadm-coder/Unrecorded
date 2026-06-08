@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:unrecorded_core/unrecorded_core.dart';
 
 import '../features/scan/scan_state.dart';
+import 'recent_risk_controller.dart';
 import 'scanner_provider.dart';
 
 const _keyStatus = 'widget_status';
@@ -14,9 +16,12 @@ const _keyLastChecked = 'widget_last_checked';
 class WidgetSyncService {
   const WidgetSyncService();
 
-  Future<void> syncFromState(ScanState state) async {
+  Future<void> syncFromState(
+    ScanState state, {
+    bool recentRiskVisible = false,
+  }) async {
     try {
-      final lines = _linesForState(state);
+      final lines = linesForState(state, recentRiskVisible: recentRiskVisible);
       await HomeWidget.saveWidgetData<String>(_keyStatus, lines.$1);
       await HomeWidget.saveWidgetData<String>(_keySecondary, lines.$2);
       await HomeWidget.saveWidgetData<String>(
@@ -30,7 +35,18 @@ class WidgetSyncService {
     } catch (_) {}
   }
 
-  (String, String) _linesForState(ScanState state) {
+  @visibleForTesting
+  (String, String) linesForState(
+    ScanState state, {
+    required bool recentRiskVisible,
+  }) {
+    if (state.status != ScanStatus.possibleRiskDetected && recentRiskVisible) {
+      return (
+        AppCopy.widgetPossibleRiskRecent,
+        AppCopy.widgetOpenAppToView,
+      );
+    }
+
     switch (state.status) {
       case ScanStatus.scanning:
       case ScanStatus.confirmingRisk:
@@ -75,14 +91,26 @@ class WidgetSyncService {
 final widgetSyncServiceProvider = Provider<WidgetSyncService>((ref) {
   final service = const WidgetSyncService();
 
-  ref.listen(scanControllerProvider, (prev, next) {
-    unawaited(service.syncFromState(next));
-  });
+  void syncWidget() {
+    final scanState = ref.read(scanControllerProvider);
+    final recentState = ref.read(recentRiskControllerProvider);
+    final now = ref.read(clockProvider)();
+    final recentRiskVisible = isRecentRiskReminderVisible(
+      event: recentState.event,
+      window: recentState.window,
+      hasLiveAlert: scanState.status == ScanStatus.possibleRiskDetected,
+      now: now,
+    );
+    unawaited(
+      service.syncFromState(
+        scanState,
+        recentRiskVisible: recentRiskVisible,
+      ),
+    );
+  }
 
-  ref.listen(widgetSyncTriggerProvider, (_, __) {
-    final state = ref.read(scanControllerProvider);
-    unawaited(service.syncFromState(state));
-  });
+  ref.listen(scanControllerProvider, (_, __) => syncWidget());
+  ref.listen(recentRiskControllerProvider, (_, __) => syncWidget());
 
   return service;
 });

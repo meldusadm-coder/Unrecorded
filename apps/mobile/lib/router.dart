@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+export 'services/notification_payloads.dart';
+
 import 'features/alerts/alert_details_screen.dart';
 import 'features/alerts/alert_explanation_screen.dart';
+import 'features/alerts/recent_risk_screen.dart';
 import 'features/feedback/feedback_screen.dart';
 import 'features/help/help_screen.dart';
 import 'features/monetisation/remove_ads_screen.dart';
@@ -19,7 +22,8 @@ const alertInfoRoute = '/alert-info';
 /// Live alert context (devices, level, reasons) from the current scan.
 const alertDetailsRoute = '/alert-details';
 
-const notificationAlertPayload = 'alert-details';
+/// Short-lived recent possible-risk reminder details.
+const recentRiskRoute = '/recent-risk';
 
 /// Custom scheme host for Android VIEW intents (`unrecorded://open/...`).
 const deepLinkScheme = 'unrecorded';
@@ -72,6 +76,10 @@ GoRouter buildAppRouter() => GoRouter(
           builder: (context, state) => const AlertExplanationScreen(),
         ),
         GoRoute(
+          path: recentRiskRoute,
+          builder: (context, state) => const RecentRiskScreen(),
+        ),
+        GoRoute(
           path: '/remove-ads',
           builder: (context, state) => const RemoveAdsScreen(),
         ),
@@ -83,6 +91,13 @@ void navigateToAlertDetails() {
   final context = rootNavigatorKey.currentContext;
   if (context == null) return;
   GoRouter.of(context).push(alertDetailsRoute);
+}
+
+/// Navigate to the main protection / scan screen (status notification tap).
+void navigateToProtectionScreen() {
+  final context = rootNavigatorKey.currentContext;
+  if (context == null) return;
+  GoRouter.of(context).go('/');
 }
 
 /// @deprecated Use [navigateToAlertDetails]. Kept for tests migrating off old name.
