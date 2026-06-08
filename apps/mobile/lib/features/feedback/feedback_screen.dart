@@ -176,8 +176,14 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
         title: const Text(FeedbackCopy.screenTitle),
       ),
       body: SafeArea(
+        bottom: false,
         child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: EdgeInsets.fromLTRB(
+            16,
+            12,
+            16,
+            12 + MediaQuery.viewInsetsOf(context).bottom,
+          ),
           children: [
             Text(FeedbackCopy.intro, style: theme.textTheme.bodyLarge),
             const SizedBox(height: 12),
