@@ -39,6 +39,17 @@ void main() {
     expect(prefs.event?.acknowledged, isTrue);
   });
 
+  test('load picks up storage written outside RecentRiskPrefs', () async {
+    final raw = await SharedPreferences.getInstance();
+    await raw.setString(
+      'recent_risk_window',
+      RecentRiskWindow.off.storageKey,
+    );
+
+    final prefs = await RecentRiskPrefs.load();
+    expect(prefs.window, RecentRiskWindow.off);
+  });
+
   test('setWindowOffAndClear atomically clears event', () async {
     final prefs = await RecentRiskPrefs.load();
     await prefs.setEvent(

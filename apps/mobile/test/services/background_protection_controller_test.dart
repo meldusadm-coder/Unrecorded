@@ -199,6 +199,46 @@ void main() {
       built.controller.state.stoppedReason,
       BackgroundProtectionStoppedReason.stoppedByAndroid,
     );
-    expect(built.mirrored, isEmpty);
+    expect(built.mirrored, hasLength(1));
+    expect(built.mirrored.single.status, ScanStatus.paused);
+    expect(built.mirrored.single.protectionRequested, isFalse);
+  });
+
+  test('stopped snapshot clears previously mirrored active scan state',
+      () async {
+    final fgs = FakeForegroundServiceController();
+    final built = buildController(fgs: fgs);
+
+    fgs.emitTaskData(
+      const BackgroundProtectionSnapshot(
+        status: ScanStatus.scanning,
+        riskLevel: RiskLevel.high,
+        score: 80,
+        reasonLabels: ['Strong signal'],
+        possibleRiskCount: 2,
+        otherNearbyCount: 1,
+        isDemoMode: false,
+        serviceRunning: true,
+      ).toJson(),
+    );
+
+    fgs.emitTaskData(
+      const BackgroundProtectionSnapshot(
+        status: ScanStatus.paused,
+        riskLevel: RiskLevel.low,
+        score: 0,
+        reasonLabels: [],
+        possibleRiskCount: 0,
+        otherNearbyCount: 0,
+        isDemoMode: false,
+        serviceRunning: false,
+        stoppedReason: BackgroundProtectionStoppedReason.stoppedByAndroid,
+      ).toJson(),
+    );
+
+    expect(built.mirrored, hasLength(2));
+    expect(built.mirrored.last.status, ScanStatus.paused);
+    expect(built.mirrored.last.protectionRequested, isFalse);
+    expect(built.mirrored.last.riskLevel, RiskLevel.low);
   });
 }

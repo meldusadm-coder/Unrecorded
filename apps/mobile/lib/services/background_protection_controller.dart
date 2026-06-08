@@ -107,9 +107,9 @@ class BackgroundProtectionController
     state = next;
     _onServiceRunningChanged(snapshot.serviceRunning);
 
-    if (snapshot.serviceRunning) {
-      _applyMirroredScanState(snapshot.toScanState());
-    }
+    _applyMirroredScanState(
+      snapshot.toScanState(protectionRequested: snapshot.serviceRunning),
+    );
   }
 
   /// Reconciles persisted user intent with the foreground-service process.

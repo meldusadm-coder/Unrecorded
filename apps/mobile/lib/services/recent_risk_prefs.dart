@@ -14,6 +14,9 @@ class RecentRiskPrefs {
 
   static Future<RecentRiskPrefs> load() async {
     final prefs = await SharedPreferences.getInstance();
+    // Foreground-task and main isolates each cache SharedPreferences; reload
+    // before reads so cross-isolate writes (e.g. window Off, new events) apply.
+    await prefs.reload();
     return RecentRiskPrefs(prefs);
   }
 
