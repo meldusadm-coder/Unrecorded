@@ -49,6 +49,7 @@ ScanController _controller({
     coordinator: coordinator,
     pipeline: pipeline,
     mapper: const SignalUiMapper(),
+    isBackgroundOwnsScanning: () => false,
   );
 }
 

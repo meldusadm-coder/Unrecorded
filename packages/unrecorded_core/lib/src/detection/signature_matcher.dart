@@ -6,10 +6,11 @@ import 'detection_signatures.dart';
 enum SignatureMatchKind {
   name,
   serviceUuid,
+  manufacturer,
   macPrefix,
 }
 
-/// Result of matching a [DetectedSignal] against the local catalogue.
+/// Result of matching a [DetectedSignal] against one catalogue entry.
 class SignatureMatch {
   const SignatureMatch({
     required this.signature,
@@ -29,6 +30,50 @@ class SignatureMatch {
   }
 }
 
+/// All match kinds for one signature against a signal.
+class SignatureMatchSet {
+  const SignatureMatchSet({
+    required this.signature,
+    this.name,
+    this.serviceUuid,
+    this.manufacturer,
+    this.macPrefix,
+  });
+
+  final DetectionSignature signature;
+  final SignatureMatch? name;
+  final SignatureMatch? serviceUuid;
+  final SignatureMatch? manufacturer;
+  final SignatureMatch? macPrefix;
+
+  bool get hasAnyMatch =>
+      name != null ||
+      serviceUuid != null ||
+      manufacturer != null ||
+      macPrefix != null;
+
+  /// Strongest match for this signature (kind precedence, not raw score).
+  SignatureMatch? get best => name ?? serviceUuid ?? manufacturer ?? macPrefix;
+
+  Iterable<SignatureMatch> get allMatches sync* {
+    if (name != null) yield name!;
+    if (serviceUuid != null) yield serviceUuid!;
+    if (manufacturer != null) yield manufacturer!;
+    if (macPrefix != null) yield macPrefix!;
+  }
+}
+
+/// Catalogue-wide match result for one signal.
+class CatalogueMatchResult {
+  const CatalogueMatchResult({
+    required this.perSignature,
+    this.primary,
+  });
+
+  final List<SignatureMatchSet> perSignature;
+  final SignatureMatch? primary;
+}
+
 /// Shared local matching for scoring and classification.
 class SignatureMatcher {
   const SignatureMatcher({this.signatures = detectionSignatures});
@@ -45,34 +90,53 @@ class SignatureMatcher {
     return false;
   }
 
+  /// Whether [address] is a canonical public unicast MAC suitable for prefix hints.
+  static bool shouldConsiderAddressPrefix(String? address) {
+    if (address == null || address.trim().isEmpty) return false;
+
+    final trimmed = address.trim();
+    if (RegExp(
+      r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
+      caseSensitive: false,
+    ).hasMatch(trimmed)) {
+      return false;
+    }
+
+    final normalized = normalizeMac(trimmed);
+    if (normalized == null || normalized.length != 12) return false;
+
+    final firstOctet = int.parse(normalized.substring(0, 2), radix: 16);
+    if ((firstOctet & 0x01) != 0) return false;
+    if ((firstOctet & 0x02) != 0) return false;
+    return true;
+  }
+
+  /// All signature matches for [signal], with a precedence-ranked primary.
+  CatalogueMatchResult matchCatalogue(DetectedSignal signal) {
+    final sets = <SignatureMatchSet>[];
+    for (final signature in signatures) {
+      final set = _matchSignature(signal, signature);
+      if (set.hasAnyMatch) sets.add(set);
+    }
+    return CatalogueMatchResult(
+      perSignature: sets,
+      primary: _bestAcrossSets(sets),
+    );
+  }
+
   /// Best catalogue match for [signal], or null if none.
   ///
-  /// Does not apply benign suppression — callers assess benign after matching.
-  SignatureMatch? bestMatch(DetectedSignal signal) {
-    SignatureMatch? best;
-    for (final signature in signatures) {
-      final nameMatch = _matchName(signal.displayName, signature);
-      if (nameMatch != null && (best == null || nameMatch.score > best.score)) {
-        best = nameMatch;
-      }
-
-      final uuidMatch = _matchServiceUuids(signal.serviceIds, signature);
-      if (uuidMatch != null && (best == null || uuidMatch.score > best.score)) {
-        best = uuidMatch;
-      }
-
-      final macMatch = _matchMacPrefix(signal.id, signature);
-      if (macMatch != null && (best == null || macMatch.score > best.score)) {
-        best = macMatch;
-      }
-    }
-    return best;
-  }
+  /// Ranked by kind precedence (name > service UUID > manufacturer > address
+  /// prefix), not raw score. Does not apply benign suppression.
+  SignatureMatch? bestMatch(DetectedSignal signal) =>
+      matchCatalogue(signal).primary;
 
   bool hasMatch(DetectedSignal signal) => bestMatch(signal) != null;
 
-  /// User-facing vendor hint from MAC prefix, independent of scoring weight.
+  /// User-facing vendor hint from address prefix, independent of scoring weight.
   String? vendorHintFromId(String id) {
+    if (!shouldConsiderAddressPrefix(id)) return null;
+
     final normalized = normalizeMac(id);
     if (normalized == null || normalized.length < 6) return null;
 
@@ -89,6 +153,45 @@ class SignatureMatcher {
     if (bestSignature == null) return null;
     return '${bestSignature.brandFamily} (address prefix hint — not proof)';
   }
+
+  SignatureMatchSet _matchSignature(
+    DetectedSignal signal,
+    DetectionSignature signature,
+  ) {
+    return SignatureMatchSet(
+      signature: signature,
+      name: _matchName(signal.displayName, signature),
+      serviceUuid: _matchServiceUuids(signal.serviceIds, signature),
+      manufacturer: _matchManufacturer(signal.manufacturerIds, signature),
+      macPrefix: _matchMacPrefix(signal.id, signature),
+    );
+  }
+
+  SignatureMatch? _bestAcrossSets(List<SignatureMatchSet> sets) {
+    SignatureMatch? best;
+    for (final set in sets) {
+      final candidate = set.best;
+      if (candidate == null) continue;
+      if (best == null || _compareMatches(candidate, best) < 0) {
+        best = candidate;
+      }
+    }
+    return best;
+  }
+
+  int _compareMatches(SignatureMatch a, SignatureMatch b) {
+    final rankA = _kindRank(a.kind);
+    final rankB = _kindRank(b.kind);
+    if (rankA != rankB) return rankA.compareTo(rankB);
+    return b.score.compareTo(a.score);
+  }
+
+  static int _kindRank(SignatureMatchKind kind) => switch (kind) {
+        SignatureMatchKind.name => 0,
+        SignatureMatchKind.serviceUuid => 1,
+        SignatureMatchKind.manufacturer => 2,
+        SignatureMatchKind.macPrefix => 3,
+      };
 
   SignatureMatch? _matchName(String? name, DetectionSignature signature) {
     final lower = name?.toLowerCase();
@@ -129,12 +232,36 @@ class SignatureMatcher {
     return null;
   }
 
+  SignatureMatch? _matchManufacturer(
+    List<int> manufacturerIds,
+    DetectionSignature signature,
+  ) {
+    if (signature.manufacturerIdHints.isEmpty || manufacturerIds.isEmpty) {
+      return null;
+    }
+    final hints = signature.manufacturerIdHints.toSet();
+    for (final id in manufacturerIds) {
+      if (hints.contains(id)) {
+        return SignatureMatch(
+          signature: signature,
+          kind: SignatureMatchKind.manufacturer,
+          score: signature.confidenceWeight,
+        );
+      }
+    }
+    return null;
+  }
+
   SignatureMatch? _matchMacPrefix(
     String id,
     DetectionSignature signature,
   ) {
+    if (!shouldConsiderAddressPrefix(id) || signature.macPrefixHints.isEmpty) {
+      return null;
+    }
+
     final normalized = normalizeMac(id);
-    if (normalized == null || signature.macPrefixHints.isEmpty) return null;
+    if (normalized == null) return null;
 
     String? bestPrefix;
     for (final prefix in signature.macPrefixHints) {

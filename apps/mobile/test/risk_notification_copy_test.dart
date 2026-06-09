@@ -4,10 +4,22 @@ import 'package:unrecorded_mobile/router.dart';
 import 'package:unrecorded_ui/unrecorded_ui.dart';
 
 void main() {
-  test('notification payload matches alert details route', () {
+  test('notification payloads match routes', () {
     expect(notificationAlertPayload, 'alert-details');
+    expect(notificationProtectionStatusPayload, 'protection-status');
     expect(alertDetailsRoute, '/alert-details');
     expect(alertInfoRoute, '/alert-info');
+  });
+
+  test('protection status notification title is uncertainty-aware', () {
+    expect(
+      AppCopy.protectionStatusNotificationTitle,
+      contains('protection is active'),
+    );
+    expect(
+      AppCopy.protectionStatusNotificationTitle.toLowerCase(),
+      isNot(contains('recording detected')),
+    );
   });
 
   test('notification title includes risk level label', () {

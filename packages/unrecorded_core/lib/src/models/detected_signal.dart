@@ -12,6 +12,9 @@ class DetectedSignal {
   /// BLE service UUIDs or other protocol identifiers advertised.
   final List<String> serviceIds;
 
+  /// Bluetooth SIG company IDs from manufacturer-specific data (no raw payloads).
+  final List<int> manufacturerIds;
+
   /// When this signal was last observed.
   final DateTime seenAt;
 
@@ -23,6 +26,7 @@ class DetectedSignal {
     this.displayName,
     this.rssi,
     this.serviceIds = const [],
+    this.manufacturerIds = const [],
     required this.seenAt,
     this.isConnectable = false,
   });

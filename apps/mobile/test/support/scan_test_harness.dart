@@ -33,6 +33,7 @@ class StateHarnessController extends ScanController {
           ),
           pipeline: DetectionPipeline(),
           mapper: const SignalUiMapper(),
+          isBackgroundOwnsScanning: () => false,
         ) {
     state = value;
   }

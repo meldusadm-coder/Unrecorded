@@ -92,7 +92,12 @@ void main() {
           capturedAt: DateTime(2025, 1),
         ),
       );
-      expect(result.totalScore, lessThanOrEqualTo(39));
+      expect(
+        result.totalScore,
+        lessThanOrEqualTo(
+          defaultRiskScoringPolicy.maxSupportingOnlyMediumScore,
+        ),
+      );
       expect(result.level, isNot(RiskLevel.high));
     });
 

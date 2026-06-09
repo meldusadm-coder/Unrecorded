@@ -21,25 +21,33 @@ class DetectionEngine {
     final detected = tracked.toDetectedSignal();
     final evidence = <DetectionEvidence>[];
 
-    // Suspicious catalogue match first — benign cannot suppress this.
-    final match = _matcher.bestMatch(detected);
+    final catalogue = _matcher.matchCatalogue(detected);
+    final match = catalogue.primary;
+    SignatureMatchSet? primarySet;
     if (match != null) {
-      evidence.add(
-        DetectionEvidence(
-          kind: switch (match.kind) {
-            SignatureMatchKind.name => DetectionEvidenceKind.nameMatch,
-            SignatureMatchKind.serviceUuid =>
-              DetectionEvidenceKind.serviceUuidHint,
-            SignatureMatchKind.macPrefix =>
-              DetectionEvidenceKind.addressPrefixHint,
-          },
-          label: match.explanation,
-        ),
-      );
+      for (final set in catalogue.perSignature) {
+        if (set.signature.id == match.signature.id) {
+          primarySet = set;
+          break;
+        }
+      }
+    }
+
+    if (primarySet != null) {
+      for (final m in primarySet.allMatches) {
+        evidence.add(
+          DetectionEvidence(
+            kind: _evidenceKindFor(m.kind),
+            label: m.explanation,
+          ),
+        );
+      }
     }
 
     final vendorHint = _matcher.vendorHintFromId(tracked.id);
-    if (match == null && vendorHint != null && tracked.normalizedMac != null) {
+    if (match == null &&
+        vendorHint != null &&
+        SignatureMatcher.shouldConsiderAddressPrefix(tracked.id)) {
       evidence.add(
         DetectionEvidence(
           kind: DetectionEvidenceKind.addressPrefixHint,
@@ -89,14 +97,16 @@ class DetectionEngine {
       category = DeviceSignalCategory.possibleRecordingWearable;
       contributes = true;
       band = switch (match.kind) {
-        SignatureMatchKind.name ||
-        SignatureMatchKind.serviceUuid =>
-          tracked.sightingCount >= 2
-              ? ConfidenceBand.elevated
-              : ConfidenceBand.moderate,
+        SignatureMatchKind.name => tracked.sightingCount >= 2
+            ? ConfidenceBand.elevated
+            : ConfidenceBand.moderate,
+        SignatureMatchKind.serviceUuid ||
+        SignatureMatchKind.manufacturer =>
+          ConfidenceBand.moderate,
         SignatureMatchKind.macPrefix => ConfidenceBand.moderate,
       };
-    } else if (vendorHint != null && tracked.normalizedMac != null) {
+    } else if (vendorHint != null &&
+        SignatureMatcher.shouldConsiderAddressPrefix(tracked.id)) {
       category = DeviceSignalCategory.possibleRecordingWearable;
       contributes = true;
       band = ConfidenceBand.moderate;
@@ -133,6 +143,16 @@ class DetectionEngine {
       contributesToRisk: contributes,
       primaryMatchKind: match?.kind,
     );
+  }
+
+  DetectionEvidenceKind _evidenceKindFor(SignatureMatchKind kind) {
+    return switch (kind) {
+      SignatureMatchKind.name => DetectionEvidenceKind.nameMatch,
+      SignatureMatchKind.serviceUuid => DetectionEvidenceKind.serviceUuidHint,
+      SignatureMatchKind.manufacturer =>
+        DetectionEvidenceKind.manufacturerIdHint,
+      SignatureMatchKind.macPrefix => DetectionEvidenceKind.addressPrefixHint,
+    };
   }
 
   DeviceSignalCategory _categoryFromBenign(BenignDeviceCategory benign) {

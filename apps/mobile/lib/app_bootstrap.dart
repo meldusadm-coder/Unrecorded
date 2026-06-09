@@ -1,8 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'features/scan/scan_state.dart';
+import 'services/background_protection_controller.dart';
+import 'services/background_protection_prefs.dart';
 import 'services/protection_prefs.dart';
+import 'services/recent_risk_controller.dart';
 import 'services/risk_notification_service.dart';
 import 'services/scanner_provider.dart';
 import 'services/widget_sync_service.dart';
@@ -17,11 +22,31 @@ class AppBootstrap extends ConsumerStatefulWidget {
   ConsumerState<AppBootstrap> createState() => _AppBootstrapState();
 }
 
-class _AppBootstrapState extends ConsumerState<AppBootstrap> {
+class _AppBootstrapState extends ConsumerState<AppBootstrap>
+    with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) => _init());
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.read(recentRiskControllerProvider.notifier).reload();
+      unawaited(
+        ref
+            .read(backgroundProtectionControllerProvider.notifier)
+            .reconcileBackgroundProtection(),
+      );
+    }
   }
 
   Future<void> _init() async {
@@ -30,6 +55,14 @@ class _AppBootstrapState extends ConsumerState<AppBootstrap> {
     await notifications.handleNotificationLaunch();
     ref.read(widgetSyncServiceProvider);
     await ref.read(scannerConfigInitProvider.future);
+
+    final bgPrefs = await BackgroundProtectionPrefs.load();
+    if (bgPrefs.backgroundProtectionEnabled) {
+      await ref
+          .read(backgroundProtectionControllerProvider.notifier)
+          .reconcileBackgroundProtection();
+      return;
+    }
 
     final prefs = await ProtectionPrefs.load();
     if (prefs.protectionEnabled) {

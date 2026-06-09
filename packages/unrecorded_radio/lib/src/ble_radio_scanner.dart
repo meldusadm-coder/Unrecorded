@@ -117,6 +117,7 @@ class BleRadioScanner implements RadioScanner {
         rssi: r.rssi,
         serviceUuids:
             r.advertisementData.serviceUuids.map((e) => e.str).toList(),
+        manufacturerIds: r.advertisementData.manufacturerData.keys.toList(),
         isConnectable: r.advertisementData.connectable,
       ),
       observedAt: DateTime.now(),

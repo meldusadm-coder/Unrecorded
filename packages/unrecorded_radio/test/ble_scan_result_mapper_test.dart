@@ -60,10 +60,21 @@ void main() {
       expect(blank.name, isNull);
     });
 
+    test('maps manufacturer company IDs without payloads', () {
+      final result = mapBleAdvertisement(
+        const BleAdvertisement(
+          id: 'id',
+          manufacturerIds: [0x004C, 0x0075],
+        ),
+      );
+      expect(result.manufacturerIds, [0x004C, 0x0075]);
+    });
+
     test('handles null-like optional fields safely', () {
       final result = mapBleAdvertisement(const BleAdvertisement(id: 'id'));
       expect(result.rssi, isNull);
       expect(result.serviceUuids, isEmpty);
+      expect(result.manufacturerIds, isEmpty);
       expect(result.isConnectable, isFalse);
     });
 

@@ -104,6 +104,12 @@ class AlertExplanationScreen extends StatelessWidget {
                   'session, confidence may increase modestly. Stale signals '
                   'expire after about a minute without a new observation.',
             ),
+            const Divider(height: 32),
+            _section(
+              theme,
+              AppCopy.recentRiskExplanationSectionTitle,
+              AppCopy.recentRiskExplanationSectionBody,
+            ),
             const SizedBox(height: 24),
           ],
         ),

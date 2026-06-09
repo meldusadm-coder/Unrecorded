@@ -89,7 +89,7 @@ void main() {
     expect(find.text(AppCopy.widgetHelpTitle), findsOneWidget);
     expect(find.textContaining('Add the Unrecorded widget'), findsOneWidget);
     expect(find.textContaining('optional'), findsOneWidget);
-    expect(find.textContaining('not proof'), findsOneWidget);
+    expect(find.text(AppCopy.notificationsHelpTitle), findsOneWidget);
     expect(find.textContaining('battery settings'), findsOneWidget);
   });
 

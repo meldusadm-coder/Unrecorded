@@ -31,6 +31,7 @@ class HelpScreen extends ConsumerWidget {
         title: const Text('Help'),
       ),
       body: SafeArea(
+        bottom: false,
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           children: [
@@ -67,6 +68,13 @@ class HelpScreen extends ConsumerWidget {
             const SizedBox(height: 12),
             const HelperText(text: AppCopy.alertExampleFooter),
             const Divider(height: 32),
+            Text(
+              AppCopy.recentRiskMissedAlertTitle,
+              style: theme.textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            const HelperText(text: AppCopy.recentRiskMissedAlertBody),
+            const Divider(height: 32),
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const UnrecordedIcon(
@@ -102,6 +110,13 @@ class HelpScreen extends ConsumerWidget {
               const SizedBox(height: 8),
               const HelperText(text: AppCopy.widgetHelpLimitations),
             ],
+            const Divider(height: 32),
+            Text(
+              AppCopy.notificationsHelpTitle,
+              style: theme.textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            const HelperText(text: AppCopy.notificationsHelpBody),
             const Divider(height: 32),
             ListTile(
               key: const Key('help_feedback_tile'),

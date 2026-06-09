@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:unrecorded_core/unrecorded_core.dart';
 import 'package:unrecorded_ui/unrecorded_ui.dart';
 
@@ -10,8 +11,11 @@ import '../../services/app_version.dart';
 import '../../services/ad_consent_service.dart';
 import '../../services/entitlement_service.dart';
 import '../../services/notification_prefs.dart';
+import '../../services/recent_risk_controller.dart';
 import '../../services/notification_risk_threshold.dart';
+import '../../services/notification_status_provider.dart';
 import '../../services/risk_notification_service.dart';
+import '../scan/background_protection_toggle.dart';
 import 'debug_testing_section.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -47,12 +51,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           .requestPermissionIfNeeded();
       if (!granted && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Notification permission was denied. Enable it in system settings.',
+          // SnackBarAction callback prevents a fully const SnackBar.
+          // ignore: prefer_const_constructors
+          SnackBar(
+            content: const Text(AppCopy.notificationPermissionDeniedHelper),
+            // ignore: prefer_const_constructors
+            action: SnackBarAction(
+              label: 'Settings',
+              onPressed: openAppSettings,
             ),
           ),
         );
+        ref.invalidate(notificationsOsEnabledProvider);
         return;
       }
     } else {
@@ -61,6 +71,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     final prefs = await NotificationPrefs.load();
     await prefs.setRiskNotificationsEnabled(enabled);
+    ref.invalidate(riskNotificationsEnabledProvider);
+    ref.invalidate(notificationsOsEnabledProvider);
     if (!mounted) return;
     setState(() => _riskNotificationsEnabled = enabled);
   }
@@ -94,6 +106,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final theme = Theme.of(context);
     final adsRemoved = ref.watch(adsRemovedProvider);
     final privacyOptionsRequired = ref.watch(adPrivacyOptionsRequiredProvider);
+    final recentRiskWindow = ref.watch(recentRiskControllerProvider).window;
 
     return Scaffold(
       appBar: AppBar(
@@ -111,6 +124,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         title: const Text('Settings & Privacy'),
       ),
       body: SafeArea(
+        bottom: false,
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           children: [
@@ -125,6 +139,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ? null
                   : _setRiskNotifications,
             ),
+            const SizedBox(height: 8),
+            const HelperText(text: AppCopy.notificationsHelpBody),
             if (_riskNotificationsEnabled == true) ...[
               const SizedBox(height: 8),
               DropdownMenu<NotificationRiskThreshold>(
@@ -155,6 +171,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onSelected: _setNotificationRiskThreshold,
               ),
             ],
+            const SizedBox(height: 16),
+            DropdownMenu<RecentRiskWindow>(
+              key: ValueKey(recentRiskWindow),
+              label: const Text(AppCopy.recentRiskReminderTitle),
+              helperText: AppCopy.recentRiskReminderSubtitle,
+              initialSelection: recentRiskWindow,
+              trailingIcon: UnrecordedIcon(
+                asset: UnrecordedIconAsset.more,
+                size: 24,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              dropdownMenuEntries: RecentRiskWindow.values
+                  .map(
+                    (window) => DropdownMenuEntry(
+                      value: window,
+                      label: window.label,
+                    ),
+                  )
+                  .toList(),
+              onSelected: (value) {
+                if (value == null) return;
+                ref
+                    .read(recentRiskControllerProvider.notifier)
+                    .setWindow(value);
+              },
+            ),
+            const SizedBox(height: 8),
+            const HelperText(text: AppCopy.recentRiskReminderHelp),
+            const SizedBox(height: 16),
+            const BackgroundProtectionToggle(),
             const SizedBox(height: 24),
             PrivacyNoticeCard(
               text: PrivacyDisclaimer.privacyModel,
