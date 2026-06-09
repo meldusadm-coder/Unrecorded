@@ -4,6 +4,11 @@ import 'detection_signature.dart';
 ///
 /// Update this list to add brands or refine keywords — scoring rules read from
 /// here instead of hard-coded lists in rule classes.
+///
+/// Production hints use name keywords, [macPrefixHints] (address-prefix/OUI),
+/// and cautiously verified [manufacturerIdHints]. [serviceUuidHints] stay empty
+/// until a consumer-advertised UUID is publicly documented (experimental dev
+/// templates do not count).
 const List<DetectionSignature> detectionSignatures = [
   DetectionSignature(
     id: 'meta-ray-ban',
@@ -15,15 +20,17 @@ const List<DetectionSignature> detectionSignatures = [
       'stories',
     ],
     macPrefixHints: ['000b9a', 'e45f01'],
+    manufacturerIdHints: [0x0D53],
     confidenceWeight: 35,
     matchExplanation:
         'A nearby device may match Meta or Ray-Ban smart glasses based on '
-        'its advertised name or address pattern.',
+        'its advertised name, manufacturer hint, or address pattern.',
     macPrefixExplanation:
         'A nearby Bluetooth address prefix may match Meta or Ray-Ban smart '
         'glasses. Address hints are not proof of a specific device.',
     sourceNote:
-        'Address-prefix hints from existing repo catalogue; weak supporting '
+        'Address-prefix hints from existing repo catalogue; manufacturer ID '
+        '0x0D53 is Luxottica Group (Bluetooth SIG assigned) — weak supporting '
         'evidence only, not proof of identity or recording.',
   ),
   DetectionSignature(
@@ -35,16 +42,18 @@ const List<DetectionSignature> detectionSignatures = [
       'snap glasses',
     ],
     macPrefixHints: ['acbc32', 'f4a739'],
+    manufacturerIdHints: [0x03C2],
     confidenceWeight: 35,
     matchExplanation:
         'A nearby device may match Snap Spectacles based on its advertised '
-        'name or address pattern.',
+        'name, manufacturer hint, or address pattern.',
     macPrefixExplanation:
         'A nearby Bluetooth address prefix may match Snap Spectacles. '
         'Address hints are not proof of a specific device.',
     sourceNote:
-        'Address-prefix hints from existing repo catalogue; weak supporting '
-        'evidence only, not proof of identity or recording.',
+        'Address-prefix hints from existing repo catalogue; manufacturer ID '
+        '0x03C2 is Snapchat Inc (Bluetooth SIG; Snap Spectacles BLE docs) — '
+        'weak supporting evidence only, not proof of identity or recording.',
   ),
   DetectionSignature(
     id: 'even-realities',
