@@ -2,6 +2,7 @@
 enum DetectionEvidenceKind {
   nameMatch,
   serviceUuidHint,
+  manufacturerIdHint,
   addressPrefixHint,
   strongSignal,
   repeatedSighting,

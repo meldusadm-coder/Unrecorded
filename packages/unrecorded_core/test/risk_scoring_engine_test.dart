@@ -213,7 +213,7 @@ void main() {
       }
     });
 
-    test('mac-only prefix hint can reach medium but not high', () {
+    test('address-prefix-only hint can reach medium but not high', () {
       final result = _evaluate([
         DetectedSignal(
           id: '00:0B:9A:12:34:56',
@@ -222,7 +222,13 @@ void main() {
         ),
       ]);
       expect(result.scoring.level, RiskLevel.medium);
-      expect(result.scoring.totalScore, lessThan(40));
+      expect(
+        result.scoring.totalScore,
+        lessThanOrEqualTo(
+          defaultRiskScoringPolicy.maxSupportingOnlyMediumScore,
+        ),
+      );
+      expect(result.scoring.level, isNot(RiskLevel.high));
     });
 
     test('deterministic scoring for identical input', () {

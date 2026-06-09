@@ -77,6 +77,9 @@ class RiskScoringEngine {
 
   int _scoreAssessment(DetectionAssessment assessment) {
     final signature = assessment.matchedSignature;
+    final hasName = assessment.evidence.any(
+      (e) => e.kind == DetectionEvidenceKind.nameMatch,
+    );
     final hasAddressOnly = signature == null &&
         assessment.evidence.any(
           (e) => e.kind == DetectionEvidenceKind.addressPrefixHint,
@@ -88,34 +91,39 @@ class RiskScoringEngine {
 
     if (signature != null) {
       score += switch (kind) {
-        SignatureMatchKind.name ||
-        SignatureMatchKind.serviceUuid =>
-          signature.confidenceWeight,
+        SignatureMatchKind.name => signature.confidenceWeight,
+        SignatureMatchKind.serviceUuid ||
+        SignatureMatchKind.manufacturer =>
+          _policy.supportingBaseWeight,
         SignatureMatchKind.macPrefix => signature.confidenceWeight >= 5
             ? signature.confidenceWeight - 5
             : signature.confidenceWeight,
         null => signature.confidenceWeight,
       };
-    } else {
-      score += 20;
-    }
 
-    final rssi =
-        assessment.signal.smoothedRssi?.round() ?? assessment.signal.lastRssi;
-    if (rssi != null && signature != null) {
-      if (rssi >= _policy.strongRssiThreshold) {
-        score += _policy.strongRssiPoints;
-      } else if (rssi >= _policy.moderateRssiThreshold) {
-        score += _policy.moderateRssiPoints;
+      if (hasName) {
+        score += _sameSignatureSupportBonus(assessment);
       }
+    } else {
+      score += _policy.supportingBaseWeight;
     }
 
-    if (assessment.signal.everConnectable && signature != null) {
-      score += _policy.connectablePoints;
-    }
+    if (hasName && signature != null) {
+      final rssi =
+          assessment.signal.smoothedRssi?.round() ?? assessment.signal.lastRssi;
+      if (rssi != null) {
+        if (rssi >= _policy.strongRssiThreshold) {
+          score += _policy.strongRssiPoints;
+        } else if (rssi >= _policy.moderateRssiThreshold) {
+          score += _policy.moderateRssiPoints;
+        }
+      }
 
-    final sightings = assessment.signal.sightingCount;
-    if (signature != null) {
+      if (assessment.signal.everConnectable) {
+        score += _policy.connectablePoints;
+      }
+
+      final sightings = assessment.signal.sightingCount;
       if (sightings >= 4) {
         score += _policy.repeatBoostFourPlus;
       } else if (sightings >= 2) {
@@ -123,18 +131,23 @@ class RiskScoringEngine {
       }
     }
 
-    final macOnly = kind == SignatureMatchKind.macPrefix &&
-        !assessment.evidence.any(
-          (e) =>
-              e.kind == DetectionEvidenceKind.nameMatch ||
-              e.kind == DetectionEvidenceKind.serviceUuidHint,
-        );
-
-    if (macOnly && score > _policy.macOnlyMaxScore) {
-      score = _policy.macOnlyMaxScore;
+    if (!hasName && score > _policy.maxSupportingOnlyMediumScore) {
+      score = _policy.maxSupportingOnlyMediumScore;
     }
 
     return score;
+  }
+
+  int _sameSignatureSupportBonus(DetectionAssessment assessment) {
+    var bonus = 0;
+    for (final e in assessment.evidence) {
+      if (e.kind == DetectionEvidenceKind.serviceUuidHint ||
+          e.kind == DetectionEvidenceKind.manufacturerIdHint ||
+          e.kind == DetectionEvidenceKind.addressPrefixHint) {
+        bonus += _policy.sameSignatureSupportBonus;
+      }
+    }
+    return bonus;
   }
 
   List<String> _reasonsFor(DetectionAssessment assessment, int score) {

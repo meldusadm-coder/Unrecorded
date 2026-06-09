@@ -22,6 +22,9 @@ const List<DetectionSignature> detectionSignatures = [
     macPrefixExplanation:
         'A nearby Bluetooth address prefix may match Meta or Ray-Ban smart '
         'glasses. Address hints are not proof of a specific device.',
+    sourceNote:
+        'Address-prefix hints from existing repo catalogue; weak supporting '
+        'evidence only, not proof of identity or recording.',
   ),
   DetectionSignature(
     id: 'snap-spectacles',
@@ -39,6 +42,9 @@ const List<DetectionSignature> detectionSignatures = [
     macPrefixExplanation:
         'A nearby Bluetooth address prefix may match Snap Spectacles. '
         'Address hints are not proof of a specific device.',
+    sourceNote:
+        'Address-prefix hints from existing repo catalogue; weak supporting '
+        'evidence only, not proof of identity or recording.',
   ),
   DetectionSignature(
     id: 'even-realities',

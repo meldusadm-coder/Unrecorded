@@ -15,6 +15,9 @@ class RadioScanResult {
   /// Advertised service UUIDs.
   final List<String> serviceUuids;
 
+  /// Bluetooth SIG company IDs from manufacturer-specific data (no payloads).
+  final List<int> manufacturerIds;
+
   /// Whether the device is connectable.
   final bool isConnectable;
 
@@ -26,6 +29,7 @@ class RadioScanResult {
     this.name,
     this.rssi,
     this.serviceUuids = const [],
+    this.manufacturerIds = const [],
     this.isConnectable = false,
     required this.observedAt,
   });

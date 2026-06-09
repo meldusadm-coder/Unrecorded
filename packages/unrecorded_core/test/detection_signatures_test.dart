@@ -13,6 +13,7 @@ void main() {
         expect(
           signature.nameKeywords.isNotEmpty ||
               signature.serviceUuidHints.isNotEmpty ||
+              signature.manufacturerIdHints.isNotEmpty ||
               signature.macPrefixHints.isNotEmpty,
           isTrue,
           reason: '${signature.id} must match on at least one field',

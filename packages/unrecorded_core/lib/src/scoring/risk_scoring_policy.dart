@@ -5,7 +5,9 @@ class RiskScoringPolicy {
   const RiskScoringPolicy({
     this.mediumThreshold = 15,
     this.highThreshold = 40,
-    this.macOnlyMaxScore = 39,
+    this.maxSupportingOnlyMediumScore = 29,
+    this.supportingBaseWeight = 20,
+    this.sameSignatureSupportBonus = 3,
     this.repeatBoostTwoToThree = 5,
     this.repeatBoostFourPlus = 8,
     this.strongRssiThreshold = -55,
@@ -13,13 +15,20 @@ class RiskScoringPolicy {
     this.strongRssiPoints = 10,
     this.moderateRssiPoints = 5,
     this.connectablePoints = 10,
-  });
+  }) : assert(maxSupportingOnlyMediumScore < highThreshold);
 
   final int mediumThreshold;
   final int highThreshold;
 
-  /// MAC-prefix-only matches cannot exceed this score (stays below high).
-  final int macOnlyMaxScore;
+  /// Supporting-only matches (no name) cannot exceed this score — clearly
+  /// medium-at-most, well below [highThreshold].
+  final int maxSupportingOnlyMediumScore;
+
+  /// Base score for standalone service-UUID or manufacturer-ID matches.
+  final int supportingBaseWeight;
+
+  /// Small bonus when same-signature UUID/manufacturer/address supports a name.
+  final int sameSignatureSupportBonus;
 
   final int repeatBoostTwoToThree;
   final int repeatBoostFourPlus;
