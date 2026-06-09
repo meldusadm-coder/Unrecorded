@@ -62,7 +62,7 @@ void main() {
       );
     });
 
-    test('matches MAC prefix when name is missing', () {
+    test('matches address prefix when name is missing', () {
       final match = matcher.bestMatch(
         DetectedSignal(
           id: '00:0B:9A:12:34:56',
@@ -72,6 +72,42 @@ void main() {
       expect(match, isNotNull);
       expect(match!.kind, SignatureMatchKind.macPrefix);
       expect(match.score, greaterThanOrEqualTo(15));
+    });
+
+    test('ignores address prefix on locally administered MAC', () {
+      expect(
+        matcher.bestMatch(
+          DetectedSignal(
+            id: 'F2:0B:9A:12:34:56',
+            seenAt: DateTime(2025, 1, 1),
+          ),
+        ),
+        isNull,
+      );
+    });
+
+    test('matches manufacturer ID hint', () {
+      const mfgMatcher = SignatureMatcher(
+        signatures: [
+          DetectionSignature(
+            id: 'test-mfg',
+            brandFamily: 'Test Glasses',
+            manufacturerIdHints: [0x1234],
+            confidenceWeight: 30,
+            matchExplanation:
+                'A nearby device may match Test Glasses via a manufacturer hint.',
+          ),
+        ],
+      );
+      final match = mfgMatcher.bestMatch(
+        DetectedSignal(
+          id: 'opaque',
+          manufacturerIds: [0x1234],
+          seenAt: DateTime(2025, 1, 1),
+        ),
+      );
+      expect(match, isNotNull);
+      expect(match!.kind, SignatureMatchKind.manufacturer);
     });
 
     test('matches normalized service UUID hints', () {

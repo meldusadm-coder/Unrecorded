@@ -8,6 +8,7 @@ class BleAdvertisement {
     this.platformName,
     this.rssi,
     this.serviceUuids = const [],
+    this.manufacturerIds = const [],
     this.isConnectable = false,
   });
 
@@ -16,6 +17,7 @@ class BleAdvertisement {
   final String? platformName;
   final int? rssi;
   final List<String> serviceUuids;
+  final List<int> manufacturerIds;
   final bool isConnectable;
 }
 
@@ -37,6 +39,7 @@ RadioScanResult mapBleAdvertisement(
     name: name,
     rssi: advertisement.rssi,
     serviceUuids: advertisement.serviceUuids,
+    manufacturerIds: advertisement.manufacturerIds,
     isConnectable: advertisement.isConnectable,
     observedAt: observedAt ?? DateTime.now(),
   );

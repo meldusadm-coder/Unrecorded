@@ -11,6 +11,8 @@ TrackedSignal makeTrackedSignal({
   int? rssi,
   int sightings = 1,
   bool connectable = false,
+  List<String> serviceIds = const [],
+  List<int> manufacturerIds = const [],
 }) {
   final now = DateTime(2025, 1, 1);
   return TrackedSignal(
@@ -21,8 +23,10 @@ TrackedSignal makeTrackedSignal({
     displayName: name,
     lastRssi: rssi,
     smoothedRssi: rssi?.toDouble(),
+    serviceIds: List<String>.from(serviceIds),
+    manufacturerIds: List<int>.from(manufacturerIds),
     sightingCount: sightings,
     everConnectable: connectable,
-    normalizedMac: id.replaceAll(':', '').toLowerCase(),
+    normalizedMac: SignatureMatcher.normalizeMac(id),
   );
 }

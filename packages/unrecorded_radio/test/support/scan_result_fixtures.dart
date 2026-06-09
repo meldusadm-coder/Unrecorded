@@ -11,6 +11,7 @@ RadioScanResult namedResult({
   int rssi = -70,
   bool connectable = false,
   List<String> serviceUuids = const [],
+  List<int> manufacturerIds = const [],
 }) =>
     RadioScanResult(
       id: id,
@@ -18,5 +19,6 @@ RadioScanResult namedResult({
       rssi: rssi,
       isConnectable: connectable,
       serviceUuids: serviceUuids,
+      manufacturerIds: manufacturerIds,
       observedAt: DateTime(2025, 1, 1),
     );

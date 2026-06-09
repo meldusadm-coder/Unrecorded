@@ -49,7 +49,8 @@ List<RecentRiskReason> recentRiskReasonsForAssessments(
 RecentRiskReason? _reasonForEvidenceKind(DetectionEvidenceKind kind) {
   return switch (kind) {
     DetectionEvidenceKind.nameMatch ||
-    DetectionEvidenceKind.serviceUuidHint =>
+    DetectionEvidenceKind.serviceUuidHint ||
+    DetectionEvidenceKind.manufacturerIdHint =>
       RecentRiskReason.matchedKnownPattern,
     DetectionEvidenceKind.addressPrefixHint =>
       RecentRiskReason.addressPrefixHint,

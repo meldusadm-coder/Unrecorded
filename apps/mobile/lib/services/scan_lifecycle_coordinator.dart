@@ -133,6 +133,7 @@ class ScanLifecycleCoordinator {
             displayName: r.name,
             rssi: r.rssi,
             serviceIds: r.serviceUuids,
+            manufacturerIds: r.manufacturerIds,
             seenAt: r.observedAt,
             isConnectable: r.isConnectable,
           ),

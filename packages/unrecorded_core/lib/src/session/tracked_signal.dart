@@ -12,6 +12,7 @@ class TrackedSignal {
     this.lastRssi,
     this.smoothedRssi,
     this.serviceIds = const [],
+    this.manufacturerIds = const [],
     this.sightingCount = 1,
     this.everConnectable = false,
     this.normalizedMac,
@@ -25,6 +26,7 @@ class TrackedSignal {
   int? lastRssi;
   double? smoothedRssi;
   List<String> serviceIds;
+  List<int> manufacturerIds;
   int sightingCount;
   bool everConnectable;
   final String? normalizedMac;
@@ -42,6 +44,7 @@ class TrackedSignal {
       lastRssi: obs.rssi,
       smoothedRssi: smoothed,
       serviceIds: List<String>.from(obs.serviceIds),
+      manufacturerIds: List<int>.from(obs.manufacturerIds),
       sightingCount: 1,
       everConnectable: obs.isConnectable,
       normalizedMac: obs.normalizedMac,
@@ -65,6 +68,9 @@ class TrackedSignal {
     for (final uuid in obs.serviceIds) {
       if (!serviceIds.contains(uuid)) serviceIds.add(uuid);
     }
+    for (final mfgId in obs.manufacturerIds) {
+      if (!manufacturerIds.contains(mfgId)) manufacturerIds.add(mfgId);
+    }
   }
 
   DetectedSignal toDetectedSignal() {
@@ -73,6 +79,7 @@ class TrackedSignal {
       displayName: displayName,
       rssi: lastRssi,
       serviceIds: List.unmodifiable(serviceIds),
+      manufacturerIds: List.unmodifiable(manufacturerIds),
       seenAt: lastSeenAt,
       isConnectable: everConnectable,
     );
