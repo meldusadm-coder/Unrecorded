@@ -13,3 +13,5 @@ Unrecorded is designed to be privacy-protective by default.
 - **No analytics by default.** Usage data is not collected.
 - **Ads policy.** Official builds may show small bottom banner ads (see [docs/monetisation.md](monetisation.md)). Ads are isolated from scan logic: no scan results or nearby device identifiers are sent to ad networks. Non-personalised ads are used by default until consent allows otherwise. Pay-what-you-want IAP can remove ads; core detection stays free.
 - **Scan data stays on-device.** If future features add optional cloud sync or sharing, they must require explicit user consent and clearly explain what data is sent and where.
+
+**Android permission inventory (Play Console / release manifest):** [docs/android-permissions.md](android-permissions.md).

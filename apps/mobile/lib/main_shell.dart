@@ -35,13 +35,18 @@ class MainShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+
     return Column(
       children: [
         Expanded(child: child),
-        BottomAdSlot(
-          showSlot: _showAdSlot(ref),
-          onRemoveAdsTap: () => context.push('/remove-ads'),
-          child: ref.watch(bannerAdWidgetProvider),
+        Padding(
+          padding: EdgeInsets.only(bottom: bottomInset),
+          child: BottomAdSlot(
+            showSlot: _showAdSlot(ref),
+            onRemoveAdsTap: () => context.push('/remove-ads'),
+            child: ref.watch(bannerAdWidgetProvider),
+          ),
         ),
       ],
     );
