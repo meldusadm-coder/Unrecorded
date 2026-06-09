@@ -41,7 +41,7 @@ void main() {
   });
 
   group('default catalogue pipeline', () {
-    PipelineResult _evaluate(DetectedSignal signal) {
+    PipelineResult evaluateSignal(DetectedSignal signal) {
       final pipeline = DetectionPipeline();
       final now = signal.seenAt;
       return pipeline.processBatch([signal], now);
@@ -49,7 +49,7 @@ void main() {
 
     test('name keyword matches through default SignatureMatcher', () {
       final now = DateTime(2025, 6, 1, 12, 0, 0);
-      final result = _evaluate(
+      final result = evaluateSignal(
         DetectedSignal(
           id: 'aa:bb:cc:dd:ee:ff',
           displayName: 'Ray-Ban Meta',
@@ -62,7 +62,7 @@ void main() {
 
     test('address prefix matches through default SignatureMatcher', () {
       final now = DateTime(2025, 6, 1, 12, 0, 0);
-      final result = _evaluate(
+      final result = evaluateSignal(
         DetectedSignal(
           id: '00:0B:9A:12:34:56',
           seenAt: now,
@@ -72,13 +72,14 @@ void main() {
       expect(
         result.scoring.totalScore,
         lessThanOrEqualTo(
-            defaultRiskScoringPolicy.maxSupportingOnlyMediumScore),
+          defaultRiskScoringPolicy.maxSupportingOnlyMediumScore,
+        ),
       );
     });
 
     test('Snap manufacturer ID matches through default SignatureMatcher', () {
       final now = DateTime(2025, 6, 1, 12, 0, 0);
-      final result = _evaluate(
+      final result = evaluateSignal(
         DetectedSignal(
           id: 'opaque-platform-id',
           manufacturerIds: [0x03C2],
@@ -89,7 +90,8 @@ void main() {
       expect(
         result.scoring.totalScore,
         lessThanOrEqualTo(
-            defaultRiskScoringPolicy.maxSupportingOnlyMediumScore),
+          defaultRiskScoringPolicy.maxSupportingOnlyMediumScore,
+        ),
       );
       expect(result.scoring.level, isNot(RiskLevel.high));
     });
@@ -97,7 +99,7 @@ void main() {
     test('benign headphone name stays low even with unrelated manufacturer ID',
         () {
       final now = DateTime(2025, 6, 1, 12, 0, 0);
-      final result = _evaluate(
+      final result = evaluateSignal(
         DetectedSignal(
           id: 'aa:bb:cc:dd:ee:ff',
           displayName: 'JBL Flip 6',
