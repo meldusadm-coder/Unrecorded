@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.7.0+12
+
+### Added
+- Background protection (Android): optional foreground service keeps BLE scanning active with a persistent notification when the app is in the background.
+- Recent risk reminder: configurable notification when elevated risk was detected recently, with threshold and window preferences.
+- Expanded BLE detection catalogue: manufacturer ID hints and verified manufacturer data improve wearable/smart-glasses signature matching.
+
+### Changed
+- Risk scoring and signature matching incorporate manufacturer evidence alongside service UUID and name heuristics.
+- Notification handling and user guidance for protection status, permission prompts, and recovery when Android stops the foreground service.
+
+### Fixed
+- Android edge-to-edge display: correct system bar insets on modern devices; release manifest permissions audited.
+
+
 ## 0.6.0+11
 
 ### Added
