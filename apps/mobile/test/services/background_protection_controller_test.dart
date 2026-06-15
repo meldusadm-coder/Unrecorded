@@ -80,6 +80,34 @@ void main() {
     expect(built.runningFlags, contains(true));
   });
 
+  test('enable immediately mirrors active protection while service starts',
+      () async {
+    final fgs = FakeForegroundServiceController();
+    final pausedStates = <ScanState>[];
+    final mirrored = <ScanState>[];
+    final runningFlags = <bool>[];
+    final controller = BackgroundProtectionController(
+      foregroundService: fgs,
+      preflight: _FakePreflight(
+        const BackgroundProtectionPreflightResult.ok(),
+      ),
+      isAndroidPlatform: true,
+      applyMirroredScanState: mirrored.add,
+      pauseMainProtection: () async {
+        pausedStates.add(const ScanState(status: ScanStatus.paused));
+      },
+      onServiceRunningChanged: runningFlags.add,
+    );
+
+    final ok = await controller.enable();
+
+    expect(ok, isTrue);
+    expect(pausedStates, hasLength(1));
+    expect(mirrored, hasLength(1));
+    expect(mirrored.single.status, ScanStatus.scanning);
+    expect(mirrored.single.protectionRequested, isTrue);
+  });
+
   test('notification denied preflight does not start service', () async {
     final fgs = FakeForegroundServiceController();
     final built = buildController(
@@ -129,6 +157,23 @@ void main() {
     );
     expect(built.controller.state.showsStoppedByAndroidBanner, isTrue);
     expect(built.runningFlags.last, isFalse);
+  });
+
+  test('reconcile running service immediately mirrors active protection',
+      () async {
+    final prefs = await BackgroundProtectionPrefs.load();
+    await prefs.setBackgroundProtectionEnabled(true);
+
+    final fgs = FakeForegroundServiceController()..running = true;
+    final built = buildController(fgs: fgs);
+
+    await built.controller.reconcileBackgroundProtection();
+
+    expect(built.controller.state.enabled, isTrue);
+    expect(built.controller.state.serviceRunning, isTrue);
+    expect(built.mirrored, hasLength(1));
+    expect(built.mirrored.single.status, ScanStatus.scanning);
+    expect(built.mirrored.single.protectionRequested, isTrue);
   });
 
   test('reconcile clears explicit stop as plain off', () async {
