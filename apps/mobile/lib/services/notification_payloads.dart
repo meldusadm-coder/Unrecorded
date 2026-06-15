@@ -6,3 +6,6 @@ const notificationAlertPayload = 'alert-details';
 
 /// Payload for taps on the ongoing protection-status notification.
 const notificationProtectionStatusPayload = 'protection-status';
+
+/// Payload for taps when the protection notification shows a recent-risk reminder.
+const notificationRecentRiskPayload = 'recent-risk';

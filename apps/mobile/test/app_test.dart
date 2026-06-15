@@ -90,7 +90,8 @@ void main() {
     expect(find.textContaining('Add the Unrecorded widget'), findsOneWidget);
     expect(find.textContaining('optional'), findsOneWidget);
     expect(find.text(AppCopy.notificationsHelpTitle), findsOneWidget);
-    expect(find.textContaining('battery settings'), findsOneWidget);
+    expect(find.text(AppCopy.widgetHelpLimitations), findsOneWidget);
+    expect(find.text(AppCopy.notificationsHelpBody), findsOneWidget);
   });
 
   testWidgets('help screen can navigate back to scan screen', (tester) async {

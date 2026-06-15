@@ -1,6 +1,5 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:unrecorded_core/unrecorded_core.dart';
-import 'package:unrecorded_ui/unrecorded_ui.dart';
 
 import 'notification_payloads.dart';
 
@@ -18,6 +17,11 @@ const NotificationDetails riskAlertNotificationDetails = NotificationDetails(
     importance: Importance.high,
     priority: Priority.high,
     visibility: NotificationVisibility.public,
+    styleInformation: BigTextStyleInformation(
+      AppCopy.possibleRiskNotificationExpanded,
+      contentTitle: AppCopy.possibleRiskNotificationTitle,
+      summaryText: AppCopy.possibleRiskNotificationBody,
+    ),
   ),
   iOS: DarwinNotificationDetails(
     presentAlert: true,
@@ -26,11 +30,8 @@ const NotificationDetails riskAlertNotificationDetails = NotificationDetails(
   ),
 );
 
-String riskAlertTitleFor(RiskLevel riskLevel) {
-  final levelLabel = RiskBadge.labelFor(riskLevel);
-  return '$levelLabel — ${AppCopy.possibleRiskTitle}';
-}
+String get riskAlertTitle => AppCopy.possibleRiskNotificationTitle;
 
-String get riskAlertBody => AppCopy.possibleRiskBody;
+String get riskAlertBody => AppCopy.possibleRiskNotificationBody;
 
 String get riskAlertPayload => notificationAlertPayload;

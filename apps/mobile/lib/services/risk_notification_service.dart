@@ -73,6 +73,8 @@ class RiskNotificationService {
     switch (response.payload) {
       case notificationAlertPayload:
         navigateToAlertDetails();
+      case notificationRecentRiskPayload:
+        navigateToRecentRisk();
       case notificationProtectionStatusPayload:
         navigateToProtectionScreen();
       default:
@@ -94,6 +96,8 @@ class RiskNotificationService {
       switch (payload) {
         case notificationAlertPayload:
           navigateToAlertDetails();
+        case notificationRecentRiskPayload:
+          navigateToRecentRisk();
         case notificationProtectionStatusPayload:
           navigateToProtectionScreen();
         default:
@@ -145,7 +149,10 @@ class RiskNotificationService {
     return notificationsOsEnabled();
   }
 
-  Future<void> syncProtectionStatusNotification(ScanState state) async {
+  Future<void> syncProtectionStatusNotification(
+    ScanState state, {
+    bool recentRiskVisible = false,
+  }) async {
     if (!_platformSupported) return;
 
     if (!shouldShowProtectionStatusNotification(state)) {
@@ -162,7 +169,10 @@ class RiskNotificationService {
     await init();
     if (!_initialized) return;
 
-    final body = protectionStatusBodyFor(state.status);
+    final content = protectionStatusNotificationContentFor(
+      status: state.status,
+      recentRiskVisible: recentRiskVisible,
+    );
     const details = NotificationDetails(
       android: AndroidNotificationDetails(
         protectionStatusChannelId,
@@ -187,9 +197,9 @@ class RiskNotificationService {
       await _plugin.show(
         id: protectionStatusNotificationId,
         title: AppCopy.protectionStatusNotificationTitle,
-        body: body,
+        body: content.body,
         notificationDetails: details,
-        payload: notificationProtectionStatusPayload,
+        payload: content.payload,
       );
       _logDebug('protection status shown: ${state.status.name}');
     } catch (e) {
@@ -232,7 +242,7 @@ class RiskNotificationService {
     try {
       await _plugin.show(
         id: riskAlertNotificationId,
-        title: riskAlertTitleFor(riskLevel),
+        title: riskAlertTitle,
         body: riskAlertBody,
         notificationDetails: riskAlertNotificationDetails,
         payload: riskAlertPayload,

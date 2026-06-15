@@ -16,6 +16,10 @@ void main() {
       notificationProtectionStatusPayload,
       isNot(notificationAlertPayload),
     );
+    expect(
+      notificationRecentRiskPayload,
+      isNot(notificationProtectionStatusPayload),
+    );
   });
 
   test('shouldShowProtectionStatusNotification for active protection states',
@@ -83,5 +87,44 @@ void main() {
       expect(body.toLowerCase(), isNot(contains('recording detected')));
       expect(body.toLowerCase(), isNot(contains('confirmed')));
     }
+  });
+
+  test('backgroundProtectionStatusBodyFor uses checking copy while scanning',
+      () {
+    expect(
+      backgroundProtectionStatusBodyFor(ScanStatus.scanning),
+      'Checking nearby signals. Not proof of recording.',
+    );
+    expect(
+      backgroundProtectionStatusBodyFor(ScanStatus.possibleRiskDetected),
+      protectionStatusBodyFor(ScanStatus.possibleRiskDetected),
+    );
+    expect(
+      backgroundProtectionStatusBodyFor(ScanStatus.resting),
+      protectionStatusBodyFor(ScanStatus.resting),
+    );
+  });
+
+  test('protectionStatusNotificationContentFor chooses body and payload', () {
+    final active = protectionStatusNotificationContentFor(
+      status: ScanStatus.possibleRiskDetected,
+      recentRiskVisible: false,
+    );
+    expect(active.payload, notificationAlertPayload);
+    expect(active.body, contains('Possible risk nearby'));
+
+    final recent = protectionStatusNotificationContentFor(
+      status: ScanStatus.scanning,
+      recentRiskVisible: true,
+    );
+    expect(recent.payload, notificationRecentRiskPayload);
+    expect(recent.body, AppCopy.protectionStatusNotificationRecentRiskBody);
+
+    final scanning = protectionStatusNotificationContentFor(
+      status: ScanStatus.scanning,
+      recentRiskVisible: false,
+    );
+    expect(scanning.payload, notificationProtectionStatusPayload);
+    expect(scanning.body, AppCopy.protectionStatusNotificationScanningBody);
   });
 }
