@@ -100,5 +100,12 @@ void navigateToProtectionScreen() {
   GoRouter.of(context).go('/');
 }
 
+/// Navigate to recent possible-risk reminder details (notification tap).
+void navigateToRecentRisk() {
+  final context = rootNavigatorKey.currentContext;
+  if (context == null) return;
+  GoRouter.of(context).push(recentRiskRoute);
+}
+
 /// @deprecated Use [navigateToAlertDetails]. Kept for tests migrating off old name.
 void navigateToAlertInfo() => navigateToAlertDetails();

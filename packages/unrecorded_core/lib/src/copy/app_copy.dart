@@ -38,6 +38,16 @@ class AppCopy {
   static const String possibleRiskBody =
       'We found a signal pattern that may need your attention.';
 
+  static const String possibleRiskNotificationTitle = 'Possible privacy risk';
+
+  static const String possibleRiskNotificationBody =
+      'Nearby signals may match wearable recording devices. Not proof of recording.';
+
+  static const String possibleRiskNotificationExpanded =
+      'Unrecorded found nearby Bluetooth signals with risk indicators that may '
+      'match smart glasses or wearable recording devices. This is not proof '
+      'that anyone is recording.';
+
   static const String alertCardTitle = 'Possible recording risk nearby';
 
   static const String alertCardBody =
@@ -97,6 +107,9 @@ class AppCopy {
   static const String protectionStatusNotificationScanningBody =
       'Scanning is most reliable while the app remains open.';
 
+  static const String protectionStatusNotificationRecentRiskBody =
+      'Possible risk noticed recently — tap to view details.';
+
   static const String notificationModeRiskAlertsOn =
       'Risk alerts on: you\'ll see notifications for possible risk.';
 
@@ -119,9 +132,10 @@ class AppCopy {
       'The protection status notification means protection is active while '
       'the app is running — it is not proof that someone is recording. '
       'A possible-risk notification means nearby Bluetooth signals matched '
-      'risk indicators, which is also not proof of recording. Scanning '
-      'reliability depends on Android, permissions, Bluetooth, and whether '
-      'the app can keep running.';
+      'risk indicators, which is also not proof of recording. Android may '
+      'mirror phone notifications to a connected watch when notification '
+      'settings allow it, but watch delivery depends on Android, Wear OS, '
+      'permissions, Bluetooth, battery settings, and the connected device.';
 
   // Background protection (Android foreground service, opt-in)
   static const String backgroundProtectionTitle = 'Background protection';

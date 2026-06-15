@@ -43,15 +43,28 @@ class BackgroundRiskAlertNotifier {
     }
   }
 
+  Future<bool> _notificationsOsEnabled() async {
+    final android = _plugin.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+    final enabled = await android?.areNotificationsEnabled();
+    if (enabled != null) return enabled;
+    return true;
+  }
+
   /// Phase 2a proof: post a test possible-risk notification while minimised.
   Future<void> showTestAlert() async {
     await init();
     if (!_initialized) return;
 
+    if (!await _notificationsOsEnabled()) {
+      _log('test risk alert skipped: OS notifications disabled');
+      return;
+    }
+
     try {
       await _plugin.show(
         id: riskAlertNotificationId,
-        title: riskAlertTitleFor(RiskLevel.high),
+        title: riskAlertTitle,
         body: riskAlertBody,
         notificationDetails: riskAlertNotificationDetails,
         payload: riskAlertPayload,
@@ -76,10 +89,15 @@ class BackgroundRiskAlertNotifier {
     await init();
     if (!_initialized) return;
 
+    if (!await _notificationsOsEnabled()) {
+      _log('risk alert skipped: OS notifications disabled');
+      return;
+    }
+
     try {
       await _plugin.show(
         id: riskAlertNotificationId,
-        title: riskAlertTitleFor(riskLevel),
+        title: riskAlertTitle,
         body: riskAlertBody,
         notificationDetails: riskAlertNotificationDetails,
         payload: riskAlertPayload,
@@ -88,6 +106,14 @@ class BackgroundRiskAlertNotifier {
     } catch (e) {
       _log('risk alert show failed: $e');
     }
+  }
+
+  Future<void> cancelRiskAlert() async {
+    if (!_initialized) return;
+    try {
+      await _plugin.cancel(id: riskAlertNotificationId);
+      _log('risk alert cancelled');
+    } catch (_) {}
   }
 
   void _log(String message) {
