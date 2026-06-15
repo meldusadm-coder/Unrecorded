@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.8.0+13
+
+### Added
+- Watch-friendly possible-risk notification copy with expanded phone text for Android notification mirroring.
+- Recent-risk-aware protection status notifications with tap-through to recent risk details.
+
+### Changed
+- Protection and background notification copy now reflects scanning mode (foreground vs background) and recent risk state.
+- Notifications help text explains that watch delivery depends on Android, Wear OS, and device settings.
+
+### Fixed
+- Stale risk alerts when background protection stops; foreground protection notification re-sync when background scanning ends.
+- Background risk alerts respect OS notification permission; active-alert notification taps open alert details.
+
+
 ## 0.7.0+12
 
 ### Added
