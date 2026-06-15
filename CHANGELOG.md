@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.8.1+14
+
+### Fixed
+- Background protection now keeps protection visibly on during the handoff to
+  background scanning and app resume, avoiding a transient "Turn on protection"
+  state while background protection is enabled.
+
+
 ## 0.8.0+13
 
 ### Added

@@ -88,6 +88,15 @@ class BackgroundProtectionController
     _foregroundService.removeDataCallback(_onTaskData);
   }
 
+  void _mirrorBackgroundServiceActive() {
+    _applyMirroredScanState(
+      const ScanState(
+        status: ScanStatus.scanning,
+        protectionRequested: true,
+      ),
+    );
+  }
+
   void _onTaskData(Object data) {
     final snapshot = BackgroundProtectionSnapshot.fromJson(data);
     if (snapshot == null) return;
@@ -139,6 +148,7 @@ class BackgroundProtectionController
     if (running) {
       await _pauseMainProtection();
       _onServiceRunningChanged(true);
+      _mirrorBackgroundServiceActive();
       state = state.copyWith(
         enabled: true,
         serviceRunning: true,
@@ -200,6 +210,7 @@ class BackgroundProtectionController
     }
 
     _onServiceRunningChanged(true);
+    _mirrorBackgroundServiceActive();
     state = state.copyWith(
       enabled: true,
       serviceRunning: true,
