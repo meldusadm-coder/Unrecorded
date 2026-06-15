@@ -60,6 +60,7 @@ final signalUiMapperProvider = Provider<SignalUiMapper>((ref) {
 final scanControllerProvider =
     StateNotifierProvider<ScanController, ScanState>((ref) {
   final pipeline = ref.watch(detectionPipelineProvider);
+  var latestScanState = const ScanState();
   final controller = ScanController(
     coordinator: ScanLifecycleCoordinator(
       scannerFactory: () => ref.read(radioScannerProvider),
@@ -72,11 +73,17 @@ final scanControllerProvider =
     mapper: ref.read(signalUiMapperProvider),
     isBackgroundOwnsScanning: () => ref.read(backgroundOwnsScanningProvider),
     onStateChanged: (previous, state) {
+      latestScanState = state;
       final notifications = ref.read(riskNotificationServiceProvider);
       final backgroundOwns = ref.read(backgroundOwnsScanningProvider);
 
       if (!backgroundOwns) {
-        unawaited(notifications.syncProtectionStatusNotification(state));
+        unawaited(
+          notifications.syncProtectionStatusNotification(
+            state,
+            recentRiskVisible: _recentRiskVisibleForNotification(ref, state),
+          ),
+        );
       }
 
       if (!backgroundOwns &&
@@ -106,6 +113,34 @@ final scanControllerProvider =
     },
   );
 
+  ref.listen<bool>(backgroundOwnsScanningProvider, (previous, next) {
+    final notifications = ref.read(riskNotificationServiceProvider);
+    if (previous == true && next == false) {
+      unawaited(
+        notifications.syncProtectionStatusNotification(
+          latestScanState,
+          recentRiskVisible:
+              _recentRiskVisibleForNotification(ref, latestScanState),
+        ),
+      );
+    } else if (previous == false && next == true) {
+      unawaited(notifications.cancelProtectionStatusNotification());
+    }
+  });
+
+  ref.listen(recentRiskControllerProvider, (_, __) {
+    if (ref.read(backgroundOwnsScanningProvider)) return;
+    unawaited(
+      ref
+          .read(riskNotificationServiceProvider)
+          .syncProtectionStatusNotification(
+            latestScanState,
+            recentRiskVisible:
+                _recentRiskVisibleForNotification(ref, latestScanState),
+          ),
+    );
+  });
+
   ref.listen<ScannerConfig?>(scannerConfigProvider, (previous, next) {
     if (previous == null || next == null || previous == next) return;
     unawaited(controller.onScannerConfigChanged());
@@ -113,6 +148,17 @@ final scanControllerProvider =
 
   return controller;
 });
+
+bool _recentRiskVisibleForNotification(Ref ref, ScanState state) {
+  final recentState = ref.read(recentRiskControllerProvider);
+  final now = ref.read(clockProvider)();
+  return isRecentRiskReminderVisible(
+    event: recentState.event,
+    window: recentState.window,
+    hasLiveAlert: state.status == ScanStatus.possibleRiskDetected,
+    now: now,
+  );
+}
 
 final scannerConfigControllerProvider =
     Provider<ScannerConfigController>((ref) {

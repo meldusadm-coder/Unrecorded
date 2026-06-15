@@ -1,13 +1,17 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:unrecorded_core/unrecorded_core.dart';
 import 'package:unrecorded_mobile/router.dart';
-import 'package:unrecorded_ui/unrecorded_ui.dart';
+import 'package:unrecorded_mobile/services/risk_alert_notification.dart';
+
+import 'support/certainty_language.dart';
 
 void main() {
   test('notification payloads match routes', () {
     expect(notificationAlertPayload, 'alert-details');
     expect(notificationProtectionStatusPayload, 'protection-status');
+    expect(notificationRecentRiskPayload, 'recent-risk');
     expect(alertDetailsRoute, '/alert-details');
+    expect(recentRiskRoute, '/recent-risk');
     expect(alertInfoRoute, '/alert-info');
   });
 
@@ -22,14 +26,11 @@ void main() {
     );
   });
 
-  test('notification title includes risk level label', () {
-    expect(
-      '${RiskBadge.labelFor(RiskLevel.high)} — ${AppCopy.possibleRiskTitle}',
-      'High risk — Possible recording risk nearby',
-    );
-    expect(
-      '${RiskBadge.labelFor(RiskLevel.medium)} — ${AppCopy.possibleRiskTitle}',
-      contains('Medium risk'),
-    );
+  test('risk alert notification title is watch-safe and uncertainty-aware', () {
+    expect(riskAlertTitle, AppCopy.possibleRiskNotificationTitle);
+    expect(riskAlertTitle, isNotEmpty);
+    expectNoCertaintyLanguage(riskAlertTitle);
+    expect(riskAlertBody, AppCopy.possibleRiskNotificationBody);
+    expectNoCertaintyLanguage(riskAlertBody);
   });
 }

@@ -143,7 +143,7 @@ class _BackgroundScanTaskHandler extends TaskHandler {
     try {
       await FlutterForegroundTask.updateService(
         notificationTitle: AppCopy.backgroundProtectionNotificationTitle,
-        notificationText: protectionStatusBodyFor(status),
+        notificationText: backgroundProtectionStatusBodyFor(status),
         notificationButtons: [
           const NotificationButton(
             id: kFgsStopButtonId,
@@ -163,6 +163,7 @@ class _BackgroundScanTaskHandler extends TaskHandler {
   Future<void> onDestroy(DateTime timestamp, bool isTimeout) async {
     _log('task destroyed (isTimeout=$isTimeout)');
     _serviceRunning = false;
+    await _riskNotifier.cancelRiskAlert();
     await _coordinator?.pauseProtection();
     _coordinator = null;
 

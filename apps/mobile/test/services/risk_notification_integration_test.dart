@@ -17,13 +17,21 @@ class _RecordingNotificationService extends RiskNotificationService {
   _RecordingNotificationService() : super(RiskNotificationService.sharedPlugin);
 
   ScanState? lastSyncedState;
+  bool? lastRecentRiskVisible;
   RiskLevel? lastRiskAlertLevel;
   var riskAlertCancelled = false;
 
   @override
-  Future<void> syncProtectionStatusNotification(ScanState state) async {
+  Future<void> syncProtectionStatusNotification(
+    ScanState state, {
+    bool recentRiskVisible = false,
+  }) async {
     lastSyncedState = state;
-    await super.syncProtectionStatusNotification(state);
+    lastRecentRiskVisible = recentRiskVisible;
+    await super.syncProtectionStatusNotification(
+      state,
+      recentRiskVisible: recentRiskVisible,
+    );
   }
 
   @override
@@ -59,6 +67,7 @@ ScanController _controllerWithNotifications(
   required RadioScanner scanner,
   ScanRuntime? runtime,
   ScannerMode scannerMode = ScannerMode.demo,
+  bool recentRiskVisible = false,
 }) {
   final pipeline = DetectionPipeline();
   final coordinator = ScanLifecycleCoordinator(
@@ -75,7 +84,12 @@ ScanController _controllerWithNotifications(
     mapper: const SignalUiMapper(),
     isBackgroundOwnsScanning: () => false,
     onStateChanged: (previous, state) {
-      unawaited(notifications.syncProtectionStatusNotification(state));
+      unawaited(
+        notifications.syncProtectionStatusNotification(
+          state,
+          recentRiskVisible: recentRiskVisible,
+        ),
+      );
 
       if (previous.status != ScanStatus.possibleRiskDetected &&
           state.status == ScanStatus.possibleRiskDetected) {
@@ -145,14 +159,35 @@ void main() {
     );
   });
 
+  test('recent risk visibility is passed to protection status sync', () async {
+    final notifications = _RecordingNotificationService();
+    final controller = _controllerWithNotifications(
+      notifications,
+      scanner: FakeRadioScanner(),
+      recentRiskVisible: true,
+    );
+
+    await controller.startProtection(persist: false);
+
+    expect(notifications.lastRecentRiskVisible, isTrue);
+    final content = protectionStatusNotificationContentFor(
+      status: notifications.lastSyncedState!.status,
+      recentRiskVisible: notifications.lastRecentRiskVisible!,
+    );
+    expect(content.payload, notificationRecentRiskPayload);
+    expect(content.body, AppCopy.protectionStatusNotificationRecentRiskBody);
+  });
+
   test('notification tap payloads are distinct', () {
     expect(notificationAlertPayload, 'alert-details');
     expect(notificationProtectionStatusPayload, 'protection-status');
+    expect(notificationRecentRiskPayload, 'recent-risk');
     expect(
       notificationProtectionStatusPayload,
       isNot(notificationAlertPayload),
     );
     expect(alertDetailsRoute, '/alert-details');
+    expect(recentRiskRoute, '/recent-risk');
   });
 
   test('blocked state should not show protection status', () async {
