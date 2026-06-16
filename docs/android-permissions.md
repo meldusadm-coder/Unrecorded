@@ -56,15 +56,20 @@ Command used: `cd apps/mobile/android && ./gradlew :app:processReleaseMainManife
 
 | Permission | Result |
 |------------|--------|
-| `com.google.android.gms.permission.AD_ID` | **Removed** |
-| `android.permission.ACCESS_ADSERVICES_AD_ID` | **Removed** |
-| `android.permission.ACCESS_ADSERVICES_ATTRIBUTION` | **Removed** |
-| `android.permission.ACCESS_ADSERVICES_TOPICS` | **Removed** |
 | `android.permission.RECEIVE_BOOT_COMPLETED` | **Removed** — app sets `autoRunOnBoot: false`; background protection does not auto-start after reboot ([`detection-limitations.md`](detection-limitations.md)) |
 
-**Remaining release permissions:** BLE set (above), `POST_NOTIFICATIONS`, `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_CONNECTED_DEVICE`, `WAKE_LOCK`, `INTERNET`, `VIBRATE`, `ACCESS_NETWORK_STATE`, `com.android.vending.BILLING`, plus internal signature permission `app.unrecorded.unrecorded_mobile.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` (AndroidX).
+**Merged from AdMob / Play Services (release manifest):**
 
-AdMob may still merge non-permission AdServices metadata (`android.adservices.AD_SERVICES_CONFIG`); the app does not declare AdServices API permissions and uses non-personalised ad requests by default ([`ads_service.dart`](../apps/mobile/lib/services/ads_service.dart)).
+| Permission | Result |
+|------------|--------|
+| `com.google.android.gms.permission.AD_ID` | **Present** — required for Google Play policy when using AdMob; ad requests default to non-personalised until UMP consent |
+| `android.permission.ACCESS_ADSERVICES_AD_ID` | **Present** (AdMob SDK) |
+| `android.permission.ACCESS_ADSERVICES_ATTRIBUTION` | **Present** (AdMob SDK) |
+| `android.permission.ACCESS_ADSERVICES_TOPICS` | **Present** (AdMob SDK) |
+
+**Remaining app-declared permissions:** BLE set (above), `POST_NOTIFICATIONS`, `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_CONNECTED_DEVICE`, `WAKE_LOCK`, `INTERNET`, `VIBRATE`, `ACCESS_NETWORK_STATE`, `com.android.vending.BILLING`, plus internal signature permission `app.unrecorded.unrecorded_mobile.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` (AndroidX).
+
+Ad requests use non-personalised ads by default ([`ad_consent_service.dart`](../apps/mobile/lib/services/ad_consent_service.dart)). Scan data is never passed to ad SDKs.
 
 ## Permission inventory
 
@@ -81,8 +86,8 @@ AdMob may still merge non-permission AdServices metadata (`android.adservices.AD
 | `INTERNET` | AdMob, UMP, Play Billing | Banner ads, consent form, IAP | **Keep** | No scan data sent; ads isolated from detection ([`monetisation.md`](monetisation.md)) |
 | `ACCESS_NETWORK_STATE` | AdMob / Play Services | SDK connectivity checks | **Keep** | Does not upload scan results |
 | `com.android.vending.BILLING` | Play Billing | Pay-what-you-want remove-ads IAP | **Keep** | Optional purchase; core scanning stays free |
-| `com.google.android.gms.permission.AD_ID` | AdMob (was merged) | Advertising ID for personalised ads | **Removed** | App defaults to non-personalised requests; declare “No” for Advertising ID in Play Console |
-| AdServices permissions (3) | AdMob (was merged) | Topics / attribution APIs | **Removed** | Not used for banner-only non-personalised flow |
+| `com.google.android.gms.permission.AD_ID` | AdMob SDK | Google Play policy: advertising ID for ad serving (not scan data) | **Keep** (merged) | Declare **Yes** in Play Console; non-personalised ads by default until UMP consent |
+| AdServices permissions (3) | AdMob SDK | AdMob / Play Services ad stack | **Keep** (merged) | Isolated from BLE scanning; no scan data to ads |
 | `RECEIVE_BOOT_COMPLETED` | `flutter_foreground_task` (was merged) | Plugin boot receiver | **Removed** | Boot auto-start disabled in app; user re-enables protection manually after reboot |
 
 ## Play Console label mapping
@@ -94,18 +99,18 @@ AdMob may still merge non-permission AdServices metadata (`android.adservices.AD
 | Show notifications | Possible-risk alerts and protection status |
 | Full network access | AdMob banners, UMP consent, Play Billing — not scan uploads |
 | Google Play billing | Remove-ads in-app purchase |
-| Advertising ID / AdId / AdServices | **Removed from manifest** — declare Advertising ID **No**; ads non-personalised by default |
+| Advertising ID / AdId / AdServices | **Present** (AdMob) — declare Advertising ID **Yes** in Play Console; non-personalised by default until consent |
 
 ## Privacy boundary (ads)
 
 - Scan results, device names, MAC addresses, and risk outputs are **never** passed to ad SDKs.
 - Ad code lives under `apps/mobile/lib/services/` only; core packages have no ad SDK imports.
 
-## Play Console follow-ups after this audit
+## Play Console follow-ups
 
-1. **Advertising ID declaration** → **No** (permissions removed from release manifest).
-2. **Data safety** → review Device IDs / Advertising ID sections to match “No”.
-3. **Privacy policy** → [apps/site/privacy.html](../apps/site/privacy.html) §8 remains accurate (permissions for BLE/notifications); no change required unless store copy mentions Advertising ID collection.
+1. **Advertising ID declaration** → **Yes** (AdMob; `AD_ID` in release manifest). Users still get non-personalised ads by default until UMP consent.
+2. **Data safety** → Device IDs / Advertising ID sections should match AdMob processing when ads are shown.
+3. **Privacy policy** → [apps/site/privacy.html](../apps/site/privacy.html) §7 and §8 describe Advertising ID and ad defaults.
 
 ## Manual QA (edge-to-edge + permissions)
 
