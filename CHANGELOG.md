@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.8.2+15
+
+### Changed
+- Android release manifest again declares Google AdMob advertising ID permissions
+  so the app aligns with Play policy while keeping non-personalised ads by default
+  until UMP consent.
+- Privacy policy and Android permissions docs clarify advertising ID is for ad
+  serving only and is separate from Bluetooth scanning.
+
 ## 0.8.1+14
 
 ### Fixed
