@@ -51,6 +51,7 @@
         </a>
         <nav aria-label="Primary">
           <ul class="nav-links">
+            <li><a href="#mvp">MVP</a></li>
             <li><a href="#how-it-works">How it works</a></li>
             <li><a href="#limits">Limits</a></li>
             <li><a href="/privacy.html">Privacy</a></li>
@@ -72,25 +73,22 @@
           <div class="hero-content">
             <p class="hero-eyebrow">Local-first privacy awareness</p>
             <h1 id="hero-heading">
-              Know when nearby signals may suggest smart glasses.
+              Situational awareness for the era of smart glasses.
             </h1>
             <p class="hero-lead">
-              Unrecorded is a local-first privacy awareness app that helps you
-              understand when nearby Bluetooth signals may match smart glasses or
-              wearable recording devices.
-            </p>
-            <p class="hero-note">
-              <strong>Important:</strong> Unrecorded does not prove anyone is
-              recording. It highlights possible privacy risk indicators so you can
-              make a more informed choice.
+              Unrecorded is a local-first, open-source Android utility. It scans
+              for nearby Bluetooth Low Energy (BLE) signals that match known
+              wearable recording device patterns and alerts you to potential
+              privacy risks. It cannot prove a device is actively recording, but
+              it helps you stay aware.
             </p>
             <div class="hero-actions">
-              <span
+              <a
                 class="btn btn-primary"
-                role="status"
-                aria-disabled="true"
-                title="Android release coming soon"
-                >Coming soon for Android</span
+                href="https://play.google.com/store/apps/details?id=app.unrecorded.unrecorded_mobile"
+                target="_blank"
+                rel="noopener noreferrer"
+                >Get it on Google Play</a
               >
               <a class="btn btn-secondary" href="/privacy.html"
                 >Read the privacy policy</a
@@ -247,10 +245,57 @@
               </svg>
               <h3>Local-first by design</h3>
               <p>
-                Scan data is processed on your device. No account, no cloud upload,
-                and no analytics by default.
+                Scan data stays on your device. No account, no cloud upload, and
+                no analytics by default.
               </p>
             </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="mvp" class="section" aria-labelledby="mvp-heading">
+        <div class="container">
+          <header class="section-header">
+            <h2 id="mvp-heading">What the MVP Does (And Doesn't Do)</h2>
+            <p>
+              A clear picture of what the Android MVP offers today — and what it
+              does not claim.
+            </p>
+          </header>
+          <div class="mvp-grid">
+            <div class="mvp-col">
+              <h3>What it does right now</h3>
+              <ul>
+                <li>
+                  Scans nearby Bluetooth Low Energy (BLE) signals every 10–15
+                  seconds while open in the foreground.
+                </li>
+                <li>
+                  Triggers a local notification if a nearby signal may match
+                  known smart glasses patterns (Meta/Ray-Ban, Snap Spectacles,
+                  Even Realities, etc.).
+                </li>
+                <li>
+                  Operates 100% locally—no accounts, no internet required, no
+                  data leaves your device.
+                </li>
+              </ul>
+            </div>
+            <div class="mvp-col mvp-col-limits">
+              <h3>Current MVP Limitations</h3>
+              <ul>
+                <li>
+                  <strong>Foreground Focused:</strong> Scanning is most reliable
+                  while the app is kept open in the foreground (true background
+                  optimization is a near-term priority).
+                </li>
+                <li>
+                  <strong>No Magic Bullet:</strong> The app cannot detect
+                  non-Bluetooth cameras or tell you with absolute certainty that
+                  someone is recording.
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </section>
@@ -290,6 +335,16 @@
           <header class="section-header">
             <h2 id="how-heading">How it works</h2>
           </header>
+          <aside class="dev-callout" aria-label="Developer Testing Note">
+            <p>
+              💡 <strong>Testing without smart glasses?</strong> You don't need
+              real hardware to test the app. Switch Unrecorded to
+              <strong>Demo Mode</strong> in the settings, or use a secondary phone
+              running an app like <strong>nRF Connect</strong> to broadcast a BLE
+              advertisement with the custom name <code>ray-ban</code> or
+              <code>meta</code>.
+            </p>
+          </aside>
           <ol class="steps">
             <li class="step">
               <div class="step-num" aria-hidden="true"></div>
