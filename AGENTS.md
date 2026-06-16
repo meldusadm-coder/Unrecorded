@@ -99,7 +99,7 @@ When the user asks for git/release work, **read the matching skill in full** and
 
 Run shell commands from the skill; report after each step; ask before push/merge/workflow dispatch unless the user already approved.
 
-**Plan review (required):** After drafting any implementation plan, read [skills/review-plan/SKILL.md](skills/review-plan/SKILL.md) and dispatch a **GPT 5.5** review (`gpt-5.5-medium` via Task subagent) before presenting the plan as complete or starting execution.
+**Plan review (optional):** After drafting any implementation plan, read [skills/review-plan/SKILL.md](skills/review-plan/SKILL.md), present the plan, and ask **"Do you want this reviewed by GPT?"** — dispatch `gpt-5.5-medium` only if the user says yes.
 
 ### Quick reference
 
@@ -118,7 +118,7 @@ Never run the release workflow from `dev` while `main` is behind production. Nev
 
 ## Agent workflow
 
-- **Plans:** After any implementation plan is drafted, follow [skills/review-plan/SKILL.md](skills/review-plan/SKILL.md) — GPT 5.5 review is mandatory before execution.
+- **Plans:** After any implementation plan is drafted, follow [skills/review-plan/SKILL.md](skills/review-plan/SKILL.md) — ask whether to run optional GPT 5.5 review before execution.
 - Keep edits small, testable, and privacy-first.
 - When changing detection, scoring, permissions, or privacy-sensitive behaviour, update the relevant tests and concise docs.
 - For release-related edits: use a `release/*` or `hotfix/*` branch (not direct commits intended only for `main`), update `CHANGELOG.md`, run `./tool/git/preflight_release.sh`, and follow [docs/git-flow.md](docs/git-flow.md).
