@@ -16,7 +16,7 @@ Step-by-step playbooks for AI assistants (Cursor, Copilot, Claude Code, Codex, G
 
 **Agents:** When the user’s request matches a row above, **read that `SKILL.md` in full** before running commands, then follow it step by step.
 
-**Plan review (required):** After writing any implementation plan (writing-plans, Plan mode, or inline), **always** read [review-plan/SKILL.md](review-plan/SKILL.md) and dispatch **GPT 5.5** (`gpt-5.5-medium`) before calling the plan complete or starting execution. Report progress after each step; ask before destructive or irreversible actions (push, merge, workflow dispatch).
+**Plan review (optional):** After writing any implementation plan, read [review-plan/SKILL.md](review-plan/SKILL.md), present the plan, and ask **"Do you want this reviewed by GPT?"** — dispatch `gpt-5.5-medium` only if the user says yes. Report progress after each step; ask before destructive or irreversible actions (push, merge, workflow dispatch).
 
 **Humans:** `@skills/create-release/SKILL.md` in chat, or paste the file into your assistant’s project instructions.
 
