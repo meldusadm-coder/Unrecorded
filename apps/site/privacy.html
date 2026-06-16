@@ -261,7 +261,14 @@
           <li>
             <strong>Non-personalised by default:</strong> Ad requests use non-personalised
             ads by default until you provide consent through Google’s User Messaging
-            Platform (UMP) where required (for example UK / GDPR).
+            Platform (UMP) where required (for example UK / GDPR). Personalised ads are
+            not enabled without that consent flow where it applies.
+          </li>
+          <li>
+            <strong>Android advertising ID:</strong> Official Google Play builds declare
+            the Android advertising ID permission so Google AdMob can comply with Play
+            policy. That identifier is used only for ad serving through AdMob — not for
+            Bluetooth scanning, risk scoring, or building a profile from nearby devices.
           </li>
           <li>
             <strong>Change your choices:</strong> In the app, open
@@ -322,6 +329,12 @@
           location.
         </p>
         <p>Permission behaviour may differ between Android and iOS.</p>
+        <p>
+          On Android store builds, Google AdMob may use the device advertising identifier
+          and related ad SDK permissions for banner ads only (see section 7). That is
+          separate from Bluetooth scan permissions and does not give ads access to
+          nearby-device scan results.
+        </p>
         <p>You can control app permissions through your device settings.</p>
 
         <h2 id="notifications">9. Notifications</h2>
