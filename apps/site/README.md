@@ -9,6 +9,47 @@ Static marketing site and privacy policy for [Unrecorded](https://unrecorded.app
 - **`privacy/index.html`** — redirects to `privacy.html` for `/privacy/` URLs
 - **`src/styles.css`** — shared styles (brand tokens from `docs/brand-colors.json`)
 - **`assets/`** — favicon, social preview image, and copies of repo brand SVGs
+- **`robots.txt`** — crawl rules, AI bot directives, and Content Signals
+- **`sitemap.xml`** — canonical URL list for crawlers
+- **`llms.txt`** — machine-readable site index for AI agents ([llmstxt.org](https://llmstxt.org/))
+- **`_headers`** — Cloudflare Pages response headers (Link headers on homepage)
+
+## AI / SEO files
+
+Static files for crawler and agent discovery. Deployed with the rest of `apps/site`; no build step.
+
+| File | Purpose |
+|------|---------|
+| `robots.txt` | Allow public pages; explicit AI crawler rules; `Content-Signal: ai-train=no, search=yes, ai-input=yes`; references sitemap |
+| `sitemap.xml` | Lists canonical pages (`/`, `/privacy.html` only) |
+| `llms.txt` | Short markdown index with links to key pages and GitHub |
+| `_headers` | Homepage `Link` headers pointing to sitemap, `llms.txt`, and privacy policy |
+
+**When to update:** add a `<url>` to `sitemap.xml` and a link under `## Pages` in `llms.txt` whenever you add a new public HTML page. Update `robots.txt` only if crawl policy changes.
+
+**Local preview:** `python3 -m http.server` serves `robots.txt`, `sitemap.xml`, and `llms.txt` but does **not** apply `_headers`. Use Wrangler to preview Link headers:
+
+```bash
+npx wrangler pages dev apps/site
+curl -sI http://localhost:8788/ | grep -i '^link:'
+```
+
+**Optional (Cloudflare Pro+):** enable **Markdown for Agents** in the dashboard under [AI Crawl Control](https://dash.cloudflare.com/?to=/:account/:zone/ai) so requests with `Accept: text/markdown` get converted HTML responses.
+
+### Post-deploy verification
+
+```bash
+curl -sI https://unrecorded.app/robots.txt
+curl -sI https://unrecorded.app/sitemap.xml
+curl -sI https://unrecorded.app/ | grep -i '^link:'
+curl -s https://unrecorded.app/llms.txt | head
+
+curl -s -X POST https://isitagentready.com/api/scan \
+  -H 'Content-Type: application/json' \
+  -d '{"url":"https://unrecorded.app"}'
+```
+
+Expected passes after deploy: `robotsTxt`, `sitemap`, `linkHeaders`, `robotsTxtAiRules`, `contentSignals`.
 
 ## Run locally
 
