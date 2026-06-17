@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
-/// GDPR/UK consent via Google UMP. Defaults to non-personalised until consented.
+/// GDPR/UK consent via Google UMP. Ad requests always use non-personalised ads.
 class AdConsentService {
   const AdConsentService();
 

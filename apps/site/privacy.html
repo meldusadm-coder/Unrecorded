@@ -63,7 +63,7 @@
 
         <h1>Privacy Policy</h1>
         <p class="policy-meta">
-          <strong>Effective date:</strong> 21 May 2026<br />
+          <strong>Effective date:</strong> 17 June 2026<br />
           <strong>Public URL (Google Play, AdMob, App Store):</strong>
           <a href="https://unrecorded.app/privacy.html">https://unrecorded.app/privacy.html</a>
         </p>
@@ -79,7 +79,7 @@
           Unrecorded is designed to be <strong>local-first</strong>. The app scans
           nearby Bluetooth Low Energy (BLE) signals for patterns that may indicate
           smart glasses or wearable recording devices. Detection and risk scoring run
-          on your device. By default, nearby Bluetooth scan results are
+          on your device. Nearby Bluetooth scan results are
           <strong>not uploaded</strong> to Meldlife Ltd or other servers we operate.
         </p>
         <p>
@@ -89,12 +89,12 @@
           describe possible risk — not confirmed recording.
         </p>
 
-        <div class="policy-summary" role="region" aria-label="Summary for app store reviewers">
+        <div class="policy-summary" role="region" aria-label="App privacy summary">
           <p><strong>At a glance (app):</strong></p>
           <ul>
             <li>BLE scanning and risk scoring are processed on your device</li>
-            <li>Nearby scan data is not uploaded to us by default</li>
-            <li>No account required; no in-app analytics in the core scanning experience</li>
+            <li>Nearby scan data is not uploaded to us</li>
+            <li>No account required; no analytics or telemetry in the core app</li>
             <li>Official store builds may show Google AdMob banner ads; optional pay-what-you-want in-app purchase to remove ads</li>
             <li>Scan results and nearby device identifiers are not passed to ad networks</li>
           </ul>
@@ -125,11 +125,10 @@
               device (local-first)
             </li>
             <li>
-              does not upload nearby Bluetooth scan results to our servers by default
+              does not upload nearby Bluetooth scan results to our servers
             </li>
             <li>
-              does not include third-party analytics or telemetry in the core scanning
-              experience by default
+              does not include third-party analytics or telemetry
             </li>
             <li>does not use scan data to identify you</li>
             <li>does not build a profile about you</li>
@@ -182,13 +181,11 @@
         <h2 id="on-device">4. What Stays on Your Device</h2>
         <p>
           Unrecorded is designed so nearby BLE scan data stays on your device. All
-          detection and scoring for privacy risk indicators is performed locally unless
-          you explicitly choose a future optional export or sharing feature (none is
-          required to use the app today).
+          detection and scoring for privacy risk indicators is performed locally.
         </p>
         <p>
-          By default, Meldlife Ltd does not collect, receive, or upload your nearby Bluetooth
-          scan results, device names seen during scans, or risk scores derived from those
+          Meldlife Ltd does not collect, receive, or upload your nearby Bluetooth scan
+          results, device names seen during scans, or risk scores derived from those
           scans.
         </p>
         <p>We do not use nearby scan data to:</p>
@@ -200,42 +197,20 @@
           <li>sell information about you</li>
           <li>monitor your behaviour</li>
         </ul>
-        <p>
-          If future versions introduce optional export, diagnostics, backup, or support
-          features, those features must be clearly explained before any related data is
-          shared.
-        </p>
 
         <h2 id="accounts">5. Accounts</h2>
         <p>Unrecorded does not require you to create an account.</p>
-        <p>
-          If accounts are introduced in the future, this Privacy Policy must be
-          updated before account features are released.
-        </p>
 
         <h2 id="analytics">6. Analytics and Core App Tracking</h2>
         <p>
           The core Unrecorded experience — Bluetooth scanning, risk scoring, and privacy
-          alerts — does not include third-party analytics or telemetry by default. We do
-          not currently use separate in-app analytics SDKs to track how you use scanning
-          features.
+          alerts — does not include third-party analytics or telemetry.
         </p>
         <p>
           Ad serving in official store builds uses Google AdMob (see section 7). AdMob
           may collect or process data according to Google’s policies; that is separate
           from our BLE scan pipeline.
         </p>
-        <p>
-          If privacy-respecting analytics are added to the app in the future, this policy
-          must be updated before release to explain:
-        </p>
-        <ul>
-          <li>what is collected</li>
-          <li>why it is collected</li>
-          <li>whether it is optional</li>
-          <li>which provider is used</li>
-          <li>how users can control it</li>
-        </ul>
 
         <h2 id="ads">7. Advertising (Google AdMob) and In-App Purchases</h2>
 
@@ -259,16 +234,18 @@
             <strong>not</strong> passed to AdMob or other ad networks.
           </li>
           <li>
-            <strong>Non-personalised by default:</strong> Ad requests use non-personalised
-            ads by default until you provide consent through Google’s User Messaging
-            Platform (UMP) where required (for example UK / GDPR). Personalised ads are
-            not enabled without that consent flow where it applies.
+            <strong>Non-personalised ads only:</strong> All ad requests use
+            non-personalised ads. Unrecorded does not enable personalised advertising.
+            Where required (for example UK / GDPR), Google’s User Messaging Platform
+            (UMP) may ask for your advertising consent and provide a way to change or
+            withdraw those choices.
           </li>
           <li>
-            <strong>Android advertising ID:</strong> Official Google Play builds declare
-            the Android advertising ID permission so Google AdMob can comply with Play
-            policy. That identifier is used only for ad serving through AdMob — not for
-            Bluetooth scanning, risk scoring, or building a profile from nearby devices.
+            <strong>Device advertising identifiers:</strong> Official store builds use the
+            device advertising identifier required by Google AdMob and app-store policy
+            (for example the Android advertising ID). That identifier is used only for ad
+            serving through AdMob — not for Bluetooth scanning, risk scoring, or building
+            a profile from nearby devices.
           </li>
           <li>
             <strong>Change your choices:</strong> In the app, open
@@ -277,8 +254,9 @@
           </li>
           <li>
             <strong>What AdMob may process:</strong> When an ad is shown, Google AdMob may
-            process information such as advertising ID, IP address, device type, and
-            interaction with ads, as described in
+            still process limited information — such as advertising ID, IP address, device
+            type, and interaction with ads — for ad delivery, fraud prevention, and
+            reporting, even when ads are non-personalised, as described in
             <a href="https://policies.google.com/privacy" rel="noopener noreferrer"
               >Google’s Privacy Policy</a
             >
@@ -288,7 +266,6 @@
             >. You can limit ad personalisation in your device settings where available.
           </li>
         </ul>
-        <p>Ads must not interfere with the core scanning experience.</p>
 
         <h3>In-app purchase — remove ads</h3>
         <p>
@@ -304,8 +281,10 @@
           identifiers, and region according to its own privacy policy.
         </p>
         <p>
-          If advertising or payment providers change, this section will be updated and
-          the effective date above revised.
+          Ad-free entitlement is stored <strong>locally on your device</strong>. Meldlife
+          Ltd does not operate a separate purchase or receipt server. You can
+          <strong>restore purchases</strong> through the app or your app-store account to
+          re-enable ad-free access on a new device or after reinstalling.
         </p>
         <p>
           Open-source builds of Unrecorded remain available to build from source under the
@@ -339,15 +318,14 @@
 
         <h2 id="notifications">9. Notifications</h2>
         <p>
-          If Unrecorded uses notifications, they are used to show app status or privacy
-          risk alerts.
+          If you enable notifications, Unrecorded uses them to show app status or privacy
+          risk alerts. Notifications describe possible risk — not confirmed recording.
         </p>
-        <p>Notifications should not claim that recording has been detected.</p>
         <p>You can disable notifications through your device settings.</p>
 
         <h2 id="website">10. Website Privacy</h2>
-        <p>The Unrecorded website is intended to be a simple static website.</p>
-        <p>The website should not use:</p>
+        <p>The Unrecorded website is a simple static site.</p>
+        <p>The website does not use:</p>
         <ul>
           <li>cookies</li>
           <li>analytics scripts</li>
@@ -359,9 +337,6 @@
         <p>
           If the hosting provider collects basic server logs for security, reliability,
           or abuse prevention, those logs are controlled by the hosting provider.
-        </p>
-        <p>
-          Do not add website analytics unless the privacy policy is updated first.
         </p>
 
         <h2 id="cannot-do">11. What Unrecorded Cannot Do</h2>
@@ -387,26 +362,19 @@
 
         <h2 id="retention">12. Data Retention</h2>
         <p>
-          Because Unrecorded is designed to process scan information locally on your
-          device, we do not retain nearby Bluetooth scan results on our servers by
-          default.
+          Because Unrecorded processes scan information locally on your device, we do not
+          retain nearby Bluetooth scan results on our servers.
         </p>
         <p>
-          If the app stores recent scan history locally on your device, that information
-          remains on your device unless you delete it, clear app data, or uninstall the
-          app.
-        </p>
-        <p>
-          If future versions add optional cloud features, this policy must be updated
-          before those features are released.
+          Scan state used for alerts is held on your device and cleared when you delete
+          app data or uninstall the app.
         </p>
 
         <h2 id="sharing">13. Sharing Information</h2>
         <p>We do not sell your Bluetooth scan data.</p>
         <p>
           We do not share nearby Bluetooth scan results, device names from scans, or risk
-          scores with advertisers, data brokers, or third-party analytics providers by
-          default.
+          scores with advertisers, data brokers, or third-party analytics providers.
         </p>
         <p>
           Information may be processed by third parties only where necessary for services
@@ -424,17 +392,11 @@
           <li>website hosting for <code>unrecorded.app</code></li>
           <li>security and abuse prevention by infrastructure providers</li>
         </ul>
-        <p>
-          If we add optional analytics, cloud backup, or other data-sharing features, this
-          policy will be updated before those features are released.
-        </p>
 
         <h2 id="children">14. Children</h2>
-        <p>Unrecorded is not designed specifically for children.</p>
-        <p>The app is intended as a general privacy awareness tool.</p>
         <p>
-          If app store requirements require a more specific children’s privacy statement,
-          update this section before launch.
+          Unrecorded is not directed at children and is intended as a general privacy
+          awareness tool for adults.
         </p>
 
         <h2 id="international">15. International Processing</h2>
@@ -448,8 +410,7 @@
           under their own privacy policies.
         </p>
         <p>
-          Unrecorded itself is designed to avoid uploading nearby scan results by
-          default.
+          Unrecorded itself does not upload nearby scan results to our servers.
         </p>
 
         <h2 id="rights">16. Your Rights</h2>
@@ -460,7 +421,7 @@
         </p>
         <p>
           Because Unrecorded does not require an account and does not upload nearby scan
-          results by default, we may not hold personal information that identifies you.
+          results to our servers, we may not hold personal information that identifies you.
         </p>
         <p>
           For privacy questions or requests, contact
@@ -468,7 +429,7 @@
         </p>
 
         <h2 id="opensource">17. Open-Source Project</h2>
-        <p>Unrecorded is being developed as an open-source project.</p>
+        <p>Unrecorded is an open-source project.</p>
         <p>
           This helps users and contributors inspect how the app works, understand its
           limitations, and suggest improvements.
@@ -479,14 +440,10 @@
         </p>
 
         <h2 id="changes">18. Changes to This Policy</h2>
-        <p>We may update this Privacy Policy as Unrecorded develops.</p>
+        <p>We may update this Privacy Policy from time to time.</p>
         <p>
-          When we make meaningful changes, we will update the effective date above.
-        </p>
-        <p>
-          If the app introduces accounts, analytics, cloud features, advertising
-          providers, payment providers, or optional data-sharing features, this policy
-          must be reviewed and updated before those features are released.
+          When we make meaningful changes, we will update the effective date above and
+          publish the revised policy at this URL.
         </p>
 
         <h2 id="contact">19. Contact</h2>

@@ -1,0 +1,12 @@
+# Unrecorded
+
+> Unrecorded is a local-first, open-source privacy app that warns when nearby Bluetooth signals may match smart glasses or wearable recording devices. It alerts users to possible recording risk and never claims to prove that someone is recording.
+
+## Pages
+
+- [Home](https://unrecorded.app/): Landing page — product overview, how it works, and limitations
+- [Privacy policy](https://unrecorded.app/privacy.html): Privacy policy for app stores, AdMob, and site visitors
+
+## External
+
+- [GitHub repository](https://github.com/meldusadm-coder/Unrecorded): Source code, issues, and contributions
