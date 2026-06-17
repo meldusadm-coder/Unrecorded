@@ -11,7 +11,7 @@
 - Ad and payment code lives under `apps/mobile/lib/services/` and feature screens only.
 - `ScanController`, `unrecorded_core`, and `unrecorded_radio` never import ad or IAP SDKs.
 - Scan results, device names, and identifiers are **never** passed to ad SDKs.
-- Default ad requests use **non-personalised** ads until UMP consent allows otherwise.
+- Default ad requests use **non-personalised** ads only; personalised advertising is not enabled.
 
 ## Manual setup
 
