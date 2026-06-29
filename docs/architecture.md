@@ -2,6 +2,8 @@
 
 Unrecorded uses a Dart pub workspace monorepo with clear separation between detection logic, radio scanning, UI components, and the Flutter app.
 
+**Public site & guides:** [unrecorded.app](https://unrecorded.app) — [architecture context for users](https://unrecorded.app/how-smart-glasses-broadcast-ble.html) · [BLE pattern catalogue](https://unrecorded.app/smart-glasses-ble-patterns.html) · [detection limits FAQ](https://unrecorded.app/detection-limitations.html)
+
 ## Packages
 
 ### `apps/mobile`

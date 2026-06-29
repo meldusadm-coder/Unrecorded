@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Detection Limitations FAQ — Unrecorded App</title>
+    <meta
+      name="description"
+      content="Honest FAQ about what Unrecorded can and cannot detect: probabilistic BLE matching, foreground scanning, background protection, and why alerts are not proof of recording."
+    />
+    <link
+      rel="canonical"
+      href="https://unrecorded.app/detection-limitations.html"
+    />
+    <meta name="theme-color" content="#5B4DFF" />
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="article" />
+    <meta
+      property="og:url"
+      content="https://unrecorded.app/detection-limitations.html"
+    />
+    <meta property="og:title" content="Detection Limitations FAQ — Unrecorded App" />
+    <meta
+      property="og:description"
+      content="Honest FAQ about what Unrecorded can and cannot detect: probabilistic BLE matching, foreground scanning, background protection, and why alerts are not proof of recording."
+    />
+    <meta
+      property="og:image"
+      content="https://unrecorded.app/assets/social-card.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Detection Limitations FAQ — Unrecorded App" />
+    <meta
+      name="twitter:description"
+      content="Honest FAQ about what Unrecorded can and cannot detect: probabilistic BLE matching, foreground scanning, background protection, and why alerts are not proof of recording."
+    />
+    <meta
+      name="twitter:image"
+      content="https://unrecorded.app/assets/social-card.png"
+    />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Can Unrecorded prove someone is recording?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. Unrecorded shows possible privacy risk when nearby Bluetooth signals may match known smart-glasses patterns. That is a proximity and pattern indicator, not proof of active recording."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Why is smart glasses detection probabilistic?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Bluetooth names can be hidden, randomised, or spoofed. Signal strength is noisy. Address-prefix hints are weak evidence. Some devices never advertise useful BLE fields. Alerts reflect visible signals, not certainty."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Unrecorded upload scan data to the cloud?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. Scanning and risk scoring run on your device. Nearby Bluetooth observations are merged in memory during a session and are not uploaded to project-operated servers by default."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "When is scanning most reliable?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Foreground scanning while the app is open is most reliable. Optional background protection on Android uses a foreground service where the OS allows, but battery policies and device settings may still limit behaviour."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What devices can Unrecorded not see?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Non-Bluetooth cameras and microphones, devices that hide BLE advertising, and recorders that never expose recognisable patterns are outside this detection path."
+            }
+          }
+        ]
+      }
+    </script>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+
+    <header class="site-header">
+      <div class="container">
+        <a class="brand-link" href="/">
+          <img
+            src="/assets/logo-mark.svg"
+            width="36"
+            height="36"
+            alt=""
+            aria-hidden="true"
+          />
+          <span class="brand-name">Unrecorded</span>
+        </a>
+        <nav aria-label="Primary">
+          <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li>
+              <a href="/how-smart-glasses-broadcast-ble.html">BLE broadcasts</a>
+            </li>
+            <li>
+              <a href="/how-to-avoid-being-recorded-by-smart-glasses.html"
+                >Public awareness</a
+              >
+            </li>
+            <li>
+              <a href="/detection-limitations.html" aria-current="page">Limits</a>
+            </li>
+            <li><a href="/privacy.html">Privacy</a></li>
+            <li>
+              <a
+                href="https://github.com/meldusadm-coder/Unrecorded"
+                rel="noopener noreferrer"
+                >GitHub</a
+              >
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="article-page">
+      <div class="container">
+        <a class="back-home" href="/">← Back to home</a>
+
+        <h1>Detection limitations FAQ</h1>
+        <p class="article-lead">
+          Unrecorded is built around honest limits. This FAQ explains what the
+          app can notice, what it cannot know, and why every alert is a
+          <strong>possible privacy risk indicator</strong> — not proof of
+          recording.
+        </p>
+
+        <div class="disclaimer-box" role="note">
+          <p>
+            <strong>Product truth:</strong> A match against known hardware
+            patterns means a nearby signal <em>may</em> resemble smart glasses
+            or a wearable recording device. It does not confirm that video or
+            audio capture is happening.
+          </p>
+        </div>
+
+        <h2 id="proof">Can Unrecorded prove someone is recording?</h2>
+        <p>
+          <strong>No.</strong> The app compares visible Bluetooth Low Energy
+          (BLE) fields against a local catalogue of known patterns. When several
+          weak indicators align, you may see a low, medium, or high privacy-risk
+          level with plain-English reasons. That is situational awareness — not
+          evidence of active recording.
+        </p>
+
+        <h2 id="probabilistic">Why is detection probabilistic?</h2>
+        <ul>
+          <li>
+            <strong>Hidden or randomised names</strong> — manufacturers and
+            users can change what appears in advertisements.
+          </li>
+          <li>
+            <strong>Spoofing</strong> — a device can advertise a misleading
+            name.
+          </li>
+          <li>
+            <strong>Noisy RSSI</strong> — signal strength is a rough proximity
+            hint, not a measured distance.
+          </li>
+          <li>
+            <strong>Weak address-prefix hints</strong> — partial address patterns
+            are supporting evidence only, not identity proof.
+          </li>
+          <li>
+            <strong>Platform filters</strong> — Android and iOS may limit which
+            BLE advertisements your phone exposes to apps.
+          </li>
+        </ul>
+        <p>
+          For technical background, see
+          <a href="/how-smart-glasses-broadcast-ble.html"
+            >how smart glasses use BLE broadcasts</a
+          >
+          and
+          <a href="/smart-glasses-ble-patterns.html"
+            >known smart-glasses BLE patterns</a
+          >.
+        </p>
+
+        <h2 id="local">Does scan data leave my device?</h2>
+        <p>
+          No. Unrecorded processes scans and scores risk on-device. Observations
+          are merged in memory inside a <code>ScanSession</code> during active
+          use. The app does not upload nearby Bluetooth results to
+          project-operated servers. Only your protection and notification
+          preferences are persisted — not a history of people or addresses
+          nearby.
+        </p>
+
+        <h2 id="foreground">When is scanning most reliable?</h2>
+        <p>
+          Scanning runs in short windows with rest periods to limit battery use.
+          <strong>Keeping the app open in the foreground</strong> is the most
+          reliable path when background protection is off.
+        </p>
+        <p>
+          On Android, optional <strong>background protection</strong> (off by
+          default) runs a foreground service with a persistent notification where
+          the OS allows. Battery saver, force-stop, and manufacturer policies may
+          still pause scanning. The app explains honestly when protection was
+          stopped by the system — it does not claim silent protection.
+        </p>
+
+        <h2 id="notifications">What do notifications mean?</h2>
+        <div class="tech-table-wrap">
+          <table class="tech-table">
+            <thead>
+              <tr>
+                <th scope="col">Notification</th>
+                <th scope="col">Meaning</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Protection status (ongoing)</td>
+                <td>
+                  Protection is active while the app is running. Not proof that
+                  recording was detected.
+                </td>
+              </tr>
+              <tr>
+                <td>Possible-risk alert</td>
+                <td>
+                  Nearby signals may match risk indicators. Tap for details. Not
+                  proof of recording.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 id="can-detect">What can the app detect?</h2>
+        <ul>
+          <li>BLE advertisements from nearby devices while scanning.</li>
+          <li>
+            Names, manufacturer hints, and cautious address-prefix patterns
+            matched against a local open-source catalogue.
+          </li>
+          <li>
+            Deterministic, explainable scoring — no machine-learning black box.
+          </li>
+        </ul>
+
+        <h2 id="cannot-detect">What can the app not detect?</h2>
+        <ul>
+          <li>Whether recording is actually happening.</li>
+          <li>Devices that do not use Bluetooth or hide advertising.</li>
+          <li>Non-BLE cameras, microphones, or phones used as recorders.</li>
+          <li>Every smart-glasses model that exists or will exist.</li>
+        </ul>
+
+        <h2 id="demo">What about demo mode?</h2>
+        <p>
+          Demo mode uses a fake scanner with sample data for UI testing. It does
+          not reflect live Bluetooth around you. Use it to understand alerts and
+          copy — not as a field test of real-world detection.
+        </p>
+
+        <h2 id="more">Where to read more</h2>
+        <ul>
+          <li>
+            <a href="/how-to-avoid-being-recorded-by-smart-glasses.html"
+              >Privacy in public spaces</a
+            >
+            — practical situational awareness
+          </li>
+          <li>
+            <a
+              href="https://github.com/meldusadm-coder/Unrecorded/blob/main/docs/detection-limitations.md"
+              rel="noopener noreferrer"
+              >Developer detection limitations (GitHub)</a
+            >
+            — full engineering notes
+          </li>
+          <li>
+            <a href="/privacy.html">Privacy policy</a> — data handling and
+            permissions
+          </li>
+        </ul>
+
+        <aside class="cta-box" aria-labelledby="cta-heading">
+          <h2 id="cta-heading">Try Unrecorded on Android</h2>
+          <p>
+            Local-first scanning with calm risk indicators and clear limitations.
+          </p>
+          <div class="cta-actions">
+            <a
+              class="btn btn-primary"
+              href="https://play.google.com/store/apps/details?id=app.unrecorded.unrecorded_mobile"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Get it on Google Play</a
+            >
+            <a class="btn btn-secondary" href="/smart-glasses-ble-patterns.html"
+              >Known BLE patterns</a
+            >
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <nav aria-label="Footer">
+          <ul class="footer-nav">
+            <li><a href="/">Home</a></li>
+            <li><a href="/privacy.html">Privacy Policy</a></li>
+            <li>
+              <a href="/how-smart-glasses-broadcast-ble.html"
+                >How smart glasses use BLE</a
+              >
+            </li>
+            <li>
+              <a href="/how-to-avoid-being-recorded-by-smart-glasses.html"
+                >Privacy in public</a
+              >
+            </li>
+            <li>
+              <a href="/detection-limitations.html">Detection limits FAQ</a>
+            </li>
+            <li>
+              <a href="/smart-glasses-ble-patterns.html">BLE patterns</a>
+            </li>
+            <li>
+              <a
+                href="https://github.com/meldusadm-coder/Unrecorded"
+                rel="noopener noreferrer"
+                >GitHub</a
+              >
+            </li>
+            <li>
+              <a href="mailto:privacy@unrecorded.app">Contact</a>
+            </li>
+          </ul>
+        </nav>
+        <p class="footer-copy">
+          © 2026 Meldlife Ltd. Unrecorded is a privacy awareness tool and does not
+          prove recording activity.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

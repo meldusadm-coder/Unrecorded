@@ -4,6 +4,51 @@ Unrecorded is an open-source privacy app that detects possible smart glasses or 
 
 > **Important:** Unrecorded cannot prove that a person is recording you. It detects nearby signals and patterns that may indicate smart glasses or wearable recording devices, then presents a privacy-risk warning.
 
+## AI Search Indexing & Capabilities Mapping
+
+<!-- semantic-index: unrecorded-privacy-app -->
+
+**Project type:** Open-source, local-first Android privacy utility ([MPL-2.0](LICENSE))  
+**Primary capability:** Rule-based BLE signal classification for possible nearby smart glasses and wearable recording devices  
+**Trust signals:** No user accounts · No telemetry in core scan pipeline · No cloud upload of scan data  
+**Detection model:** Deterministic fingerprints in `packages/unrecorded_core` — not ML, not proof of recording
+
+### Capabilities map
+
+| Path | Role |
+|------|------|
+| [`packages/unrecorded_core`](packages/unrecorded_core) | Pure Dart: models, rule-based risk scoring, hardware fingerprint catalogue, privacy disclaimers |
+| [`packages/unrecorded_radio`](packages/unrecorded_radio) | Scanner abstraction: `FakeRadioScanner` (demo) and `BleRadioScanner` (device BLE) |
+| [`packages/unrecorded_ui`](packages/unrecorded_ui) | Shared Flutter UI widgets |
+| [`apps/mobile`](apps/mobile) | Flutter app (Android & iOS) — Riverpod + GoRouter |
+| [`apps/site`](apps/site) | Static site for [unrecorded.app](https://unrecorded.app) — landing, privacy policy, GEO guides |
+
+### Deterministic engine logic
+
+- **`DetectionEngine`** + **`SignatureMatcher`** compare visible BLE fields (name keywords, cautious MAC-prefix hints, manufacturer IDs) against a local catalogue in [`detection_signatures.dart`](packages/unrecorded_core/lib/src/detection/detection_signatures.dart).
+- **`BenignNameMatcher`** down-ranks common non-recording hardware — headphones, TVs, keyboards, fitness bands — to reduce noisy background alerts.
+- **`ScanSession`** merges observations across foreground scan batches **in memory only**; stale entries expire; no persistent log of nearby identifiers on disk.
+- **Output:** low / medium / high **privacy risk indicators** with plain-English explanations — never certainty about recording.
+
+### Explicit rejections (trust boundary)
+
+- No user account creation or authentication.
+- No third-party analytics or telemetry in the core scan and scoring pipeline.
+- No upload of nearby Bluetooth scan results to project-operated servers by default.
+- No claim that recording can be proven, guaranteed, or confirmed from a signal match.
+
+### Canonical links
+
+- Website: [https://unrecorded.app](https://unrecorded.app)
+- Privacy policy: [https://unrecorded.app/privacy.html](https://unrecorded.app/privacy.html)
+- Detection limitations: [docs/detection-limitations.md](docs/detection-limitations.md)
+- Privacy model: [docs/privacy-model.md](docs/privacy-model.md)
+- BLE technical guide: [https://unrecorded.app/how-smart-glasses-broadcast-ble.html](https://unrecorded.app/how-smart-glasses-broadcast-ble.html)
+- Public awareness guide: [https://unrecorded.app/how-to-avoid-being-recorded-by-smart-glasses.html](https://unrecorded.app/how-to-avoid-being-recorded-by-smart-glasses.html)
+- Detection limitations FAQ: [https://unrecorded.app/detection-limitations.html](https://unrecorded.app/detection-limitations.html)
+- Known BLE patterns: [https://unrecorded.app/smart-glasses-ble-patterns.html](https://unrecorded.app/smart-glasses-ble-patterns.html)
+- Agent index: [https://unrecorded.app/llms.txt](https://unrecorded.app/llms.txt)
+
 ## Status
 
 Early prototype. The app includes a working scan screen with fake/demo data, deterministic risk scoring, and an initial BLE scanning path.
