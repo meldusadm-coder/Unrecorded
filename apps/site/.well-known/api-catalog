@@ -1,0 +1,25 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://unrecorded.app/.well-known/apis/content-discovery",
+      "service-desc": [
+        {
+          "href": "https://unrecorded.app/.well-known/openapi/content-discovery.yaml",
+          "type": "application/yaml"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://unrecorded.app/llms.txt",
+          "type": "text/markdown"
+        }
+      ],
+      "status": [
+        {
+          "href": "https://unrecorded.app/.well-known/status.json",
+          "type": "application/json"
+        }
+      ]
+    }
+  ]
+}

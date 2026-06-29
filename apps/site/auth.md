@@ -1,0 +1,26 @@
+# auth.md — Unrecorded (unrecorded.app)
+
+Audience: AI agents and automated clients reading public site content about the Unrecorded Android app.
+
+## Summary
+
+**No authentication is required.** This domain is a read-only static marketing site and privacy policy. There are no web APIs, user accounts, or credentials on `unrecorded.app`.
+
+The Unrecorded **Android app** runs locally on device. It does not expose HTTP endpoints on this domain.
+
+## Public content indexes
+
+| Endpoint | Purpose |
+|----------|---------|
+| `/llms.txt` | Markdown site index ([llmstxt.org](https://llmstxt.org/)) |
+| `/sitemap.xml` | Canonical page list for crawlers |
+| `/.well-known/api-catalog` | Machine-readable catalog of public content endpoints (RFC 9727) |
+| `/auth.md` | This document |
+
+## Credential use
+
+Do not send credentials to `unrecorded.app`. All endpoints above are anonymously accessible over HTTPS.
+
+## Contact
+
+Privacy questions: [privacy@unrecorded.app](mailto:privacy@unrecorded.app)
