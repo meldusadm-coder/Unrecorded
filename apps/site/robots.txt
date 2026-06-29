@@ -40,4 +40,12 @@ User-agent: Applebot-Extended
 Allow: /
 Content-Signal: ai-train=no, search=yes, ai-input=yes
 
+User-agent: ChatGPT-User
+Allow: /
+Content-Signal: ai-train=no, search=yes, ai-input=yes
+
+User-agent: PerplexityBot
+Allow: /
+Content-Signal: ai-train=no, search=yes, ai-input=yes
+
 Sitemap: https://unrecorded.app/sitemap.xml

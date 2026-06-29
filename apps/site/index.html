@@ -32,6 +32,50 @@
       content="Unrecorded is a local-first privacy app that warns when nearby Bluetooth signals may match smart glasses or wearable recording devices."
     />
     <meta name="twitter:image" content="https://unrecorded.app/assets/social-card.svg" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://unrecorded.app/#organization",
+            "name": "Meldlife Ltd",
+            "url": "https://unrecorded.app/",
+            "email": "privacy@unrecorded.app",
+            "sameAs": ["https://github.com/meldusadm-coder/Unrecorded"]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://unrecorded.app/#website",
+            "url": "https://unrecorded.app/",
+            "name": "Unrecorded",
+            "description": "Local-first privacy awareness for possible nearby smart glasses and wearable recording devices.",
+            "publisher": { "@id": "https://unrecorded.app/#organization" }
+          },
+          {
+            "@type": "MobileApplication",
+            "@id": "https://unrecorded.app/#app",
+            "name": "Unrecorded",
+            "operatingSystem": "Android",
+            "applicationCategory": ["UtilitiesApplication", "SecurityApplication"],
+            "description": "Open-source, local-first privacy utility that warns when nearby Bluetooth signals may match smart glasses or wearable recording devices. Does not prove recording.",
+            "url": "https://unrecorded.app/",
+            "downloadUrl": "https://play.google.com/store/apps/details?id=app.unrecorded.unrecorded_mobile",
+            "softwareVersion": "early prototype",
+            "license": "https://opensource.org/licenses/MPL-2.0",
+            "isAccessibleForFree": true,
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD",
+              "description": "Core Bluetooth scanning and privacy risk indicators are free. Optional in-app purchase removes banner ads on official store builds."
+            },
+            "author": { "@id": "https://unrecorded.app/#organization" },
+            "publisher": { "@id": "https://unrecorded.app/#organization" }
+          }
+        ]
+      }
+    </script>
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>
@@ -55,6 +99,14 @@
             <li><a href="#how-it-works">How it works</a></li>
             <li><a href="#limits">Limits</a></li>
             <li><a href="/privacy.html">Privacy</a></li>
+            <li>
+              <a href="/how-smart-glasses-broadcast-ble.html">BLE broadcasts</a>
+            </li>
+            <li>
+              <a href="/how-to-avoid-being-recorded-by-smart-glasses.html"
+                >Public awareness</a
+              >
+            </li>
             <li>
               <a
                 href="https://github.com/meldusadm-coder/Unrecorded"
@@ -390,7 +442,38 @@
         </div>
       </section>
 
-      <section class="section" aria-labelledby="opensource-heading">
+      <section class="section" aria-labelledby="learn-heading">
+        <div class="container">
+          <header class="section-header">
+            <h2 id="learn-heading">Learn more</h2>
+            <p>
+              Technical background and practical guidance — written for humans and
+              search engines, with honest limits.
+            </p>
+          </header>
+          <div class="guide-card-grid">
+            <a class="guide-card" href="/how-smart-glasses-broadcast-ble.html">
+              <h3>How smart glasses use BLE broadcasts</h3>
+              <p>
+                Plain-English breakdown of Bluetooth advertising, what fields
+                scanners see, and how Unrecorded merges observations in memory.
+              </p>
+            </a>
+            <a
+              class="guide-card"
+              href="/how-to-avoid-being-recorded-by-smart-glasses.html"
+            >
+              <h3>Privacy in public spaces</h3>
+              <p>
+                Situational awareness, conversational boundaries, and when a
+                signal match means proximity — not proof of recording.
+              </p>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-alt" aria-labelledby="opensource-heading">
         <div class="container">
           <div class="opensource">
             <h2 id="opensource-heading">Open-source and transparent</h2>
@@ -416,6 +499,16 @@
         <nav aria-label="Footer">
           <ul class="footer-nav">
             <li><a href="/privacy.html">Privacy Policy</a></li>
+            <li>
+              <a href="/how-smart-glasses-broadcast-ble.html"
+                >How smart glasses use BLE</a
+              >
+            </li>
+            <li>
+              <a href="/how-to-avoid-being-recorded-by-smart-glasses.html"
+                >Privacy in public</a
+              >
+            </li>
             <li>
               <a
                 href="https://github.com/meldusadm-coder/Unrecorded"

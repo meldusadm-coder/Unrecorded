@@ -6,6 +6,8 @@ Static marketing site and privacy policy for [Unrecorded](https://unrecorded.app
 
 - **`index.html`** — public landing page
 - **`privacy.html`** — privacy policy (for app stores and the site)
+- **`how-smart-glasses-broadcast-ble.html`** — technical BLE advertising guide
+- **`how-to-avoid-being-recorded-by-smart-glasses.html`** — public situational-awareness guide
 - **`privacy/index.html`** — redirects to `privacy.html` for `/privacy/` URLs
 - **`src/styles.css`** — shared styles (brand tokens from `docs/brand-colors.json`)
 - **`assets/`** — favicon, social preview image, and copies of repo brand SVGs
@@ -21,11 +23,11 @@ Static files for crawler and agent discovery. Deployed with the rest of `apps/si
 | File | Purpose |
 |------|---------|
 | `robots.txt` | Allow public pages; explicit AI crawler rules; `Content-Signal: ai-train=no, search=yes, ai-input=yes`; references sitemap |
-| `sitemap.xml` | Lists canonical pages (`/`, `/privacy.html` only) |
+| `sitemap.xml` | Lists canonical pages (`/`, `/privacy.html`, and both guide articles) |
 | `llms.txt` | Short markdown index with links to key pages and GitHub |
 | `_headers` | Homepage `Link` headers pointing to sitemap, `llms.txt`, and privacy policy |
 
-**When to update:** add a `<url>` to `sitemap.xml` and a link under `## Pages` in `llms.txt` whenever you add a new public HTML page. Update `robots.txt` only if crawl policy changes.
+**When to update:** add a `<url>` to `sitemap.xml` and a link under `## Pages` in `llms.txt` whenever you add a new public HTML page. Update `robots.txt` only if crawl policy changes. Guide articles: `how-smart-glasses-broadcast-ble.html`, `how-to-avoid-being-recorded-by-smart-glasses.html`.
 
 **Local preview:** `python3 -m http.server` serves `robots.txt`, `sitemap.xml`, and `llms.txt` but does **not** apply `_headers`. Use Wrangler to preview Link headers:
 

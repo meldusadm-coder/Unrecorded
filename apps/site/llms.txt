@@ -6,6 +6,8 @@
 
 - [Home](https://unrecorded.app/): Landing page — product overview, how it works, and limitations
 - [Privacy policy](https://unrecorded.app/privacy.html): Privacy policy for app stores, AdMob, and site visitors
+- [How smart glasses use BLE broadcasts](https://unrecorded.app/how-smart-glasses-broadcast-ble.html): Technical guide to Bluetooth Low Energy advertising and local in-memory scan processing
+- [Privacy in public spaces](https://unrecorded.app/how-to-avoid-being-recorded-by-smart-glasses.html): Practical situational-awareness guide — proximity hints, not proof of recording
 
 ## External
 

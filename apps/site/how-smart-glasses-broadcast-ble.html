@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Understanding Smart Glasses BLE Broadcasts | Unrecorded App</title>
+    <meta
+      name="description"
+      content="How smart glasses use Bluetooth Low Energy advertising, what signals may appear in scan results, and how Unrecorded processes them locally — not proof of recording."
+    />
+    <link
+      rel="canonical"
+      href="https://unrecorded.app/how-smart-glasses-broadcast-ble.html"
+    />
+    <meta name="theme-color" content="#5B4DFF" />
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="article" />
+    <meta
+      property="og:url"
+      content="https://unrecorded.app/how-smart-glasses-broadcast-ble.html"
+    />
+    <meta
+      property="og:title"
+      content="Understanding Smart Glasses BLE Broadcasts | Unrecorded App"
+    />
+    <meta
+      property="og:description"
+      content="How smart glasses use Bluetooth Low Energy advertising, what signals may appear in scan results, and how Unrecorded processes them locally — not proof of recording."
+    />
+    <meta
+      property="og:image"
+      content="https://unrecorded.app/assets/social-card.svg"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Understanding Smart Glasses BLE Broadcasts | Unrecorded App"
+    />
+    <meta
+      name="twitter:description"
+      content="How smart glasses use Bluetooth Low Energy advertising, what signals may appear in scan results, and how Unrecorded processes them locally — not proof of recording."
+    />
+    <meta
+      name="twitter:image"
+      content="https://unrecorded.app/assets/social-card.svg"
+    />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Understanding Smart Glasses BLE Broadcasts",
+        "description": "A plain-English technical breakdown of how wearable devices advertise Bluetooth Low Energy signals and how Unrecorded observes them locally.",
+        "author": {
+          "@type": "Organization",
+          "name": "Meldlife Ltd"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Meldlife Ltd"
+        },
+        "datePublished": "2026-06-29",
+        "dateModified": "2026-06-29",
+        "mainEntityOfPage": {
+          "@type": "WebPage",
+          "@id": "https://unrecorded.app/how-smart-glasses-broadcast-ble.html"
+        }
+      }
+    </script>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+
+    <header class="site-header">
+      <div class="container">
+        <a class="brand-link" href="/">
+          <img
+            src="/assets/logo-mark.svg"
+            width="36"
+            height="36"
+            alt=""
+            aria-hidden="true"
+          />
+          <span class="brand-name">Unrecorded</span>
+        </a>
+        <nav aria-label="Primary">
+          <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li>
+              <a href="/how-smart-glasses-broadcast-ble.html" aria-current="page"
+                >BLE broadcasts</a
+              >
+            </li>
+            <li>
+              <a href="/how-to-avoid-being-recorded-by-smart-glasses.html"
+                >Public awareness</a
+              >
+            </li>
+            <li><a href="/privacy.html">Privacy</a></li>
+            <li>
+              <a
+                href="https://github.com/meldusadm-coder/Unrecorded"
+                rel="noopener noreferrer"
+                >GitHub</a
+              >
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="article-page">
+      <div class="container">
+        <a class="back-home" href="/">← Back to home</a>
+
+        <h1>Understanding how smart glasses use BLE broadcasts</h1>
+        <p class="article-lead">
+          Modern smart glasses and companion wearables stay connected to phones
+          using Bluetooth Low Energy (BLE). They continually advertise short
+          radio packets so a paired device can find them again. This article
+          explains what those broadcasts contain, why they appear, and how
+          Unrecorded uses them for <strong>situational awareness</strong> — not
+          proof of active recording.
+        </p>
+
+        <h2>What BLE advertising is</h2>
+        <p>
+          BLE peripherals do not wait to be asked for their presence. They
+          periodically transmit <strong>advertising packets</strong> — small
+          bursts of data any nearby phone or scanner can receive without
+          pairing. This is how wireless earbuds reconnect after you open their
+          case, and how smart glasses stay available to a companion app.
+        </p>
+        <p>
+          From a privacy perspective, advertising means a wearable may leave
+          <em>visible traces</em> in the radio environment: a name, a signal
+          strength reading, and sometimes manufacturer or service identifiers.
+          Those traces can suggest that hardware <em>may</em> be nearby. They do
+          not reveal whether someone is recording video or audio right now.
+        </p>
+
+        <h2>What appears in a typical advertisement</h2>
+        <p>
+          When Unrecorded (or any BLE scanner) receives a packet, the operating
+          system exposes a subset of fields. Not every device advertises every
+          field, and values can be hidden or randomised by the manufacturer.
+        </p>
+        <div class="tech-table-wrap">
+          <table class="tech-table">
+            <thead>
+              <tr>
+                <th scope="col">Field</th>
+                <th scope="col">What it means</th>
+                <th scope="col">Privacy note</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Local name</td>
+                <td>
+                  A human-readable label (for example a product or brand string)
+                  broadcast in the packet.
+                </td>
+                <td>
+                  May be empty, generic, or changed by the user or firmware.
+                </td>
+              </tr>
+              <tr>
+                <td>RSSI</td>
+                <td>
+                  Received signal strength — a rough hint that a transmitter is
+                  closer or farther, not an exact distance.
+                </td>
+                <td>Noisy; walls and bodies affect readings.</td>
+              </tr>
+              <tr>
+                <td>Service UUIDs</td>
+                <td>
+                  Identifiers for Bluetooth services the device may offer when
+                  connected.
+                </td>
+                <td>Often absent in advertising; not unique to recording.</td>
+              </tr>
+              <tr>
+                <td>Manufacturer data</td>
+                <td>
+                  A company ID plus optional payload defined by the vendor.
+                </td>
+                <td>
+                  Can support pattern matching; not proof of a specific model.
+                </td>
+              </tr>
+              <tr>
+                <td>Connectable flag</td>
+                <td>
+                  Whether the device is currently accepting connection requests.
+                </td>
+                <td>Indicates availability, not recording state.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Why wearables advertise continuously</h2>
+        <p>
+          Smart glasses and similar wearables need a reliable link to a phone for
+          setup, firmware updates, media transfer, and companion-app features.
+          BLE advertising supports:
+        </p>
+        <ul>
+          <li>
+            <strong>Initial pairing</strong> — your phone discovers the glasses
+            during setup.
+          </li>
+          <li>
+            <strong>Reconnection</strong> — after sleep or out-of-range events,
+            the phone can find the device again.
+          </li>
+          <li>
+            <strong>Companion-app sync</strong> — background services may look
+            for known peripherals.
+          </li>
+        </ul>
+        <p>
+          Advertising activity is normal for connected wearables. It is
+          <strong>not</strong> the same as active video or audio capture. A
+          device can advertise while idle, and it can record without advertising
+          a recognisable name.
+        </p>
+
+        <h2>How Unrecorded observes signals</h2>
+        <p>
+          Unrecorded runs on your Android device and performs foreground BLE
+          scans in short batches (roughly every 10–15 seconds while the app is
+          open). Each batch yields a set of observations: names, signal strength,
+          and other fields the OS exposes.
+        </p>
+        <p>
+          Those observations are merged <strong>in memory</strong> inside a
+          <code>ScanSession</code> — the app's session layer for tracking what
+          has been seen recently across scan batches. The session:
+        </p>
+        <ul>
+          <li>
+            Combines repeated sightings of the same nearby signal (smoothing
+            noisy RSSI readings over time).
+          </li>
+          <li>
+            Expires entries that have not been seen for a configurable stale
+            period (about 60 seconds).
+          </li>
+          <li>
+            Resets when you clear app data or uninstall — it is
+            <strong>not persisted to disk</strong> as a history of people or
+            addresses.
+          </li>
+        </ul>
+        <p>
+          Unrecorded does not upload scan results to our servers. Processing
+          stays on your device. The goal is a calm privacy-risk indicator based
+          on what your phone can currently hear — not a log of everyone who
+          passed nearby.
+        </p>
+
+        <h2>Pattern matching, not machine learning</h2>
+        <p>
+          Unrecorded uses <strong>rule-based classification</strong> in
+          <code>packages/unrecorded_core</code>. A local catalogue of known
+          hardware fingerprints — name keywords, cautious address-prefix hints,
+          and manufacturer IDs where documented — is compared against each
+          observation. Examples in the catalogue include patterns associated with
+          Meta / Ray-Ban, Snap Spectacles, Even Realities, and other wearable
+          lines.
+        </p>
+        <p>
+          Separately, a benign-device filter down-ranks common non-recording
+          hardware so alerts are less noisy:
+        </p>
+        <ul>
+          <li>Headphones and speakers (AirPods, Galaxy Buds, Bose, JBL, …)</li>
+          <li>TVs and streaming devices (Roku, Chromecast, Fire TV, …)</li>
+          <li>Keyboards, mice, and fitness bands</li>
+        </ul>
+        <p>
+          When several weak indicators align, the app may show a
+          <strong>potential privacy risk</strong> level (low, medium, or high).
+          That score reflects how closely visible signals match known patterns —
+          <strong>not proof of recording</strong>.
+        </p>
+
+        <h2>Honest limits</h2>
+        <div class="disclaimer-box" role="note">
+          <p>
+            <strong>Important:</strong> A signal that may match a smart-glasses
+            pattern only means compatible hardware <em>might</em> be nearby. It
+            is strictly an indicator of proximity and pattern similarity — not
+            absolute proof of active video recording.
+          </p>
+        </div>
+        <ul>
+          <li>
+            Device names can be hidden, randomised, or spoofed — matching is
+            probabilistic.
+          </li>
+          <li>
+            RSSI fluctuates; “closer” on screen is an estimate, not a measured
+            distance.
+          </li>
+          <li>
+            Phones, body-worn cameras, and microphones without useful BLE
+            advertising are outside this detection path.
+          </li>
+          <li>
+            Unrecorded is a privacy awareness utility, not a security guarantee.
+          </li>
+        </ul>
+        <p>
+          For a consumer-oriented guide to situational awareness in public
+          spaces, see
+          <a href="/how-to-avoid-being-recorded-by-smart-glasses.html"
+            >How to avoid being recorded by smart glasses: a practical guide</a
+          >.
+        </p>
+
+        <aside class="cta-box" aria-labelledby="cta-heading">
+          <h2 id="cta-heading">Try Unrecorded on Android</h2>
+          <p>
+            Local-first scanning for signals that may match known smart-glasses
+            patterns. No account required. Scan data stays on your device.
+          </p>
+          <div class="cta-actions">
+            <a
+              class="btn btn-primary"
+              href="https://play.google.com/store/apps/details?id=app.unrecorded.unrecorded_mobile"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Get it on Google Play</a
+            >
+            <a class="btn btn-secondary" href="/privacy.html"
+              >Read the privacy policy</a
+            >
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <nav aria-label="Footer">
+          <ul class="footer-nav">
+            <li><a href="/">Home</a></li>
+            <li><a href="/privacy.html">Privacy Policy</a></li>
+            <li>
+              <a href="/how-smart-glasses-broadcast-ble.html"
+                >How smart glasses use BLE</a
+              >
+            </li>
+            <li>
+              <a href="/how-to-avoid-being-recorded-by-smart-glasses.html"
+                >Privacy in public</a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/meldusadm-coder/Unrecorded"
+                rel="noopener noreferrer"
+                >GitHub</a
+              >
+            </li>
+            <li>
+              <a href="mailto:privacy@unrecorded.app">Contact</a>
+            </li>
+          </ul>
+        </nav>
+        <p class="footer-copy">
+          © 2026 Meldlife Ltd. Unrecorded is a privacy awareness tool and does not
+          prove recording activity.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
