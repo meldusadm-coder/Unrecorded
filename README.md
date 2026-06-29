@@ -45,6 +45,9 @@ Unrecorded is an open-source privacy app that detects possible smart glasses or 
 - Privacy model: [docs/privacy-model.md](docs/privacy-model.md)
 - BLE technical guide: [https://unrecorded.app/how-smart-glasses-broadcast-ble.html](https://unrecorded.app/how-smart-glasses-broadcast-ble.html)
 - Public awareness guide: [https://unrecorded.app/how-to-avoid-being-recorded-by-smart-glasses.html](https://unrecorded.app/how-to-avoid-being-recorded-by-smart-glasses.html)
+- Detection limitations FAQ: [https://unrecorded.app/detection-limitations.html](https://unrecorded.app/detection-limitations.html)
+- Known BLE patterns: [https://unrecorded.app/smart-glasses-ble-patterns.html](https://unrecorded.app/smart-glasses-ble-patterns.html)
+- Agent index: [https://unrecorded.app/llms.txt](https://unrecorded.app/llms.txt)
 
 ## Status
 

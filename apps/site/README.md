@@ -8,6 +8,8 @@ Static marketing site and privacy policy for [Unrecorded](https://unrecorded.app
 - **`privacy.html`** — privacy policy (for app stores and the site)
 - **`how-smart-glasses-broadcast-ble.html`** — technical BLE advertising guide
 - **`how-to-avoid-being-recorded-by-smart-glasses.html`** — public situational-awareness guide
+- **`detection-limitations.html`** — detection limits FAQ for consumers and crawlers
+- **`smart-glasses-ble-patterns.html`** — open catalogue of known wearable BLE fingerprints
 - **`privacy/index.html`** — redirects to `privacy.html` for `/privacy/` URLs
 - **`src/styles.css`** — shared styles (brand tokens from `docs/brand-colors.json`)
 - **`assets/`** — favicon, social preview image, and copies of repo brand SVGs
@@ -23,11 +25,11 @@ Static files for crawler and agent discovery. Deployed with the rest of `apps/si
 | File | Purpose |
 |------|---------|
 | `robots.txt` | Allow public pages; explicit AI crawler rules; `Content-Signal: ai-train=no, search=yes, ai-input=yes`; references sitemap |
-| `sitemap.xml` | Lists canonical pages (`/`, `/privacy.html`, and both guide articles) |
+| `sitemap.xml` | Lists canonical pages (home, privacy, four guides) |
 | `llms.txt` | Short markdown index with links to key pages and GitHub |
 | `_headers` | Homepage `Link` headers pointing to sitemap, `llms.txt`, and privacy policy |
 
-**When to update:** add a `<url>` to `sitemap.xml` and a link under `## Pages` in `llms.txt` whenever you add a new public HTML page. Update `robots.txt` only if crawl policy changes. Guide articles: `how-smart-glasses-broadcast-ble.html`, `how-to-avoid-being-recorded-by-smart-glasses.html`.
+**When to update:** add a `<url>` with `<lastmod>` to `sitemap.xml` and a link under `## Pages` in `llms.txt` whenever you add a new public HTML page. Update `robots.txt` only if crawl policy changes. Guide articles: `how-smart-glasses-broadcast-ble.html`, `how-to-avoid-being-recorded-by-smart-glasses.html`, `detection-limitations.html`, `smart-glasses-ble-patterns.html`. Regenerate `assets/social-card.png` from `social-card.svg` if the artwork changes.
 
 **Local preview:** `python3 -m http.server` serves `robots.txt`, `sitemap.xml`, and `llms.txt` but does **not** apply `_headers`. Use Wrangler to preview Link headers:
 
@@ -151,7 +153,8 @@ npx wrangler pages dev apps/site
 | `assets/logo-horizontal.svg` | `packages/unrecorded_ui/assets/brand/unrecorded-logo-horizontal.svg` |
 | `assets/app-icon-accent.svg` | `packages/unrecorded_ui/assets/brand/unrecorded-app-icon-accent.svg` |
 | `assets/favicon.svg` | Derived from logo mark |
-| `assets/social-card.svg` | Site-specific Open Graph image |
+| `assets/social-card.png` | Open Graph / Twitter preview image (1200×630 PNG) |
+| `assets/social-card.svg` | Source artwork for social card |
 
 Colour tokens match `packages/unrecorded_ui/lib/src/app_theme.dart` and `docs/brand-colors.json`. Update copies here if the mobile brand kit changes.
 

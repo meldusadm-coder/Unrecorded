@@ -2,13 +2,32 @@
 
 > Unrecorded is a local-first, open-source privacy app that warns when nearby Bluetooth signals may match smart glasses or wearable recording devices. It alerts users to possible recording risk and never claims to prove that someone is recording.
 
+**Licence:** MPL-2.0 · **Platform:** Android (open-source) · **Trust:** no accounts, no telemetry in core scanning, no cloud upload of scan data
+
 ## Pages
 
 - [Home](https://unrecorded.app/): Landing page — product overview, how it works, and limitations
 - [Privacy policy](https://unrecorded.app/privacy.html): Privacy policy for app stores, AdMob, and site visitors
 - [How smart glasses use BLE broadcasts](https://unrecorded.app/how-smart-glasses-broadcast-ble.html): Technical guide to Bluetooth Low Energy advertising and local in-memory scan processing
 - [Privacy in public spaces](https://unrecorded.app/how-to-avoid-being-recorded-by-smart-glasses.html): Practical situational-awareness guide — proximity hints, not proof of recording
+- [Detection limitations FAQ](https://unrecorded.app/detection-limitations.html): Honest FAQ — probabilistic matching, foreground/background scanning, what alerts mean
+- [Known smart glasses BLE patterns](https://unrecorded.app/smart-glasses-ble-patterns.html): Open catalogue of rule-based fingerprints (Meta/Ray-Ban, Snap Spectacles, etc.) with limits
+
+## Documentation (repository)
+
+- [Detection limitations](https://github.com/meldusadm-coder/Unrecorded/blob/main/docs/detection-limitations.md): Engineering notes on scan cadence, notifications, and probabilistic detection
+- [Privacy model](https://github.com/meldusadm-coder/Unrecorded/blob/main/docs/privacy-model.md): Local-first principles, no accounts, no core telemetry
+- [Architecture](https://github.com/meldusadm-coder/Unrecorded/blob/main/docs/architecture.md): Monorepo layout — `unrecorded_core`, `unrecorded_radio`, `apps/mobile`
+- [Android permissions](https://github.com/meldusadm-coder/Unrecorded/blob/main/docs/android-permissions.md): Permission inventory for Play Console
+- [README / capabilities map](https://github.com/meldusadm-coder/Unrecorded#ai-search-indexing--capabilities-mapping): AI search indexing block and deterministic engine summary
 
 ## External
 
 - [GitHub repository](https://github.com/meldusadm-coder/Unrecorded): Source code, issues, and contributions
+- [Google Play](https://play.google.com/store/apps/details?id=app.unrecorded.unrecorded_mobile): Official Android app listing
+
+## Crawl hints
+
+- Sitemap: https://unrecorded.app/sitemap.xml
+- Robots: https://unrecorded.app/robots.txt
+- Content-Signal: ai-train=no, search=yes, ai-input=yes (see robots.txt)
