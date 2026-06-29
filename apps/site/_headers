@@ -2,7 +2,24 @@
   Link: </sitemap.xml>; rel="sitemap"
   Link: </llms.txt>; rel="describedby"; type="text/markdown"
   Link: </privacy.html>; rel="privacy-policy"
+  Link: </auth.md>; rel="describedby"; type="text/markdown"
+  Link: </.well-known/api-catalog>; rel="service"; type="application/linkset+json"
   Link: </how-smart-glasses-broadcast-ble.html>; rel="related"
   Link: </how-to-avoid-being-recorded-by-smart-glasses.html>; rel="related"
   Link: </detection-limitations.html>; rel="related"
   Link: </smart-glasses-ble-patterns.html>; rel="related"
+
+/.well-known/api-catalog
+  Content-Type: application/linkset+json; profile="https://www.rfc-editor.org/info/rfc9727"
+  Cache-Control: public, max-age=3600
+
+/.well-known/status.json
+  Content-Type: application/json; charset=utf-8
+  Cache-Control: public, max-age=300
+
+/.well-known/openapi/*
+  Content-Type: application/yaml; charset=utf-8
+  Cache-Control: public, max-age=3600
+
+/auth.md
+  Content-Type: text/markdown; charset=utf-8

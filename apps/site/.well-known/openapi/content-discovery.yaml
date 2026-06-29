@@ -1,0 +1,46 @@
+openapi: 3.1.0
+info:
+  title: Unrecorded public content discovery
+  version: 1.0.0
+  description: |
+    Read-only endpoints for discovering Unrecorded marketing site content
+    about the Android privacy app. No authentication required.
+servers:
+  - url: https://unrecorded.app
+paths:
+  /llms.txt:
+    get:
+      operationId: getLlmsIndex
+      summary: Machine-readable site index for AI agents
+      responses:
+        "200":
+          description: Markdown index of key pages and documentation links
+          content:
+            text/markdown: {}
+  /sitemap.xml:
+    get:
+      operationId: getSitemap
+      summary: Canonical URL list for crawlers
+      responses:
+        "200":
+          description: XML sitemap
+          content:
+            application/xml: {}
+  /.well-known/api-catalog:
+    get:
+      operationId: getApiCatalog
+      summary: RFC 9727 content catalog (linkset)
+      responses:
+        "200":
+          description: Linkset of discoverable public content endpoints
+          content:
+            application/linkset+json: {}
+  /.well-known/status.json:
+    get:
+      operationId: getStatus
+      summary: Site availability status
+      responses:
+        "200":
+          description: JSON status document
+          content:
+            application/json: {}

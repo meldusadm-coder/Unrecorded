@@ -16,7 +16,9 @@ Static marketing site and privacy policy for [Unrecorded](https://unrecorded.app
 - **`robots.txt`** — crawl rules, AI bot directives, and Content Signals
 - **`sitemap.xml`** — canonical URL list for crawlers
 - **`llms.txt`** — machine-readable site index for AI agents ([llmstxt.org](https://llmstxt.org/))
-- **`_headers`** — Cloudflare Pages response headers (Link headers on homepage)
+- **`auth.md`** — notes for agents that the site is public (no login)
+- **`.well-known/`** — content discovery catalog (RFC 9727) and OpenAPI for public endpoints
+- **`_headers`** — Cloudflare Pages response headers (Link headers + Content-Types)
 
 ## AI / SEO files
 
@@ -25,9 +27,11 @@ Static files for crawler and agent discovery. Deployed with the rest of `apps/si
 | File | Purpose |
 |------|---------|
 | `robots.txt` | Allow public pages; explicit AI crawler rules; `Content-Signal: ai-train=no, search=yes, ai-input=yes`; references sitemap |
-| `sitemap.xml` | Lists canonical pages (home, privacy, four guides) |
+| `sitemap.xml` | Lists canonical pages (home, privacy, four guides, auth.md) |
 | `llms.txt` | Short markdown index with links to key pages and GitHub |
-| `_headers` | Homepage `Link` headers pointing to sitemap, `llms.txt`, and privacy policy |
+| `_headers` | Homepage `Link` headers + Content-Type for `.well-known` and `auth.md` |
+| `auth.md` | Public-site note for agents (no authentication on this domain) |
+| `.well-known/*` | Content discovery catalog, OpenAPI spec, status |
 
 **When to update:** add a `<url>` with `<lastmod>` to `sitemap.xml` and a link under `## Pages` in `llms.txt` whenever you add a new public HTML page. Update `robots.txt` only if crawl policy changes. Guide articles: `how-smart-glasses-broadcast-ble.html`, `how-to-avoid-being-recorded-by-smart-glasses.html`, `detection-limitations.html`, `smart-glasses-ble-patterns.html`. Regenerate `assets/social-card.png` from `social-card.svg` if the artwork changes.
 
@@ -38,7 +42,7 @@ npx wrangler pages dev apps/site
 curl -sI http://localhost:8788/ | grep -i '^link:'
 ```
 
-**Optional (Cloudflare Pro+):** enable **Markdown for Agents** in the dashboard under [AI Crawl Control](https://dash.cloudflare.com/?to=/:account/:zone/ai) so requests with `Accept: text/markdown` get converted HTML responses.
+**Optional (Cloudflare Pro+):** enable **Markdown for Agents** so requests with `Accept: text/markdown` get converted HTML responses. Step-by-step: [docs/agent-discovery.md](../../docs/agent-discovery.md).
 
 ### Post-deploy verification
 
@@ -48,12 +52,14 @@ curl -sI https://unrecorded.app/sitemap.xml
 curl -sI https://unrecorded.app/ | grep -i '^link:'
 curl -s https://unrecorded.app/llms.txt | head
 
-curl -s -X POST https://isitagentready.com/api/scan \
-  -H 'Content-Type: application/json' \
-  -d '{"url":"https://unrecorded.app"}'
+curl -sI https://unrecorded.app/auth.md | grep -i content-type
+curl -s https://unrecorded.app/.well-known/api-catalog | head
+
+# Markdown for Agents (after enabling in Cloudflare dashboard)
+curl -sI https://unrecorded.app/ -H 'Accept: text/markdown' | grep -iE '^(content-type|x-markdown-tokens):'
 ```
 
-Expected passes after deploy: `robotsTxt`, `sitemap`, `linkHeaders`, `robotsTxtAiRules`, `contentSignals`.
+Expected passes after deploy: `robotsTxt`, `sitemap`, `linkHeaders`, `robotsTxtAiRules`, `contentSignals`, `apiCatalog`, `authMd`. `markdownNegotiation` requires the Cloudflare setting in [docs/agent-discovery.md](../../docs/agent-discovery.md). MCP, agent skills, OAuth, and DNS-AID checks are not applicable for this static Android app site.
 
 ## Run locally
 
