@@ -4,6 +4,13 @@ Unrecorded is designed to be privacy-protective by default.
 
 **Public privacy policy (Play, AdMob, stores):** [https://unrecorded.app/privacy.html](https://unrecorded.app/privacy.html) — maintained in [`apps/site/privacy.html`](../apps/site/privacy.html).
 
+**Public guides (site):**
+
+- [Detection limitations FAQ](https://unrecorded.app/detection-limitations.html)
+- [How smart glasses use BLE broadcasts](https://unrecorded.app/how-smart-glasses-broadcast-ble.html)
+- [Known smart glasses BLE patterns](https://unrecorded.app/smart-glasses-ble-patterns.html)
+- [Privacy in public spaces](https://unrecorded.app/how-to-avoid-being-recorded-by-smart-glasses.html)
+
 ## Principles
 
 - **Local-first scanning.** All detection and scoring happens on-device. No scan data leaves the phone.

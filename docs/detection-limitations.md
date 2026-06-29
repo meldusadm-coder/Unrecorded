@@ -2,6 +2,10 @@
 
 Unrecorded detects **possible** nearby smart glasses or wearable recording indicators. It **cannot** prove that any device is recording.
 
+**Public FAQ (site):** [https://unrecorded.app/detection-limitations.html](https://unrecorded.app/detection-limitations.html) — consumer-friendly limits and alert meaning.
+
+**Related guides:** [BLE broadcasts](https://unrecorded.app/how-smart-glasses-broadcast-ble.html) · [Known BLE patterns](https://unrecorded.app/smart-glasses-ble-patterns.html) · [Privacy in public](https://unrecorded.app/how-to-avoid-being-recorded-by-smart-glasses.html)
+
 ## Local-first scanning
 
 - Scan data stays on your device. There is no cloud analysis of nearby signals.

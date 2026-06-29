@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Known Smart Glasses BLE Patterns | Unrecorded App</title>
+    <meta
+      name="description"
+      content="How Unrecorded matches Meta Ray-Ban, Snap Spectacles, and other wearable BLE fingerprints — rule-based, local-first, and never proof of recording."
+    />
+    <link
+      rel="canonical"
+      href="https://unrecorded.app/smart-glasses-ble-patterns.html"
+    />
+    <meta name="theme-color" content="#5B4DFF" />
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="article" />
+    <meta
+      property="og:url"
+      content="https://unrecorded.app/smart-glasses-ble-patterns.html"
+    />
+    <meta
+      property="og:title"
+      content="Known Smart Glasses BLE Patterns | Unrecorded App"
+    />
+    <meta
+      property="og:description"
+      content="How Unrecorded matches Meta Ray-Ban, Snap Spectacles, and other wearable BLE fingerprints — rule-based, local-first, and never proof of recording."
+    />
+    <meta
+      property="og:image"
+      content="https://unrecorded.app/assets/social-card.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Known Smart Glasses BLE Patterns | Unrecorded App"
+    />
+    <meta
+      name="twitter:description"
+      content="How Unrecorded matches Meta Ray-Ban, Snap Spectacles, and other wearable BLE fingerprints — rule-based, local-first, and never proof of recording."
+    />
+    <meta
+      name="twitter:image"
+      content="https://unrecorded.app/assets/social-card.png"
+    />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Known Smart Glasses BLE Patterns",
+        "description": "Open catalogue of rule-based Bluetooth Low Energy fingerprints Unrecorded uses to flag possible nearby smart glasses — with honest limits.",
+        "author": { "@type": "Organization", "name": "Meldlife Ltd" },
+        "publisher": { "@type": "Organization", "name": "Meldlife Ltd" },
+        "datePublished": "2026-06-29",
+        "dateModified": "2026-06-29",
+        "mainEntityOfPage": {
+          "@type": "WebPage",
+          "@id": "https://unrecorded.app/smart-glasses-ble-patterns.html"
+        }
+      }
+    </script>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+
+    <header class="site-header">
+      <div class="container">
+        <a class="brand-link" href="/">
+          <img
+            src="/assets/logo-mark.svg"
+            width="36"
+            height="36"
+            alt=""
+            aria-hidden="true"
+          />
+          <span class="brand-name">Unrecorded</span>
+        </a>
+        <nav aria-label="Primary">
+          <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li>
+              <a href="/how-smart-glasses-broadcast-ble.html">BLE broadcasts</a>
+            </li>
+            <li>
+              <a href="/how-to-avoid-being-recorded-by-smart-glasses.html"
+                >Public awareness</a
+              >
+            </li>
+            <li><a href="/detection-limitations.html">Limits</a></li>
+            <li>
+              <a href="/smart-glasses-ble-patterns.html" aria-current="page"
+                >BLE patterns</a
+              >
+            </li>
+            <li><a href="/privacy.html">Privacy</a></li>
+            <li>
+              <a
+                href="https://github.com/meldusadm-coder/Unrecorded"
+                rel="noopener noreferrer"
+                >GitHub</a
+              >
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="article-page">
+      <div class="container">
+        <a class="back-home" href="/">← Back to home</a>
+
+        <h1>Known smart glasses BLE patterns</h1>
+        <p class="article-lead">
+          Unrecorded uses a <strong>local, open-source catalogue</strong> of
+          hardware fingerprints — not machine learning. When visible Bluetooth
+          fields may match a known pattern, the app can raise a calm privacy-risk
+          indicator. A match means <em>possible proximity to compatible
+          hardware</em>, not proof of recording.
+        </p>
+
+        <div class="disclaimer-box" role="note">
+          <p>
+            <strong>Important:</strong> Name keywords, address-prefix hints, and
+            manufacturer IDs are weak, independent signals. They can produce false
+            positives and miss devices that hide their identity. Treat every alert
+            as situational awareness.
+          </p>
+        </div>
+
+        <h2>How pattern matching works</h2>
+        <p>
+          For each observation from a scan batch, Unrecorded checks:
+        </p>
+        <ol>
+          <li>
+            <strong>Benign filter first</strong> — common headphones, TVs,
+            keyboards, and fitness bands are down-ranked so they are less likely
+            to trigger wearable alerts.
+          </li>
+          <li>
+            <strong>Catalogue match</strong> — advertised names, cautious
+            address-prefix hints, and documented manufacturer IDs are compared
+            to entries below.
+          </li>
+          <li>
+            <strong>Session merge</strong> — repeated sightings within an
+            in-memory <code>ScanSession</code> can modestly increase confidence
+            before stale signals expire.
+          </li>
+          <li>
+            <strong>Risk score</strong> — low / medium / high indicators with
+            plain-English reasons. Never certainty.
+          </li>
+        </ol>
+        <p>
+          Source of truth in the repo:
+          <a
+            href="https://github.com/meldusadm-coder/Unrecorded/blob/main/packages/unrecorded_core/lib/src/detection/detection_signatures.dart"
+            rel="noopener noreferrer"
+            ><code>detection_signatures.dart</code></a
+          >.
+        </p>
+
+        <h2>Brand families in the catalogue</h2>
+        <p>
+          The table summarises what the open-source engine looks for. Exact
+          keyword lists and hints may change between app releases.
+        </p>
+        <div class="tech-table-wrap">
+          <table class="tech-table">
+            <thead>
+              <tr>
+                <th scope="col">Brand family</th>
+                <th scope="col">Example name signals</th>
+                <th scope="col">Supporting hints</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Meta / Ray-Ban</td>
+                <td><code>ray-ban</code>, <code>meta glasses</code>, <code>stories</code></td>
+                <td>Address-prefix hints; manufacturer ID 0x0D53 (weak)</td>
+              </tr>
+              <tr>
+                <td>Snap / Spectacles</td>
+                <td><code>spectacles</code>, <code>snap glasses</code></td>
+                <td>Address-prefix hints; manufacturer ID 0x03C2 (weak)</td>
+              </tr>
+              <tr>
+                <td>Even Realities</td>
+                <td><code>even realities</code></td>
+                <td>Name keyword</td>
+              </tr>
+              <tr>
+                <td>Focals</td>
+                <td><code>focals</code></td>
+                <td>Name keyword</td>
+              </tr>
+              <tr>
+                <td>Vuzix</td>
+                <td><code>vuzix</code></td>
+                <td>Name keyword</td>
+              </tr>
+              <tr>
+                <td>Xreal</td>
+                <td><code>xreal</code>, <code>nreal</code></td>
+                <td>Name keyword</td>
+              </tr>
+              <tr>
+                <td>INMO</td>
+                <td><code>inmo</code></td>
+                <td>Name keyword</td>
+              </tr>
+              <tr>
+                <td>TCL RayNeo</td>
+                <td><code>rayneo</code>, <code>tcl rayneo</code></td>
+                <td>Name keyword</td>
+              </tr>
+              <tr>
+                <td>Solos</td>
+                <td><code>solos</code></td>
+                <td>Name keyword</td>
+              </tr>
+              <tr>
+                <td>Generic smart glasses</td>
+                <td><code>smart glasses</code></td>
+                <td>Broad phrase — higher false-positive risk</td>
+              </tr>
+              <tr>
+                <td>Wearable camera (generic)</td>
+                <td><code>camera glasses</code>, <code>wearable camera</code></td>
+                <td>Generic — may not be smart glasses specifically</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>What we deliberately filter out</h2>
+        <p>
+          To reduce noisy alerts, name patterns associated with common benign
+          devices are checked before catalogue matching. Examples include
+          AirPods, Galaxy Buds, Bose/JBL speakers, Roku/Chromecast TVs, Fitbit,
+          and Garmin watches. A nearby headphone should usually be classified as
+          audio hardware — unlikely recording — rather than a wearable camera.
+        </p>
+
+        <h2>Why a match is not identity proof</h2>
+        <ul>
+          <li>
+            Two different devices can share similar advertised strings in crowded
+            RF environments.
+          </li>
+          <li>
+            Manufacturers can rotate or randomise Bluetooth addresses on modern
+            platforms.
+          </li>
+          <li>
+            A user may own compatible glasses but not be recording.
+          </li>
+          <li>
+            A recorder may use hardware with no useful BLE advertisement at all.
+          </li>
+        </ul>
+        <p>
+          Read the full limits in our
+          <a href="/detection-limitations.html">detection limitations FAQ</a>.
+        </p>
+
+        <h2>Testing patterns without real glasses</h2>
+        <p>
+          Enable <strong>Demo Mode</strong> in app settings, or broadcast a test
+          advertisement from another phone using a tool like nRF Connect with a
+          custom name such as <code>ray-ban</code> or <code>meta</code>. This
+          validates the alert path — not real-world certainty.
+        </p>
+
+        <aside class="cta-box" aria-labelledby="cta-heading">
+          <h2 id="cta-heading">See matching signals nearby</h2>
+          <p>
+            Open-source Android app. Local scanning. No proof of recording —
+            only possible risk indicators.
+          </p>
+          <div class="cta-actions">
+            <a
+              class="btn btn-primary"
+              href="https://play.google.com/store/apps/details?id=app.unrecorded.unrecorded_mobile"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Get it on Google Play</a
+            >
+            <a class="btn btn-secondary" href="/how-smart-glasses-broadcast-ble.html"
+              >How BLE broadcasts work</a
+            >
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <nav aria-label="Footer">
+          <ul class="footer-nav">
+            <li><a href="/">Home</a></li>
+            <li><a href="/privacy.html">Privacy Policy</a></li>
+            <li>
+              <a href="/how-smart-glasses-broadcast-ble.html"
+                >How smart glasses use BLE</a
+              >
+            </li>
+            <li>
+              <a href="/how-to-avoid-being-recorded-by-smart-glasses.html"
+                >Privacy in public</a
+              >
+            </li>
+            <li>
+              <a href="/detection-limitations.html">Detection limits FAQ</a>
+            </li>
+            <li>
+              <a href="/smart-glasses-ble-patterns.html">BLE patterns</a>
+            </li>
+            <li>
+              <a
+                href="https://github.com/meldusadm-coder/Unrecorded"
+                rel="noopener noreferrer"
+                >GitHub</a
+              >
+            </li>
+            <li>
+              <a href="mailto:privacy@unrecorded.app">Contact</a>
+            </li>
+          </ul>
+        </nav>
+        <p class="footer-copy">
+          © 2026 Meldlife Ltd. Unrecorded is a privacy awareness tool and does not
+          prove recording activity.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
