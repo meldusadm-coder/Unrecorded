@@ -8,6 +8,17 @@ void main() {
   test('scan and alert copy avoids certainty wording', () {
     final copyStrings = <String>[
       AppCopy.scanHelper,
+      AppCopy.protectionControlOn,
+      AppCopy.protectionControlOff,
+      AppCopy.protectionOnTitle,
+      AppCopy.protectionOffTitle,
+      AppCopy.protectionStartingTitle,
+      AppCopy.protectionActionRequiredTitle,
+      AppCopy.protectionErrorTitle,
+      AppCopy.protectionOnBody,
+      AppCopy.protectionOffBody,
+      AppCopy.protectionStartingBody,
+      AppCopy.protectionPossibleRiskBody,
       AppCopy.scanningActive,
       AppCopy.scanResting,
       AppCopy.confirmingRisk,

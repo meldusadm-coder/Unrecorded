@@ -10,6 +10,8 @@ Unrecorded uses a Dart pub workspace monorepo with clear separation between dete
 
 The Flutter mobile app targeting Android and iOS. Uses Riverpod for state management and GoRouter for navigation. Contains screens (scan, alerts, settings) and wires together the packages below.
 
+The main scan screen keeps the default experience simple: a dominant Protection On / Protection Off control, one plain-English status, a secondary Background protection toggle, and a collapsed More information and settings section. `ProtectionScreenUiState` derives this presentation from `ScanState` so widgets do not interpret low-level scanner phases directly.
+
 ### `packages/unrecorded_core`
 
 Pure Dart library with no Flutter dependency. Contains:

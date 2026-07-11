@@ -14,6 +14,35 @@ class AppCopy {
       'recording-enabled smart glasses or similar devices. It cannot '
       'guarantee that recording is happening.';
 
+  static const String protectionControlOn = 'Protection On';
+
+  static const String protectionControlOff = 'Protection Off';
+
+  static const String protectionOnTitle = 'Protection is on';
+
+  static const String protectionOffTitle = 'Protection is off';
+
+  static const String protectionStartingTitle = 'Starting protection…';
+
+  static const String protectionActionRequiredTitle =
+      'Bluetooth or permission required';
+
+  static const String protectionErrorTitle = 'Protection needs attention';
+
+  static const String protectionOnBody =
+      'Checking nearby Bluetooth signals for possible recording wearables.';
+
+  static const String protectionOffBody =
+      'Turn on protection to check nearby Bluetooth signals for possible '
+      'recording wearables.';
+
+  static const String protectionStartingBody =
+      'Checking Bluetooth and permissions before scanning starts.';
+
+  static const String protectionPossibleRiskBody =
+      'Nearby signals may match smart glasses. This is not proof that anyone '
+      'is recording.';
+
   static const String scanningActive =
       'Scanning nearby signals for possible recording risk.';
 
@@ -141,9 +170,8 @@ class AppCopy {
   static const String backgroundProtectionTitle = 'Background protection';
 
   static const String backgroundProtectionSubtitle =
-      'Keep scanning while protection is active. Runs with a persistent '
-      'notification. Android or battery settings may stop background '
-      'protection. Not proof of recording.';
+      'Keeps protection running when you leave the app. Android may show a '
+      'permanent notification and can still limit background activity.';
 
   static const String backgroundProtectionNotificationTitle =
       'Unrecorded protection is active';

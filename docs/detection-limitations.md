@@ -14,6 +14,7 @@ Unrecorded detects **possible** nearby smart glasses or wearable recording indic
 ## Foreground-first scan cadence
 
 - While protection is on, scanning runs in **short windows** with **rest periods** between them to reduce battery use.
+- The main screen normally summarises these internal phases as **Protection is on**. It only becomes more specific when the user must act or a possible-risk alert needs attention.
 - **Keep the app open** for the most reliable scanning when background protection is off.
 - Risk notifications may appear while protection is active, but Android may limit behaviour when the app is not in the foreground.
 - An ongoing **protection status** notification appears in the Android notification shade while protection is active and notification permission is granted. It means protection is running — not that recording was detected.

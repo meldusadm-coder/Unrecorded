@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -24,6 +26,11 @@ void main() {
         child: const AppBootstrap(child: UnrecordedApp()),
       );
 
+  Future<void> openMoreInformation(WidgetTester tester) async {
+    await tester.tap(find.text('More information and settings'));
+    await tester.pumpAndSettle();
+  }
+
   testWidgets('settings shows Alerts before privacy tiles', (tester) async {
     tester.view.physicalSize = const Size(1080, 1920);
     tester.view.devicePixelRatio = 1.0;
@@ -33,6 +40,7 @@ void main() {
     await tester.pumpWidget(testApp());
     await tester.pump();
 
+    await openMoreInformation(tester);
     await tester.tap(find.byKey(const Key('settings_button')));
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
@@ -54,6 +62,7 @@ void main() {
     await tester.pumpWidget(testApp());
     await tester.pump();
 
+    await openMoreInformation(tester);
     await tester.tap(find.byKey(const Key('settings_button')));
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
@@ -75,6 +84,7 @@ void main() {
 
     await tester.pumpWidget(testApp());
     await tester.pump();
+    await openMoreInformation(tester);
     await tester.tap(find.byKey(const Key('settings_button')));
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
@@ -101,10 +111,22 @@ void main() {
     );
     await tester.pump();
 
+    await openMoreInformation(tester);
     await tester.tap(find.byKey(const Key('settings_button')));
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
     expect(find.byKey(const Key('ad_privacy_choices_tile')), findsOneWidget);
     expect(find.text(MonetisationCopy.adPrivacyChoicesTitle), findsOneWidget);
+  });
+
+  test('developer testing section stays hidden in release builds', () {
+    final source = File(
+      'lib/features/settings/debug_testing_section.dart',
+    ).readAsStringSync();
+
+    expect(
+      source,
+      contains('if (kReleaseMode) return const SizedBox.shrink();'),
+    );
   });
 }

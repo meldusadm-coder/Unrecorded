@@ -15,7 +15,7 @@ import '../../services/recent_risk_controller.dart';
 import '../../services/recent_risk_visibility.dart';
 import '../../services/scanner_provider.dart';
 import '../../services/widget_sync_service.dart';
-import '../../utils/time_format.dart';
+import 'protection_screen_ui_state.dart';
 import 'scan_state.dart';
 import 'signal_ui_model.dart';
 
@@ -28,12 +28,9 @@ class ScanScreen extends ConsumerWidget {
 
     final state = ref.watch(scanControllerProvider);
     final controller = ref.read(scanControllerProvider.notifier);
-    final showAlert = state.showsRiskAlert;
+    final uiState = ProtectionScreenUiState.fromScanState(state);
     final recentRisk = ref.watch(recentRiskVisibleProvider);
     final recentWindow = ref.watch(recentRiskControllerProvider).window.label;
-    final topRisk = state.possibleRiskSignals.isEmpty
-        ? null
-        : state.possibleRiskSignals.first;
 
     return Scaffold(
       appBar: AppBar(
@@ -42,28 +39,11 @@ class ScanScreen extends ConsumerWidget {
           child: AppLogo(size: 26),
         ),
         title: const Text('Unrecorded'),
-        actions: [
-          IconButton(
-            icon:
-                const UnrecordedIcon(asset: UnrecordedIconAsset.help, size: 24),
-            tooltip: 'Help',
-            onPressed: () => context.push('/help'),
-          ),
-          IconButton(
-            key: const Key('settings_button'),
-            icon: const UnrecordedIcon(
-              asset: UnrecordedIconAsset.settings,
-              size: 24,
-            ),
-            tooltip: 'Settings',
-            onPressed: () => context.push('/settings'),
-          ),
-        ],
       ),
       body: SafeArea(
         bottom: false,
         child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
           children: [
             if (state.isDemoMode && state.protectionRequested)
               const Padding(
@@ -74,24 +54,32 @@ class ScanScreen extends ConsumerWidget {
                   actions: [SizedBox.shrink()],
                 ),
               ),
-            ScanStatusCard(
-              icon: _iconWidgetForStatus(state.status, state.riskLevel),
-              title: _titleForStatus(state),
-              subtitle: _subtitleForStatus(state),
-              lastCheckedText: _lastCheckedText(state),
+            _ProtectionControl(
+              state: state,
+              uiState: uiState,
+              onPressed: uiState.primaryActionEnabled
+                  ? () => _toggleProtection(ref, state, controller)
+                  : null,
             ),
             const SizedBox(height: 12),
-            const BackgroundProtectionStoppedBanner(),
-            NotificationModeBanner(state: state),
+            _StatusArea(
+              uiState: uiState,
+              state: state,
+              onAction: () {
+                if (state.status == ScanStatus.possibleRiskDetected) {
+                  context.push('/alert-details');
+                } else if (state.isBlocked) {
+                  openAppSettings();
+                } else if (state.status == ScanStatus.error) {
+                  controller.startProtection();
+                }
+              },
+              onDismissAlert: controller.dismissRiskAlert,
+            ),
             const SizedBox(height: 12),
             const BackgroundProtectionToggle(),
             const SizedBox(height: 12),
-            const HelperText(
-              text: AppCopy.scanHelper,
-              expandableDetail: PrivacyDisclaimer.detectionDisclaimer,
-            ),
-            const SizedBox(height: 12),
-            _buildNextStep(context, state, controller),
+            const BackgroundProtectionStoppedBanner(),
             if (recentRisk != null) ...[
               const SizedBox(height: 16),
               RiskAlertCard(
@@ -103,100 +91,8 @@ class ScanScreen extends ConsumerWidget {
                     .acknowledge(),
               ),
             ],
-            if (showAlert) ...[
-              const SizedBox(height: 16),
-              if (topRisk != null)
-                Card(
-                  child: ListTile(
-                    title: Text(topRisk.title),
-                    subtitle: Text(topRisk.categoryLabel),
-                    trailing: const Text('View details'),
-                    onTap: () => context.push('/alert-details'),
-                  ),
-                ),
-              RiskAlertCard(
-                title: AppCopy.alertCardTitle,
-                body: AppCopy.alertCardBody,
-                level: state.riskLevel,
-                onViewDetails: () => context.push('/alert-details'),
-                onDismiss: () => controller.dismissRiskAlert(),
-              ),
-              const SizedBox(height: 8),
-              const HelperText(text: AppCopy.riskResultHelper),
-            ],
             const SizedBox(height: 16),
-            PrimaryActionButton(
-              label: state.protectionActive
-                  ? AppCopy.pauseProtection
-                  : AppCopy.turnOnProtection,
-              icon: state.protectionActive
-                  ? const UnrecordedStatusIcon(
-                      asset: UnrecordedStatusAsset.scanningPaused,
-                      size: 24,
-                    )
-                  : const AppLogo(size: 24, forColoredBackground: true),
-              color: state.protectionActive ? UnrecordedColors.danger : null,
-              onPressed: () async {
-                if (state.protectionActive) {
-                  final bgOwns = ref
-                      .read(backgroundProtectionControllerProvider)
-                      .ownsScanning;
-                  if (bgOwns) {
-                    await ref
-                        .read(backgroundProtectionControllerProvider.notifier)
-                        .disable();
-                  }
-                  await controller.pauseProtection();
-                } else {
-                  await controller.startProtection();
-                }
-              },
-            ),
-            if (state.possibleRiskSignals.isNotEmpty ||
-                state.otherNearbySignals.isNotEmpty) ...[
-              const SizedBox(height: 20),
-              _NearbySignalsSection(
-                riskSignals: state.possibleRiskSignals,
-                otherSignals: state.otherNearbySignals,
-              ),
-            ],
-            if (state.reasons.isNotEmpty && state.protectionActive) ...[
-              const SizedBox(height: 16),
-              Text(
-                'Why this risk level?',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const SizedBox(height: 8),
-              ...state.reasons.map(
-                (r) => Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('•  '),
-                      Expanded(child: Text(r)),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                AppCopy.notProofOfRecording,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-              ),
-            ],
-            if (!showAlert) ...[
-              const SizedBox(height: 8),
-              Center(
-                child: TextButton(
-                  key: const Key('scan_feedback_link'),
-                  onPressed: () => context.push('/feedback'),
-                  child: const Text(FeedbackCopy.sendFeedbackButton),
-                ),
-              ),
-            ],
+            _MoreInformationAndSettings(state: state),
             const SizedBox(height: 16),
           ],
         ),
@@ -204,151 +100,239 @@ class ScanScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildNextStep(
-    BuildContext context,
+  Future<void> _toggleProtection(
+    WidgetRef ref,
     ScanState state,
     ScanController controller,
-  ) {
-    if (state.isBlocked) {
-      return NextStepBanner(
-        message: state.statusMessage ?? AppCopy.permissionHelper,
-        actionLabel: 'Open settings',
-        onAction: openAppSettings,
+  ) async {
+    if (state.protectionActive) {
+      final bgOwns =
+          ref.read(backgroundProtectionControllerProvider).ownsScanning;
+      if (bgOwns) {
+        await ref
+            .read(backgroundProtectionControllerProvider.notifier)
+            .disable();
+      }
+      await controller.pauseProtection();
+    } else {
+      await controller.startProtection();
+    }
+  }
+}
+
+class _ProtectionControl extends StatelessWidget {
+  const _ProtectionControl({
+    required this.state,
+    required this.uiState,
+    required this.onPressed,
+  });
+
+  final ScanState state;
+  final ProtectionScreenUiState uiState;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isOn = state.protectionActive || state.status == ScanStatus.starting;
+    final foreground = isOn
+        ? theme.colorScheme.onPrimary
+        : theme.colorScheme.onPrimaryContainer;
+    final background =
+        isOn ? theme.colorScheme.primary : theme.colorScheme.primaryContainer;
+
+    return Semantics(
+      key: const Key('main_protection_control_semantics'),
+      button: onPressed != null,
+      enabled: onPressed != null,
+      toggled: isOn,
+      label: uiState.controlLabel,
+      hint: onPressed == null
+          ? null
+          : (isOn ? 'Tap to turn protection off' : 'Tap to turn protection on'),
+      child: SizedBox(
+        width: double.infinity,
+        height: 96,
+        child: FilledButton(
+          key: const Key('main_protection_control'),
+          onPressed: onPressed,
+          style: FilledButton.styleFrom(
+            backgroundColor: background,
+            foregroundColor: foreground,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(22),
+            ),
+            textStyle: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(isOn ? Icons.shield : Icons.shield_outlined, size: 28),
+              const SizedBox(height: 6),
+              Text(uiState.controlLabel),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StatusArea extends StatelessWidget {
+  const _StatusArea({
+    required this.uiState,
+    required this.state,
+    required this.onAction,
+    required this.onDismissAlert,
+  });
+
+  final ProtectionScreenUiState uiState;
+  final ScanState state;
+  final VoidCallback onAction;
+  final VoidCallback onDismissAlert;
+
+  @override
+  Widget build(BuildContext context) {
+    if (uiState.showsRiskAlert) {
+      return RiskAlertCard(
+        title: uiState.statusTitle,
+        body: '${uiState.supportingText}\n\n${uiState.protectionLine}.',
+        level: state.riskLevel,
+        onViewDetails: onAction,
+        onDismiss: onDismissAlert,
       );
     }
-    switch (state.status) {
-      case ScanStatus.possibleRiskDetected:
-        return const NextStepBanner(
-          message:
-              'Stay aware of your surroundings. You can view details or dismiss the alert.',
-        );
-      case ScanStatus.confirmingRisk:
-        return const NextStepBanner(message: AppCopy.confirmingRisk);
-      case ScanStatus.scanning:
-        if (!state.hasElevatedRisk) {
-          return const NextStepBanner(message: AppCopy.noRiskWhileScanning);
-        }
-        return const SizedBox.shrink();
-      case ScanStatus.resting:
-        return const NextStepBanner(message: AppCopy.scanResting);
-      case ScanStatus.error:
-        return NextStepBanner(
-          message: state.statusMessage ?? 'Something went wrong.',
-          actionLabel: 'Try again',
-          onAction: controller.startProtection,
-        );
-      case ScanStatus.idle:
-      case ScanStatus.paused:
-        return const NextStepBanner(
-          message:
-              'Turn on protection to keep checking for possible recording risk.',
-        );
-      default:
-        return const SizedBox.shrink();
-    }
-  }
 
-  String _titleForStatus(ScanState state) {
-    switch (state.status) {
-      case ScanStatus.idle:
-        return 'Protection is off';
-      case ScanStatus.starting:
-        return 'Starting protection…';
-      case ScanStatus.scanning:
-        return AppCopy.scanningActive;
-      case ScanStatus.resting:
-        return AppCopy.scanResting;
-      case ScanStatus.confirmingRisk:
-        return AppCopy.confirmingRisk;
-      case ScanStatus.possibleRiskDetected:
-        return AppCopy.possibleRiskTitle;
-      case ScanStatus.paused:
-        return 'Protection paused';
-      case ScanStatus.error:
-        return 'Scan issue';
-      case ScanStatus.permissionDenied:
-      case ScanStatus.permissionPermanentlyDenied:
-        return AppCopy.permissionRequiredTitle;
-      case ScanStatus.bluetoothOff:
-        return 'Bluetooth is off';
-      case ScanStatus.bluetoothUnsupported:
-        return 'Bluetooth not supported';
-    }
+    final theme = Theme.of(context);
+    return Column(
+      children: [
+        Text(
+          uiState.statusTitle,
+          textAlign: TextAlign.center,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          uiState.supportingText,
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+            height: 1.4,
+          ),
+        ),
+        if (uiState.actionLabel != null) ...[
+          const SizedBox(height: 12),
+          FilledButton.tonal(
+            onPressed: onAction,
+            child: Text(uiState.actionLabel!),
+          ),
+        ],
+      ],
+    );
   }
+}
 
-  String? _subtitleForStatus(ScanState state) {
-    if (state.status == ScanStatus.possibleRiskDetected) {
-      return AppCopy.possibleRiskBody;
-    }
-    if (state.statusMessage != null) return state.statusMessage;
-    if (state.status == ScanStatus.scanning && !state.hasElevatedRisk) {
-      return AppCopy.noRiskWhileScanning;
-    }
-    return null;
-  }
+class _MoreInformationAndSettings extends StatelessWidget {
+  const _MoreInformationAndSettings({required this.state});
 
-  String? _lastCheckedText(ScanState state) {
-    if (state.status == ScanStatus.idle || state.status == ScanStatus.paused) {
-      return null;
-    }
-    return relativeLastChecked(state.lastCheckedAt);
-  }
+  final ScanState state;
 
-  Widget _iconWidgetForStatus(ScanStatus status, RiskLevel riskLevel) {
-    switch (status) {
-      case ScanStatus.scanning:
-      case ScanStatus.confirmingRisk:
-        return const UnrecordedStatusIcon(
-          asset: UnrecordedStatusAsset.scanningActive,
-          size: 48,
-        );
-      case ScanStatus.resting:
-        return const UnrecordedStatusIcon(
-          asset: UnrecordedStatusAsset.scanningPaused,
-          size: 48,
-        );
-      case ScanStatus.possibleRiskDetected:
-        if (riskLevel == RiskLevel.medium) {
-          return const UnrecordedIcon(
-            asset: UnrecordedIconAsset.riskMedium,
-            size: 48,
-            color: UnrecordedColors.warning,
-          );
-        }
-        return const UnrecordedStatusIcon(
-          asset: UnrecordedStatusAsset.highRisk,
-          size: 48,
-        );
-      case ScanStatus.permissionDenied:
-      case ScanStatus.permissionPermanentlyDenied:
-      case ScanStatus.bluetoothOff:
-      case ScanStatus.bluetoothUnsupported:
-        return const UnrecordedStatusIcon(
-          asset: UnrecordedStatusAsset.permissionsNeeded,
-          size: 48,
-        );
-      case ScanStatus.error:
-        return const UnrecordedIcon(
-          asset: UnrecordedIconAsset.alert,
-          size: 48,
-          color: UnrecordedColors.danger,
-        );
-      case ScanStatus.paused:
-        return const UnrecordedStatusIcon(
-          asset: UnrecordedStatusAsset.scanningPaused,
-          size: 48,
-        );
-      case ScanStatus.starting:
-        return const UnrecordedStatusIcon(
-          asset: UnrecordedStatusAsset.scanningActive,
-          size: 48,
-        );
-      default:
-        return const UnrecordedStatusIcon(
-          asset: UnrecordedStatusAsset.protectionOn,
-          size: 48,
-        );
-    }
+  @override
+  Widget build(BuildContext context) {
+    return ExpansionTile(
+      tilePadding: EdgeInsets.zero,
+      title: const Text('More information and settings'),
+      childrenPadding: const EdgeInsets.only(bottom: 8),
+      children: [
+        const HelperText(
+          text: AppCopy.scanHelper,
+          expandableDetail: PrivacyDisclaimer.detectionDisclaimer,
+        ),
+        const SizedBox(height: 12),
+        NotificationModeBanner(state: state),
+        if (state.possibleRiskSignals.isNotEmpty ||
+            state.otherNearbySignals.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          _NearbySignalsSection(
+            riskSignals: state.possibleRiskSignals,
+            otherSignals: state.otherNearbySignals,
+          ),
+        ],
+        if (state.reasons.isNotEmpty && state.protectionActive) ...[
+          const SizedBox(height: 16),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Why this risk level?',
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+          ),
+          const SizedBox(height: 8),
+          ...state.reasons.map(
+            (r) => Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('•  '),
+                  Expanded(child: Text(r)),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              AppCopy.notProofOfRecording,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+          ),
+        ],
+        const Divider(height: 24),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const UnrecordedIcon(
+            asset: UnrecordedIconAsset.help,
+            size: 22,
+          ),
+          title: const Text('How detection works'),
+          onTap: () => context.push('/help'),
+        ),
+        ListTile(
+          key: const Key('settings_button'),
+          contentPadding: EdgeInsets.zero,
+          leading: const UnrecordedIcon(
+            asset: UnrecordedIconAsset.settings,
+            size: 22,
+          ),
+          title: const Text('Settings & privacy'),
+          onTap: () => context.push('/settings'),
+        ),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const UnrecordedIcon(
+            asset: UnrecordedIconAsset.more,
+            size: 22,
+          ),
+          title: const Text('Remove ads'),
+          onTap: () => context.push('/remove-ads'),
+        ),
+        ListTile(
+          key: const Key('scan_feedback_link'),
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.feedback_outlined),
+          title: const Text(FeedbackCopy.sendFeedbackButton),
+          onTap: () => context.push('/feedback'),
+        ),
+      ],
+    );
   }
 }
 

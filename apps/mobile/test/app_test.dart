@@ -43,26 +43,32 @@ void main() {
         child: const AppBootstrap(child: UnrecordedApp()),
       );
 
+  Future<void> openMoreInformation(WidgetTester tester) async {
+    await tester.tap(find.text('More information and settings'));
+    await tester.pumpAndSettle();
+  }
+
   testWidgets('app renders scan screen with title', (tester) async {
     await tester.pumpWidget(testApp());
     await tester.pump();
 
     expect(find.text('Unrecorded'), findsOneWidget);
-    expect(find.text(AppCopy.turnOnProtection), findsOneWidget);
+    expect(find.text(AppCopy.protectionControlOff), findsOneWidget);
   });
 
   testWidgets('protection button is shown on scan screen', (tester) async {
     await tester.pumpWidget(testApp());
     await tester.pump();
 
-    expect(find.text(AppCopy.turnOnProtection), findsOneWidget);
+    expect(find.text(AppCopy.protectionControlOff), findsOneWidget);
   });
 
   testWidgets('navigates to help screen with example alert', (tester) async {
     await tester.pumpWidget(testApp());
     await tester.pump();
 
-    await tester.tap(find.byTooltip('Help'));
+    await openMoreInformation(tester);
+    await tester.tap(find.text('How detection works'));
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
     expect(find.text('Example alert'), findsOneWidget);
@@ -98,14 +104,15 @@ void main() {
     await tester.pumpWidget(testApp());
     await tester.pump();
 
-    await tester.tap(find.byTooltip('Help'));
+    await openMoreInformation(tester);
+    await tester.tap(find.text('How detection works'));
     await tester.pumpAndSettle(const Duration(seconds: 2));
     expect(find.text('Help'), findsOneWidget);
 
     await tester.tap(find.byType(BackButton));
     await tester.pumpAndSettle(const Duration(seconds: 2));
     expect(find.text('Unrecorded'), findsOneWidget);
-    expect(find.text(AppCopy.turnOnProtection), findsOneWidget);
+    expect(find.text(AppCopy.protectionControlOff), findsOneWidget);
   });
 
   testWidgets('navigates to settings screen', (tester) async {
@@ -117,6 +124,7 @@ void main() {
     await tester.pumpWidget(testApp());
     await tester.pump();
 
+    await openMoreInformation(tester);
     await tester.tap(find.byKey(const Key('settings_button')));
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
@@ -135,6 +143,7 @@ void main() {
     await tester.pumpWidget(testApp());
     await tester.pump();
 
+    await openMoreInformation(tester);
     await tester.tap(find.byKey(const Key('settings_button')));
     await tester.pumpAndSettle(const Duration(seconds: 2));
     expect(find.text('Settings & Privacy'), findsOneWidget);
@@ -149,7 +158,8 @@ void main() {
     await tester.pumpWidget(testApp());
     await tester.pump();
 
-    await tester.tap(find.byTooltip('Help'));
+    await openMoreInformation(tester);
+    await tester.tap(find.text('How detection works'));
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
     expect(find.byType(BottomAdSlot), findsOneWidget);
@@ -164,6 +174,7 @@ void main() {
     await tester.pumpWidget(testApp());
     await tester.pump();
 
+    await openMoreInformation(tester);
     await tester.tap(find.byKey(const Key('settings_button')));
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
@@ -183,7 +194,8 @@ void main() {
     await tester.pumpWidget(testApp());
     await tester.pump();
 
-    await tester.tap(find.byTooltip('Help'));
+    await openMoreInformation(tester);
+    await tester.tap(find.text('How detection works'));
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
     await tester.scrollUntilVisible(
