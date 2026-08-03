@@ -80,3 +80,6 @@ tool/play/.venv/
 # OS
 .DS_Store
 Thumbs.db
+
+# Agent brainstorming companion (local-only mockups/state)
+.superpowers/
