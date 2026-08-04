@@ -26,6 +26,7 @@ class SingleEngineProtectionProtocolStore implements ProtectionProtocolStore {
   static const _keySchemaVersion = 'protection_protocol_schema_version';
   static const _keyRevision = 'protection_protocol_revision';
   static const _keyBackgroundModePreferred = 'background_mode_preferred';
+  static const _keyForcedBackgroundDefaultOn = 'bg_default_on_v091';
   static const _keyProtectionEnabled = 'protection_enabled';
   static const _keyExplicitlyStopped = 'explicitly_stopped';
   static const _keyLegacyBackgroundProtectionEnabled =
@@ -349,14 +350,14 @@ class SingleEngineProtectionProtocolStore implements ProtectionProtocolStore {
       return _persist(_privateAuthority!);
     }
     if (_lastConfirmed != null) {
-      return ProtocolCommitConfirmed(_lastConfirmed!);
+      return _forceBackgroundDefaultOn(_lastConfirmed!);
     }
     if (_prefs.containsKey(_keySchemaVersion)) {
       final loaded = _readTupleFromPrefs();
       if (loaded != null) {
         _lastConfirmed = loaded;
         _privateAuthority = loaded;
-        return ProtocolCommitConfirmed(loaded);
+        return _forceBackgroundDefaultOn(loaded);
       }
     }
 
@@ -368,7 +369,32 @@ class SingleEngineProtectionProtocolStore implements ProtectionProtocolStore {
     );
     final migrated = migrateFromLegacy(legacy);
     _privateAuthority = migrated;
-    return _persist(migrated);
+    final persisted = await _persist(migrated);
+    if (persisted is ProtocolCommitConfirmed) {
+      await _prefs.setBool(_keyForcedBackgroundDefaultOn, true);
+    }
+    return persisted;
+  }
+
+  Future<ProtocolCommitResult> _forceBackgroundDefaultOn(
+    ProtectionProtocolTuple current,
+  ) async {
+    if (_prefs.getBool(_keyForcedBackgroundDefaultOn) == true) {
+      return ProtocolCommitConfirmed(current);
+    }
+    if (current.backgroundModePreferred) {
+      await _prefs.setBool(_keyForcedBackgroundDefaultOn, true);
+      return ProtocolCommitConfirmed(current);
+    }
+    final forced = current.copyWith(
+      revision: current.revision + 1,
+      backgroundModePreferred: true,
+    );
+    final persisted = await _persist(forced);
+    if (persisted is ProtocolCommitConfirmed) {
+      await _prefs.setBool(_keyForcedBackgroundDefaultOn, true);
+    }
+    return persisted;
   }
 
   Future<ProtocolCommitResult> _mutate(
@@ -458,7 +484,7 @@ class SingleEngineProtectionProtocolStore implements ProtectionProtocolStore {
       schemaVersion: schema,
       revision: _prefs.getInt(_keyRevision) ?? 0,
       backgroundModePreferred:
-          _prefs.getBool(_keyBackgroundModePreferred) ?? false,
+          _prefs.getBool(_keyBackgroundModePreferred) ?? true,
       protectionEnabled: _prefs.getBool(_keyProtectionEnabled) ?? false,
       backgroundRuntimeEnabled: false,
       explicitlyStopped: _prefs.getBool(_keyExplicitlyStopped) ??
@@ -533,11 +559,11 @@ class SingleEngineProtectionProtocolStore implements ProtectionProtocolStore {
     late final bool backgroundModePreferred;
     if (explicitlyStopped) {
       protectionEnabled = false;
-      backgroundModePreferred = false;
+      backgroundModePreferred = true;
     } else {
       protectionEnabled =
           snapshot.protectionEnabled || snapshot.backgroundProtectionEnabled;
-      backgroundModePreferred = snapshot.backgroundProtectionEnabled;
+      backgroundModePreferred = true;
     }
     return _clearedSessionTuple(
       schemaVersion: kProtectionProtocolSchemaVersion,

@@ -45,11 +45,11 @@ class ProtectionProtocolEngineTest {
                     "explicit Stop must dominate for $protection/$background/$explicitStop",
                     tuple.protectionEnabled,
                 )
-                assertFalse(tuple.backgroundModePreferred)
+                assertTrue(tuple.backgroundModePreferred)
                 assertTrue(tuple.explicitlyStopped)
             } else {
                 assertEquals(protection || background, tuple.protectionEnabled)
-                assertEquals(background, tuple.backgroundModePreferred)
+                assertTrue(tuple.backgroundModePreferred)
                 assertFalse(tuple.explicitlyStopped)
             }
         }
@@ -831,6 +831,15 @@ private class InMemoryProtectionProtocolPersistence : ProtectionProtocolPersiste
         map[AndroidProtectionProtocolPersistence.KEY_LEGACY_BACKGROUND_EXPLICITLY_STOPPED] =
             tuple.explicitlyStopped
         return commitSucceeds
+    }
+
+    override fun hasForcedBackgroundDefaultOn(): Boolean =
+        map[AndroidProtectionProtocolPersistence.KEY_FORCED_BACKGROUND_DEFAULT_ON] as? Boolean
+            ?: false
+
+    override fun markForcedBackgroundDefaultOn(): Boolean {
+        map[AndroidProtectionProtocolPersistence.KEY_FORCED_BACKGROUND_DEFAULT_ON] = true
+        return true
     }
 
     /** Simulate a corrupted in-memory prefs map after a failed commit. */
