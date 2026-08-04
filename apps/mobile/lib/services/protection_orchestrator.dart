@@ -958,15 +958,11 @@ class ProtectionOrchestrator
   }
 
   Future<void> _effectStopBody(String opId) async {
-    // Persistence and physical shutdown in parallel.
+    // Always clear local scan UI/mechanics — background ownership mirrors
+    // protectionRequested:true into ScanController, and skipping pause leaves
+    // the main screen stuck on Protecting after a successful protocol Stop.
+    final pauseFuture = _pauseForeground();
     final stopPersist = _store.commitExplicitStop();
-    final pauseFuture = (state.foregroundMayBeActive ||
-            state.confirmedOwner == ScannerOwner.foreground ||
-            _foregroundLease != null)
-        ? _pauseForeground()
-        : Future<ForegroundPauseResult>.value(
-            const ForegroundAlreadyInactive(),
-          );
     final stopService = (state.backgroundMayBeActive ||
             state.confirmedOwner == ScannerOwner.background ||
             _claim.isHeld)
@@ -1160,7 +1156,9 @@ class ProtectionOrchestrator
 
     if (!snapshot.isOwnershipCapable) {
       // Diagnostic / legacy: may mirror UI but never establish ownership.
-      if (snapshot.serviceRunning) {
+      final stopped = state.lastConfirmedTuple?.explicitlyStopped == true ||
+          state.lastConfirmedTuple?.protectionEnabled == false;
+      if (snapshot.serviceRunning && !stopped) {
         _applyMirroredScanState(
           snapshot.toScanState(protectionRequested: true),
         );
@@ -1218,9 +1216,13 @@ class ProtectionOrchestrator
     }
 
     if (snapshot.serviceRunning) {
-      _applyMirroredScanState(
-        snapshot.toScanState(protectionRequested: true),
-      );
+      final stopped = state.lastConfirmedTuple?.explicitlyStopped == true ||
+          state.lastConfirmedTuple?.protectionEnabled == false;
+      if (!stopped) {
+        _applyMirroredScanState(
+          snapshot.toScanState(protectionRequested: true),
+        );
+      }
     }
   }
 

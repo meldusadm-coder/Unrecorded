@@ -431,7 +431,22 @@ class ScanController extends StateNotifier<ScanState> {
 
   /// Mechanics-only pause. Does not clear durable protection intent.
   Future<ForegroundPauseResult> pauseProtection() async {
+    // Always clear local protection UI flags — background ownership can leave
+    // mirrored scanning state that must not survive an orchestrator Stop.
     if (state.status == ScanStatus.paused || state.status == ScanStatus.idle) {
+      if (state.protectionRequested ||
+          state.possibleRiskSignals.isNotEmpty ||
+          state.otherNearbySignals.isNotEmpty) {
+        _emit(
+          state.copyWith(
+            protectionRequested: false,
+            status: ScanStatus.paused,
+            possibleRiskSignals: const [],
+            otherNearbySignals: const [],
+            clearStatusMessage: true,
+          ),
+        );
+      }
       return const ForegroundAlreadyInactive();
     }
 

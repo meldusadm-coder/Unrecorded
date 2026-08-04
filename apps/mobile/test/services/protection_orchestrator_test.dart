@@ -327,6 +327,79 @@ void main() {
     expect(orch.state.confirmedOwner, ScannerOwner.foreground);
   });
 
+  test('stop while background-owned always pauses foreground scan UI',
+      () async {
+    var pauseCalls = 0;
+    pauseFg = () async {
+      pauseCalls++;
+      return const ForegroundPaused();
+    };
+    build(supportBackground: true);
+    orch.dispose();
+    store = FakeProtectionProtocolStore();
+    claim = BackgroundOwnershipClaim();
+    owners = [];
+    final localFgs = FakeForegroundServiceController();
+    orch = ProtectionOrchestrator(
+      protocolStore: store,
+      backgroundClaim: claim,
+      startForeground: ({required lease}) async => const ForegroundStarted(),
+      pauseForeground: () => pauseFg(),
+      foregroundService: localFgs,
+      backgroundPreflight: _OkPreflight(),
+      applyMirroredScanState: (_) {},
+      onOwnerChanged: owners.add,
+      supportBackground: true,
+      readinessTimeout: const Duration(seconds: 3),
+      processId: 'test-process',
+    );
+
+    scheduleMicrotask(() async {
+      await Future<void>.delayed(const Duration(milliseconds: 40));
+      final tuple = (await store.getState()).tuple;
+      if (tuple?.activeTaskSessionId == null) return;
+      final leaseResult = await store.acquireTaskLease(
+        sessionId: tuple!.activeTaskSessionId!,
+        epoch: tuple.activeTaskEpoch!,
+        incarnationId: 'task-inc-stop',
+      );
+      if (leaseResult is! ScannerLeaseAcquired) return;
+      await store.simulateTaskReady(
+        sessionId: tuple.activeTaskSessionId!,
+        epoch: tuple.activeTaskEpoch!,
+        incarnationId: 'task-inc-stop',
+        leaseId: leaseResult.lease.leaseId,
+      );
+      localFgs.emitTaskData(
+        BackgroundProtectionSnapshot(
+          status: ScanStatus.scanning,
+          riskLevel: RiskLevel.low,
+          score: 0,
+          reasonLabels: const [],
+          possibleRiskCount: 0,
+          otherNearbyCount: 0,
+          isDemoMode: false,
+          serviceRunning: true,
+          sessionId: tuple.activeTaskSessionId,
+          sessionEpoch: tuple.activeTaskEpoch,
+          engineIncarnationId: 'task-inc-stop',
+          scannerLeaseId: leaseResult.lease.leaseId,
+          messageSequence: 1,
+          scannerPhase: BackgroundScannerPhase.scanning,
+        ).toJson(),
+      );
+    });
+
+    final on = await orch.turnProtectionOn();
+    expect(on, isA<ProtectionCompleted>());
+    expect(orch.state.confirmedOwner, ScannerOwner.background);
+
+    final stop = await orch.stopAllProtection();
+    expect(stop, isA<ProtectionCompleted>());
+    expect(pauseCalls, greaterThan(0));
+    expect(orch.state.confirmedOwner, ScannerOwner.none);
+  });
+
   test('disposal completes pending Futures with disposed', () async {
     build(supportBackground: false);
     final gate = Completer<ForegroundStartResult>();
