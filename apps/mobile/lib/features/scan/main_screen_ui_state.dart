@@ -178,8 +178,14 @@ MainScreenUiState mapMainScreenUiState(MainScreenUiInputs inputs) {
     return issuePresentation;
   }
 
+  final intentOff = orch.lastConfirmedTuple != null &&
+      (orch.lastConfirmedTuple!.explicitlyStopped ||
+          !orch.lastConfirmedTuple!.protectionEnabled);
+  final scanImpliesOn =
+      !intentOff && scan.protectionActive && scan.protectionRequested;
+
   if (orch.confirmedOwner != ScannerOwner.none ||
-      (scan.protectionActive && scan.protectionRequested) ||
+      scanImpliesOn ||
       orch.foregroundMechanics == ForegroundMechanics.active ||
       orch.backgroundMechanics == BackgroundServiceMechanics.ready) {
     return _protectingState(

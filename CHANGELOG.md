@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.9.2+18
+
+### Fixed
+- Turning protection off while background protection owns scanning now clears
+  local scan UI state, so the home screen leaves Protecting and Stop no longer
+  appears stuck after a successful protocol stop.
+
+
 ## 0.9.1+17
 
 ### Added
