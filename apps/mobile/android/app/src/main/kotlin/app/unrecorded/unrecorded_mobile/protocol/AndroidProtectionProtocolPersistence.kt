@@ -9,6 +9,8 @@ interface ProtectionProtocolPersistence {
     fun readLegacySnapshot(): LegacySnapshot
     fun readTuple(): ProtectionProtocolTuple?
     fun writeFullTuple(tuple: ProtectionProtocolTuple): Boolean
+    fun hasForcedBackgroundDefaultOn(): Boolean
+    fun markForcedBackgroundDefaultOn(): Boolean
 }
 
 /**
@@ -48,7 +50,7 @@ class AndroidProtectionProtocolPersistence(
         return ProtectionProtocolTuple(
             schemaVersion = schemaVersion,
             revision = prefs.getLong(KEY_REVISION, 0L),
-            backgroundModePreferred = prefs.getBoolean(KEY_BACKGROUND_MODE_PREFERRED, false),
+            backgroundModePreferred = prefs.getBoolean(KEY_BACKGROUND_MODE_PREFERRED, true),
             protectionEnabled = prefs.getBoolean(KEY_PROTECTION_ENABLED, false),
             backgroundRuntimeEnabled = prefs.getBoolean(KEY_BACKGROUND_RUNTIME_ENABLED, false),
             explicitlyStopped = prefs.getBoolean(KEY_EXPLICITLY_STOPPED, false),
@@ -91,6 +93,13 @@ class AndroidProtectionProtocolPersistence(
         return editor.commit()
     }
 
+    override fun hasForcedBackgroundDefaultOn(): Boolean =
+        prefs.getBoolean(KEY_FORCED_BACKGROUND_DEFAULT_ON, false)
+
+    override fun markForcedBackgroundDefaultOn(): Boolean {
+        return prefs.edit().putBoolean(KEY_FORCED_BACKGROUND_DEFAULT_ON, true).commit()
+    }
+
     private fun optionalLong(key: String): Long? {
         if (!prefs.contains(key)) return null
         return prefs.getLong(key, 0L)
@@ -118,6 +127,7 @@ class AndroidProtectionProtocolPersistence(
         const val KEY_SCHEMA_VERSION = "flutter.protection_protocol_schema_version"
         const val KEY_REVISION = "flutter.protection_protocol_revision"
         const val KEY_BACKGROUND_MODE_PREFERRED = "flutter.background_mode_preferred"
+        const val KEY_FORCED_BACKGROUND_DEFAULT_ON = "flutter.bg_default_on_v091"
         const val KEY_PROTECTION_ENABLED = "flutter.protection_enabled"
         const val KEY_BACKGROUND_RUNTIME_ENABLED = "flutter.background_runtime_enabled"
         const val KEY_EXPLICITLY_STOPPED = "flutter.explicitly_stopped"

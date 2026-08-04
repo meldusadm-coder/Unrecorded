@@ -27,7 +27,7 @@ void main() {
       expect(tuple.schemaVersion, kProtectionProtocolSchemaVersion);
       expect(tuple.revision, 1);
       expect(tuple.protectionEnabled, isFalse);
-      expect(tuple.backgroundModePreferred, isFalse);
+      expect(tuple.backgroundModePreferred, isTrue);
       expect(tuple.backgroundRuntimeEnabled, isFalse);
       expect(tuple.explicitlyStopped, isFalse);
       expect(tuple.activeTaskSessionId, isNull);
@@ -65,7 +65,7 @@ void main() {
       final result = await store.ensureReady();
       final tuple = (result as ProtocolCommitConfirmed).tuple;
       expect(tuple.protectionEnabled, isFalse);
-      expect(tuple.backgroundModePreferred, isFalse);
+      expect(tuple.backgroundModePreferred, isTrue);
       expect(tuple.explicitlyStopped, isTrue);
     });
 
@@ -170,10 +170,11 @@ void main() {
 
       final ok = await store.setBackgroundModePreferred(
         expectedRevision: 1,
-        preferred: true,
+        preferred: false,
       );
       expect(ok, isA<ProtocolCommitConfirmed>());
       expect((ok as ProtocolCommitConfirmed).tuple.revision, 2);
+      expect(ok.tuple.backgroundModePreferred, isFalse);
     });
 
     test('beginForegroundIntent rejects stale expectedRevision', () async {

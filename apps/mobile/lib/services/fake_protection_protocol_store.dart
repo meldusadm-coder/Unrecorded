@@ -74,7 +74,7 @@ class FakeProtectionProtocolStore implements ProtectionProtocolStore {
     final migrated = const ProtectionProtocolTuple(
       schemaVersion: kProtectionProtocolSchemaVersion,
       revision: 1,
-      backgroundModePreferred: false,
+      backgroundModePreferred: true,
       protectionEnabled: false,
       backgroundRuntimeEnabled: false,
       explicitlyStopped: false,

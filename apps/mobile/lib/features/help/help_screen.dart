@@ -96,12 +96,14 @@ class HelpScreen extends ConsumerWidget {
               const UnrecordedDisclosureAccordion(
                 title: 'Background protection and notification Stop',
                 body:
-                    'Background protection keeps checking nearby signals with '
-                    'a persistent notification while Android allows it. '
-                    'Notification Stop turns protection off and keeps your '
-                    'preferred background mode for next time. Android or '
-                    'battery settings may still interrupt background work — '
-                    'uninterrupted operation is not guaranteed.',
+                    'Background protection is on by default and keeps checking '
+                    'nearby signals with a persistent notification while Android '
+                    'allows it. You can turn it off in Settings — then leave the '
+                    'app open for the most reliable checks. Notification Stop '
+                    'turns protection off and keeps your preferred background '
+                    'mode for next time. Android or battery settings may still '
+                    'interrupt background work — uninterrupted operation is not '
+                    'guaranteed.',
               ),
             if (isAndroid)
               const UnrecordedDisclosureAccordion(

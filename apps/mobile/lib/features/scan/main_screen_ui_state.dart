@@ -298,7 +298,8 @@ MainScreenUiState _transitionState({
     primaryAction: stopping
         ? MainScreenPrimaryAction.turningOff
         : MainScreenPrimaryAction.turnOff,
-    primaryEnabled: !stopping,
+    // Stop must remain tappable even while finalising (re-admit / recover).
+    primaryEnabled: true,
     primaryLabel: stopping ? 'Turning off…' : AppCopy.turnOffProtection,
     backgroundPreferred: preferred,
     backgroundToggleEnabled: false,
@@ -341,7 +342,7 @@ MainScreenUiState _possibleRiskState({
     activityLine: 'Possible recording risk noticed nearby',
     accent: accent,
     primaryAction: MainScreenPrimaryAction.turnOff,
-    primaryEnabled: !busy,
+    primaryEnabled: true,
     primaryLabel: AppCopy.turnOffProtection,
     backgroundPreferred: preferred,
     backgroundToggleEnabled: isAndroid && !busy,

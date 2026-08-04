@@ -37,7 +37,7 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
     expect(find.text(AppCopy.riskNotificationsTitle), findsOneWidget);
-    expect(find.text('Privacy & data'), findsWidgets);
+    expect(find.text('Privacy & data'), findsOneWidget);
 
     final alertsY = tester.getTopLeft(find.text('Alerts')).dy;
     final privacyY = tester.getTopLeft(find.text('Privacy & data').first).dy;

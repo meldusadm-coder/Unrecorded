@@ -34,11 +34,9 @@ class BackgroundProtectionToggle extends ConsumerWidget {
     final canToggle = enabled ?? !orch.isBusy;
     final theme = Theme.of(context);
     final statusLine = subtitle ??
-        _defaultSubtitle(
-          preferred: value,
-          owner: orch.confirmedOwner,
-          busy: orch.isBusy,
-        );
+        (value
+            ? AppCopy.backgroundProtectionOnSubtitle
+            : AppCopy.backgroundProtectionOffSubtitle);
 
     return SwitchListTile(
       contentPadding: EdgeInsets.zero,
@@ -54,6 +52,35 @@ class BackgroundProtectionToggle extends ConsumerWidget {
       onChanged: !canToggle
           ? null
           : (next) async {
+              if (!next) {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (dialogContext) {
+                    return AlertDialog(
+                      title: const Text(
+                        AppCopy.backgroundProtectionTurnOffDialogTitle,
+                      ),
+                      content: const Text(
+                        AppCopy.backgroundProtectionTurnOffDialogBody,
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () =>
+                              Navigator.of(dialogContext).pop(false),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () =>
+                              Navigator.of(dialogContext).pop(true),
+                          child: const Text('Turn off'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+                if (confirmed != true) return;
+              }
+
               final outcome = await ref
                   .read(protectionOrchestratorProvider.notifier)
                   .setBackgroundModePreferred(next);
@@ -75,16 +102,5 @@ class BackgroundProtectionToggle extends ConsumerWidget {
               }
             },
     );
-  }
-
-  static String _defaultSubtitle({
-    required bool preferred,
-    required ScannerOwner owner,
-    required bool busy,
-  }) {
-    if (busy) return 'Switching…';
-    if (owner == ScannerOwner.background) return 'Active in background';
-    if (preferred) return 'Preferred for next time';
-    return 'Preferred for next time';
   }
 }

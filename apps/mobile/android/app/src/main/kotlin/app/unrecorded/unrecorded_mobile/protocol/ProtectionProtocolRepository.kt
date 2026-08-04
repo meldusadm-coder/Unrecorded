@@ -409,7 +409,7 @@ class ProtectionProtocolRepository(
         }
 
         lastConfirmedTuple?.let {
-            return ProtocolCommitResult.Confirmed(it)
+            return forceBackgroundDefaultOnLocked(it)
         }
 
         if (persistence.hasSchemaMarker()) {
@@ -417,7 +417,7 @@ class ProtectionProtocolRepository(
             if (loaded != null) {
                 lastConfirmedTuple = loaded
                 privateAuthorityTuple = loaded
-                return ProtocolCommitResult.Confirmed(loaded)
+                return forceBackgroundDefaultOnLocked(loaded)
             }
         }
 
@@ -426,7 +426,33 @@ class ProtectionProtocolRepository(
         }
         val migrated = ProtectionProtocolEngine.migrateFromLegacy(legacy)
         privateAuthorityTuple = migrated
-        return persistIntendedLocked(migrated)
+        val persisted = persistIntendedLocked(migrated)
+        if (persisted is ProtocolCommitResult.Confirmed) {
+            persistence.markForcedBackgroundDefaultOn()
+        }
+        return persisted
+    }
+
+    private fun forceBackgroundDefaultOnLocked(
+        current: ProtectionProtocolTuple,
+    ): ProtocolCommitResult {
+        if (persistence.hasForcedBackgroundDefaultOn()) {
+            return ProtocolCommitResult.Confirmed(current)
+        }
+        if (current.backgroundModePreferred) {
+            persistence.markForcedBackgroundDefaultOn()
+            return ProtocolCommitResult.Confirmed(current)
+        }
+        val forced = current.copy(
+            revision = current.revision + 1,
+            backgroundModePreferred = true,
+        )
+        privateAuthorityTuple = forced
+        val persisted = persistIntendedLocked(forced)
+        if (persisted is ProtocolCommitResult.Confirmed) {
+            persistence.markForcedBackgroundDefaultOn()
+        }
+        return persisted
     }
 
     private fun persistIntendedLocked(intended: ProtectionProtocolTuple): ProtocolCommitResult {

@@ -86,7 +86,7 @@ void main() {
       expect(ui.suppressAds, isTrue);
     });
 
-    test('finalising stop disables primary and labels Turning off', () {
+    test('finalising stop keeps primary tappable and labels Turning off', () {
       final ui = mapMainScreenUiState(
         const MainScreenUiInputs(
           orchestrator: ProtectionOrchestratorState(
@@ -99,9 +99,32 @@ void main() {
         ),
       );
       expect(ui.primaryAction, MainScreenPrimaryAction.turningOff);
-      expect(ui.primaryEnabled, isFalse);
+      expect(ui.primaryEnabled, isTrue);
       expect(ui.primaryLabel, 'Turning off…');
       expect(ui.suppressAds, isTrue);
+    });
+
+    test('protecting always enables Turn off', () {
+      final ui = mapMainScreenUiState(
+        const MainScreenUiInputs(
+          orchestrator: ProtectionOrchestratorState(
+            confirmedOwner: ScannerOwner.foreground,
+            foregroundMechanics: ForegroundMechanics.active,
+            retainedCleanup: true,
+            activeOperationId: 'stale-op',
+          ),
+          scan: ScanState(
+            status: ScanStatus.scanning,
+            protectionRequested: true,
+          ),
+          isAndroid: true,
+        ),
+      );
+      // retainedCleanup alone without active transition still reaches protecting
+      // only when transition is idle — force idle-compatible busy flags via owner.
+      expect(ui.heroKind, MainScreenHeroKind.protecting);
+      expect(ui.primaryAction, MainScreenPrimaryAction.turnOff);
+      expect(ui.primaryEnabled, isTrue);
     });
 
     test('live possible-risk owns hero and suppresses ads', () {
