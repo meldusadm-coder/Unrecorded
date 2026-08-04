@@ -8,6 +8,7 @@ import '../../router.dart';
 import '../../services/scanner_provider.dart';
 import '../../utils/time_format.dart';
 import '../scan/signal_ui_model.dart';
+import '../scan/unrecorded_disclosure_sheet.dart';
 
 /// Live alert context: risk level, possible devices, and evidence from the session.
 class AlertDetailsScreen extends ConsumerWidget {
@@ -48,9 +49,17 @@ class AlertDetailsScreen extends ConsumerWidget {
                         hasActiveAlert
                             ? AppCopy.possibleRiskBody
                             : 'This is the most recent risk level from your last '
-                                'protection scan. It is not proof of recording.',
+                                'protection scan.',
                         style:
                             theme.textTheme.bodyMedium?.copyWith(height: 1.4),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        AppCopy.notProofOfRecording,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontStyle: FontStyle.italic,
+                        ),
                       ),
                     ],
                   ),
@@ -84,7 +93,7 @@ class AlertDetailsScreen extends ConsumerWidget {
               ...devices.map((s) => _deviceTile(theme, s)),
             if (state.reasons.isNotEmpty) ...[
               const SizedBox(height: 20),
-              Text('Why this alert', style: theme.textTheme.titleMedium),
+              Text('Why this risk level?', style: theme.textTheme.titleMedium),
               const SizedBox(height: 8),
               ...state.reasons.map(
                 (r) => Padding(
@@ -106,18 +115,12 @@ class AlertDetailsScreen extends ConsumerWidget {
                 ),
               ),
             ],
-            const SizedBox(height: 12),
-            Text(
-              AppCopy.notProofOfRecording,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-            const SizedBox(height: 16),
-            const HelperText(
-              text: AppCopy.riskResultHelper,
-              expandableDetail: PrivacyDisclaimer.detectionDisclaimer,
+            const SizedBox(height: 8),
+            UnrecordedDisclosureSheet.trigger(
+              context: context,
+              label: 'Detection limitations',
+              sheetTitle: 'Detection limitations',
+              sheetBody: const Text(PrivacyDisclaimer.detectionDisclaimer),
             ),
             const Divider(height: 32),
             ListTile(
@@ -133,6 +136,16 @@ class AlertDetailsScreen extends ConsumerWidget {
               trailing: const UnrecordedListTrailing(),
               onTap: () => context.push(alertInfoRoute),
             ),
+            if (hasActiveAlert) ...[
+              const SizedBox(height: 16),
+              FilledButton(
+                onPressed: () {
+                  ref.read(scanControllerProvider.notifier).dismissRiskAlert();
+                  context.pop();
+                },
+                child: const Text('Dismiss'),
+              ),
+            ],
           ],
         ),
       ),
@@ -144,7 +157,7 @@ class AlertDetailsScreen extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 8),
       elevation: 0,
       color: theme.colorScheme.surfaceContainerHighest.withAlpha(80),
-      child: ListTile(
+      child: ExpansionTile(
         leading: const UnrecordedIcon(
           asset: UnrecordedIconAsset.glasses,
           size: 24,
@@ -154,24 +167,33 @@ class AlertDetailsScreen extends ConsumerWidget {
           signal.title,
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(signal.categoryLabel, style: theme.textTheme.bodySmall),
-            Text(signal.confidenceLabel, style: theme.textTheme.bodySmall),
-            Text(signal.lastSeenLabel, style: theme.textTheme.bodySmall),
-            Text(signal.signalStrengthLabel, style: theme.textTheme.bodySmall),
-            if (signal.evidenceLabels.isNotEmpty) ...[
-              const SizedBox(height: 6),
-              ...signal.evidenceLabels.map(
-                (e) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Text('• $e', style: theme.textTheme.bodySmall),
+        subtitle: Text(signal.categoryLabel, style: theme.textTheme.bodySmall),
+        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(signal.confidenceLabel, style: theme.textTheme.bodySmall),
+                Text(signal.lastSeenLabel, style: theme.textTheme.bodySmall),
+                Text(
+                  signal.signalStrengthLabel,
+                  style: theme.textTheme.bodySmall,
                 ),
-              ),
-            ],
-          ],
-        ),
+                if (signal.evidenceLabels.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  ...signal.evidenceLabels.map(
+                    (e) => Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Text('• $e', style: theme.textTheme.bodySmall),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

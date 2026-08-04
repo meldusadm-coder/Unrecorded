@@ -81,7 +81,11 @@ class ScanLifecycleCoordinator {
     };
   }
 
-  Future<ScanPreflightFailure?> startProtection() async {
+  /// Starts protection mechanics. Returns typed preflight/start outcome.
+  ///
+  /// Does not persist intent — [ProtectionOrchestrator] owns preferences.
+  Future<({ScanPreflightFailure? preflight, RadioStartResult? start})>
+      startProtection() async {
     _protectionRequested = true;
     _protectionStartedAt = DateTime.now();
     _consecutiveElevatedScans = 0;
@@ -90,20 +94,23 @@ class ScanLifecycleCoordinator {
     if (scannerMode == ScannerMode.auto && _runtime.isAndroid) {
       final preflight = await _runtime.ensureAndroidReady();
       if (!preflight.isOk) {
-        return preflight.failure;
+        return (preflight: preflight.failure, start: null);
       }
     }
 
-    await _manager.start();
-    final now = DateTime.now();
-    _emitFromPipeline(now, statusOverride: ScanStatus.scanning);
-    return null;
+    final start = await _manager.start();
+    if (start is RadioStarted) {
+      final now = DateTime.now();
+      _emitFromPipeline(now, statusOverride: ScanStatus.scanning);
+    }
+    return (preflight: null, start: start);
   }
 
-  Future<void> pauseProtection() async {
+  /// Pauses protection mechanics. Returns typed stop outcome.
+  Future<RadioStopResult?> pauseProtection() async {
     _protectionRequested = false;
     _consecutiveElevatedScans = 0;
-    await _manager.stop();
+    final stop = await _manager.stop();
     pipeline.reset();
     onStateChanged?.call(
       const ScanState(
@@ -122,6 +129,7 @@ class ScanLifecycleCoordinator {
         ),
       ),
     );
+    return stop;
   }
 
   void _onBatch(List<RadioScanResult> results) {

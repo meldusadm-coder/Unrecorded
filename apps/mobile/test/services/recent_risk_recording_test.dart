@@ -10,6 +10,7 @@ import 'package:unrecorded_mobile/services/recent_risk_prefs.dart';
 import 'package:unrecorded_mobile/services/risk_notification_service.dart';
 import 'package:unrecorded_mobile/services/scan_lifecycle_coordinator.dart';
 import 'package:unrecorded_mobile/services/scan_runtime.dart';
+import 'package:unrecorded_mobile/services/protection_state.dart';
 import 'package:unrecorded_mobile/services/scanner_provider.dart';
 import 'package:unrecorded_mobile/services/signal_ui_mapper.dart';
 import 'package:unrecorded_radio/unrecorded_radio.dart';
@@ -56,7 +57,7 @@ ScanController _controllerWithRecentRiskRecording({
     coordinator: coordinator,
     pipeline: pipeline,
     mapper: const SignalUiMapper(),
-    isBackgroundOwnsScanning: () => false,
+    backgroundClaim: BackgroundOwnershipClaim(),
     onStateChanged: (previous, state) {
       if (previous.status != ScanStatus.possibleRiskDetected &&
           state.status == ScanStatus.possibleRiskDetected) {
@@ -95,7 +96,7 @@ void main() {
       recentRisk: recentRisk,
     );
 
-    await controller.startProtection(persist: false);
+    await controller.startProtection();
     controller.simulateHighRiskAlert();
     await Future<void>.delayed(Duration.zero);
 
@@ -115,7 +116,7 @@ void main() {
       notifications: _DenyNotificationsService(),
     );
 
-    await controller.startProtection(persist: false);
+    await controller.startProtection();
     controller.simulateHighRiskAlert();
     await Future<void>.delayed(Duration.zero);
 
@@ -156,7 +157,7 @@ void main() {
       recentRisk: RecentRiskController(now: () => fixedNow),
     );
 
-    await controller.startProtection(persist: false);
+    await controller.startProtection();
     controller.simulateHighRiskAlert();
 
     expect(controller.state.status, ScanStatus.possibleRiskDetected);

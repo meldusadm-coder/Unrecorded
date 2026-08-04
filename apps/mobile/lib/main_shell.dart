@@ -3,10 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:unrecorded_ui/unrecorded_ui.dart';
 
-import 'features/scan/scan_state.dart';
+import 'features/scan/main_screen_ui_state.dart';
 import 'services/ads_service.dart';
 import 'services/entitlement_service.dart';
-import 'services/scanner_provider.dart';
 
 /// App shell with a single shared bottom ad slot.
 class MainShell extends ConsumerWidget {
@@ -24,13 +23,8 @@ class MainShell extends ConsumerWidget {
 
     if (location != '/') return true;
 
-    final state = ref.watch(scanControllerProvider);
-    final showAlert = state.status == ScanStatus.possibleRiskDetected &&
-        !state.alertDismissed;
-    if (showAlert) return false;
-    if (state.isBlocked) return false;
-    if (state.status == ScanStatus.error) return false;
-    return true;
+    final ui = ref.watch(mainScreenUiStateProvider);
+    return !ui.suppressAds;
   }
 
   @override

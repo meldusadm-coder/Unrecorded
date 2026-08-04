@@ -15,3 +15,8 @@ final riskNotificationsEnabledProvider = FutureProvider<bool>((ref) async {
   final prefs = await NotificationPrefs.load();
   return prefs.riskNotificationsEnabled;
 });
+
+/// Refresh OS notification status after resume or returning from settings.
+void refreshNotificationOsStatus(WidgetRef ref) {
+  ref.invalidate(notificationsOsEnabledProvider);
+}

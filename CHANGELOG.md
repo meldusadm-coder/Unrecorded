@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.9.0+16
+
+### Added
+- Glance-first main screen with a bold protection status hero, dominant Turn on/off
+  control, one compact notice row, and progressive disclosure for details (#92).
+- ProtectionOrchestrator as the sole owner of protection intent, with an Android
+  atomic protocol store (SharedPreferences transactions, engine incarnations, and
+  exclusive scanner lease) coordinating UI and background task engines.
+- Typed radio start/stop results so scanning lifecycle fails closed when stop is
+  uncertain.
+
+### Changed
+- Background task startup and notification Stop now go through the protocol store
+  so Stop cannot race an auto-restart claim.
+- Supporting screens (settings, help, alerts) use shorter glanceable copy while
+  keeping privacy disclaimers accurate (possible risk, never proof of recording).
+
+### Fixed
+- Protection intent no longer flips briefly to "off" during background handoff or
+  resume when the user still intends protection on.
+
+
 ## 0.8.2+15
 
 ### Changed

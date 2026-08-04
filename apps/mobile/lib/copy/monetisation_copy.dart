@@ -8,8 +8,8 @@ class MonetisationCopy {
   static const String removeAdsTitle = 'Remove ads';
 
   static const String removeAdsBody =
-      'Unrecorded is free to use. If you find it useful, you can choose '
-      'what to pay to remove the small ads and support ongoing development.';
+      'Unrecorded remains free. Payment removes ads and supports development. '
+      'Choose an amount from \u00a30.25\u2013\u00a320 (default \u00a32).';
 
   static const String removeAdsFreeNote =
       'Core scanning stays free. Payment only removes ads.';

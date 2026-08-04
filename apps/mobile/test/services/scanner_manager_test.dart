@@ -154,4 +154,64 @@ void main() {
       expect(manager.inScanWindow, isFalse);
     });
   });
+
+  test('uncertain stop halts cadence and reports onError', () {
+    fakeAsync((async) {
+      final scanner = ScriptedRadioScanner(
+        stopFailure: const RadioScannerException('native stop failed'),
+      );
+      final manager = ScannerManager(
+        scannerFactory: () => scanner,
+        cadence: const ScannerCadenceConfig(
+          scanWindow: Duration(milliseconds: 20),
+          restInterval: Duration(milliseconds: 30),
+        ),
+      );
+
+      final errors = <Object>[];
+      manager.onError = errors.add;
+
+      manager.start();
+      async.flushMicrotasks();
+      expect(manager.isRunning, isTrue);
+
+      manager.stop();
+      async.flushMicrotasks();
+
+      expect(manager.isRunning, isFalse);
+      expect(manager.hasUncertainActiveScanner, isTrue);
+      expect(errors, hasLength(1));
+      expect(errors.first, isA<RadioScannerException>());
+
+      // Cadence must not resume on a possibly active radio.
+      async.elapse(const Duration(milliseconds: 100));
+      async.flushMicrotasks();
+      expect(manager.isRunning, isFalse);
+      expect(manager.inScanWindow, isFalse);
+    });
+  });
+
+  test('failed start does not report running', () {
+    fakeAsync((async) {
+      final manager = ScannerManager(
+        scannerFactory: () => ScriptedRadioScanner(
+          startFailure: const RadioScannerException('start failed'),
+        ),
+        cadence: const ScannerCadenceConfig(
+          scanWindow: Duration(milliseconds: 20),
+          restInterval: Duration(milliseconds: 30),
+        ),
+      );
+
+      final errors = <Object>[];
+      manager.onError = errors.add;
+
+      manager.start();
+      async.flushMicrotasks();
+
+      expect(manager.isRunning, isFalse);
+      expect(manager.inScanWindow, isFalse);
+      expect(errors, hasLength(1));
+    });
+  });
 }

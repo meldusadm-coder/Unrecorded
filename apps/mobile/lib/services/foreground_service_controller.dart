@@ -29,6 +29,12 @@ abstract class ForegroundServiceController {
 
   /// Stop the foreground service.
   Future<ServiceRequestResult> stop();
+
+  /// Ask the task isolate for a correlated status/readiness snapshot.
+  void sendStatusRequest({
+    required String sessionId,
+    required int epoch,
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -104,6 +110,18 @@ class _RealForegroundServiceController implements ForegroundServiceController {
   @override
   Future<ServiceRequestResult> stop() {
     return FlutterForegroundTask.stopService();
+  }
+
+  @override
+  void sendStatusRequest({
+    required String sessionId,
+    required int epoch,
+  }) {
+    FlutterForegroundTask.sendDataToTask({
+      'type': 'statusRequest',
+      'sessionId': sessionId,
+      'epoch': epoch,
+    });
   }
 }
 
