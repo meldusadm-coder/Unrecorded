@@ -32,6 +32,5 @@ class PrivacyDisclaimer {
       'Core detection does not depend on payment or tracking.';
 
   /// Short funding trigger line for Settings.
-  static const String fundingNoteShort =
-      'How Unrecorded is funded';
+  static const String fundingNoteShort = 'How Unrecorded is funded';
 }

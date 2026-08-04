@@ -66,7 +66,7 @@ class BackgroundProtectionToggle extends ConsumerWidget {
                           ? 'Could not save background preference.'
                           : AppCopy.backgroundProtectionServiceStartFailed,
                     ),
-                    action: SnackBarAction(
+                    action: const SnackBarAction(
                       label: 'Settings',
                       onPressed: openAppSettings,
                     ),

@@ -51,8 +51,9 @@ final protectionProtocolStoreProvider =
   }
 });
 
-final protectionOrchestratorProvider = StateNotifierProvider<
-    ProtectionOrchestrator, ProtectionOrchestratorState>((ref) {
+final protectionOrchestratorProvider =
+    StateNotifierProvider<ProtectionOrchestrator, ProtectionOrchestratorState>(
+        (ref) {
   final store = ref.watch(protectionProtocolStoreProvider);
   final claim = ref.watch(backgroundOwnershipClaimProvider);
   final orchestrator = ProtectionOrchestrator(
@@ -111,4 +112,3 @@ BackgroundProtectionState backgroundProtectionStateFromOrchestrator(
     lastFailureMessage: state.issue?.name,
   );
 }
-

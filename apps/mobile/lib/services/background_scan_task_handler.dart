@@ -501,9 +501,11 @@ class BackgroundScanTaskEngine {
     );
 
     _scannerPhase = switch (state.status) {
-      ScanStatus.resting || ScanStatus.confirmingRisk =>
+      ScanStatus.resting ||
+      ScanStatus.confirmingRisk =>
         BackgroundScannerPhase.resting,
-      ScanStatus.possibleRiskDetected || ScanStatus.scanning =>
+      ScanStatus.possibleRiskDetected ||
+      ScanStatus.scanning =>
         BackgroundScannerPhase.scanning,
       _ => _scannerPhase,
     };
@@ -602,7 +604,8 @@ class BackgroundScanTaskEngine {
         }(),
       ProtocolCommitPersistenceUncertain() =>
         StopTransactionOutcome.persistenceUncertain,
-      ProtocolCommitRejected() || ProtocolCommitStale() =>
+      ProtocolCommitRejected() ||
+      ProtocolCommitStale() =>
         StopTransactionOutcome.rejected,
       null => StopTransactionOutcome.persistenceUncertain,
     };
@@ -860,8 +863,8 @@ class BackgroundScanTaskEngine {
   }
 
   void _emitTerminalSnapshot() {
-    final reason =
-        _terminalReason ?? BackgroundProtectionStoppedReason.protocolUnavailable;
+    final reason = _terminalReason ??
+        BackgroundProtectionStoppedReason.protocolUnavailable;
 
     // Ownership-capable only when full identity is present.
     final canOwn = _hasOwnershipIdentity;

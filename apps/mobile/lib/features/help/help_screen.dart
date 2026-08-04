@@ -77,7 +77,7 @@ class HelpScreen extends ConsumerWidget {
                   'recording devices. It is a prompt to be more aware — not '
                   'proof that anyone is recording.',
             ),
-            UnrecordedDisclosureAccordion(
+            const UnrecordedDisclosureAccordion(
               title: AppCopy.recentRiskMissedAlertTitle,
               body: AppCopy.recentRiskMissedAlertBody,
             ),
@@ -95,7 +95,8 @@ class HelpScreen extends ConsumerWidget {
             if (isAndroid)
               const UnrecordedDisclosureAccordion(
                 title: 'Background protection and notification Stop',
-                body: 'Background protection keeps checking nearby signals with '
+                body:
+                    'Background protection keeps checking nearby signals with '
                     'a persistent notification while Android allows it. '
                     'Notification Stop turns protection off and keeps your '
                     'preferred background mode for next time. Android or '
@@ -103,12 +104,12 @@ class HelpScreen extends ConsumerWidget {
                     'uninterrupted operation is not guaranteed.',
               ),
             if (isAndroid)
-              UnrecordedDisclosureAccordion(
+              const UnrecordedDisclosureAccordion(
                 title: AppCopy.widgetHelpTitle,
                 body: '${AppCopy.widgetHelpBody}\n\n'
                     '${AppCopy.widgetHelpLimitations}',
               ),
-            UnrecordedDisclosureAccordion(
+            const UnrecordedDisclosureAccordion(
               title: AppCopy.notificationsHelpTitle,
               body: AppCopy.notificationsHelpBody,
             ),

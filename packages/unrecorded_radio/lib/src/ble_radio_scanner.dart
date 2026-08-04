@@ -150,7 +150,7 @@ class BleRadioScanner implements RadioScanner {
     return _serialized(() async {
       if (!_scanning && !_platformStarted) {
         await _closeControllerOnly();
-        return RadioAlreadyStopped();
+        return const RadioAlreadyStopped();
       }
 
       try {
@@ -170,7 +170,7 @@ class BleRadioScanner implements RadioScanner {
       _scanning = false;
       _platformStarted = false;
       _cancelRequested = false;
-      return RadioStopped();
+      return const RadioStopped();
     });
   }
 

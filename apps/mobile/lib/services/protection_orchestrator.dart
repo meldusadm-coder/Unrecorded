@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -14,7 +14,6 @@ import 'foreground_service_controller.dart';
 import 'protection_protocol_models.dart';
 import 'protection_protocol_store.dart';
 import 'protection_state.dart';
-import 'scanner_provider.dart';
 
 typedef ForegroundMechanicsStart = Future<ForegroundStartResult> Function({
   required ScannerLease lease,
@@ -305,7 +304,8 @@ class ProtectionOrchestrator
           issue: BackgroundProtectionIssue.protocolPersistenceFailed,
         ),
       );
-      _completeFailed(opId, BackgroundProtectionIssue.protocolPersistenceFailed);
+      _completeFailed(
+          opId, BackgroundProtectionIssue.protocolPersistenceFailed,);
       return;
     }
     if (ready is! ProtocolCommitConfirmed) {
@@ -313,7 +313,7 @@ class ProtectionOrchestrator
       return;
     }
 
-    var tuple = ready.tuple;
+    final tuple = ready.tuple;
     _publish(
       state.copyWith(
         lastConfirmedTuple: tuple,
@@ -325,12 +325,14 @@ class ProtectionOrchestrator
 
     if (tuple.backgroundModePreferred && _supportBackground) {
       _publish(
-        state.copyWith(transition: ProtectionTransitionPhase.enablingBackground),
+        state.copyWith(
+            transition: ProtectionTransitionPhase.enablingBackground,),
       );
       await _effectEnableBackground(opId, tuple);
     } else {
       _publish(
-        state.copyWith(transition: ProtectionTransitionPhase.enablingForeground),
+        state.copyWith(
+            transition: ProtectionTransitionPhase.enablingForeground,),
       );
       await _effectEnableForeground(opId, tuple);
     }
@@ -389,7 +391,8 @@ class ProtectionOrchestrator
       state.copyWith(
         foregroundMechanics: ForegroundMechanics.starting,
         foregroundMayBeActive: true,
-        lastLeaseView: ScannerLeaseView(lease: lease, observedAt: DateTime.now()),
+        lastLeaseView:
+            ScannerLeaseView(lease: lease, observedAt: DateTime.now()),
       ),
     );
 
@@ -583,8 +586,8 @@ class ProtectionOrchestrator
         return;
       }
       await _store.markNativeStartResolved(
-        expectedRevision: (await _store.getState()).tuple?.revision ??
-            working.revision,
+        expectedRevision:
+            (await _store.getState()).tuple?.revision ?? working.revision,
         attemptId: attemptId,
       );
     }());
@@ -630,10 +633,9 @@ class ProtectionOrchestrator
       return;
     }
 
-    var tuple = ready.tuple;
+    final tuple = ready.tuple;
     // Preference-only while Off: no mechanics.
-    if (tuple.protectionEnabled &&
-        state.confirmedOwner != ScannerOwner.none) {
+    if (tuple.protectionEnabled && state.confirmedOwner != ScannerOwner.none) {
       // Switching mode while protecting is a handoff â€” stub to failed for now
       // when background unsupported; otherwise route through switch effects.
       if (preferred && !_supportBackground) {
@@ -698,7 +700,8 @@ class ProtectionOrchestrator
         ),
       );
       _active = null;
-      _completeFailed(opId, BackgroundProtectionIssue.protocolPersistenceFailed);
+      _completeFailed(
+          opId, BackgroundProtectionIssue.protocolPersistenceFailed,);
       return;
     }
     if (ready is! ProtocolCommitConfirmed) {
@@ -780,7 +783,8 @@ class ProtectionOrchestrator
         if (!ok) {
           _publish(
             state.copyWith(
-              issue: BackgroundProtectionIssue.androidStoppedBackgroundProtection,
+              issue:
+                  BackgroundProtectionIssue.androidStoppedBackgroundProtection,
               confirmedOwner: ScannerOwner.none,
               transition: ProtectionTransitionPhase.idle,
               activeOperationId: null,
@@ -844,7 +848,8 @@ class ProtectionOrchestrator
             state.confirmedOwner == ScannerOwner.foreground ||
             _foregroundLease != null)
         ? _pauseForeground()
-        : Future<ForegroundPauseResult>.value(const ForegroundAlreadyInactive());
+        : Future<ForegroundPauseResult>.value(
+            const ForegroundAlreadyInactive(),);
     final stopService = (state.backgroundMayBeActive ||
             state.confirmedOwner == ScannerOwner.background ||
             _claim.isHeld)
@@ -878,7 +883,8 @@ class ProtectionOrchestrator
         ),
       );
       _active = null;
-      _completeFailed(opId, BackgroundProtectionIssue.protocolPersistenceFailed);
+      _completeFailed(
+          opId, BackgroundProtectionIssue.protocolPersistenceFailed,);
       return;
     }
 
@@ -929,6 +935,16 @@ class ProtectionOrchestrator
     _pendingSessionId = null;
     _pendingEpoch = null;
     _pendingAttemptId = null;
+    final lateNativeStart = _pendingNativeStart;
+    _pendingNativeStart = null;
+    if (lateNativeStart != null) {
+      unawaited(() async {
+        final result = await lateNativeStart;
+        if (result is ServiceRequestSuccess) {
+          unawaited(_foregroundService.stop());
+        }
+      }());
+    }
     _setOwner(ScannerOwner.none);
 
     _publish(
@@ -942,7 +958,8 @@ class ProtectionOrchestrator
         activeOperationId: null,
         retainedCleanup: false,
         issue: null,
-        lastLeaseView: ScannerLeaseView(lease: null, observedAt: DateTime.now()),
+        lastLeaseView:
+            ScannerLeaseView(lease: null, observedAt: DateTime.now()),
       ),
     );
     _active = null;
@@ -1034,6 +1051,11 @@ class ProtectionOrchestrator
 
     if (snapshot.sessionId != _pendingSessionId &&
         snapshot.sessionId != state.lastConfirmedTuple?.activeTaskSessionId) {
+      return;
+    }
+    if (snapshot.sessionEpoch != null &&
+        _pendingEpoch != null &&
+        snapshot.sessionEpoch != _pendingEpoch) {
       return;
     }
 
@@ -1218,7 +1240,8 @@ class ProtectionOrchestrator
       return null;
     }
     if (result is ProtocolCommitPersistenceUncertain) {
-      _completeFailed(opId, BackgroundProtectionIssue.protocolPersistenceFailed);
+      _completeFailed(
+          opId, BackgroundProtectionIssue.protocolPersistenceFailed,);
       return null;
     }
     _completeFailed(opId, BackgroundProtectionIssue.protocolUnavailable);
@@ -1309,8 +1332,7 @@ class ProtectionOrchestrator
     final wasForeground = state.confirmedOwner == ScannerOwner.foreground ||
         state.foregroundMayBeActive;
     final pendingAttempt = _pendingAttemptId;
-    final leaveBackground =
-        state.confirmedOwner == ScannerOwner.background;
+    final leaveBackground = state.confirmedOwner == ScannerOwner.background;
     _active = null;
 
     unawaited(_protocolSub?.cancel());
@@ -1352,4 +1374,3 @@ class _ActiveOperation {
   final _CommandKind kind;
   final Completer<bool>? readyCompleter;
 }
-

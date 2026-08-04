@@ -74,7 +74,8 @@ void main() {
             transition: ProtectionTransitionPhase.enablingForeground,
             activeOperationId: 'op-1',
           ),
-          scan: ScanState(status: ScanStatus.starting, protectionRequested: true),
+          scan:
+              ScanState(status: ScanStatus.starting, protectionRequested: true),
           isAndroid: true,
         ),
       );
@@ -92,7 +93,8 @@ void main() {
             transition: ProtectionTransitionPhase.finalisingStop,
             activeOperationId: 'op-stop',
           ),
-          scan: ScanState(status: ScanStatus.scanning, protectionRequested: true),
+          scan:
+              ScanState(status: ScanStatus.scanning, protectionRequested: true),
           isAndroid: true,
         ),
       );

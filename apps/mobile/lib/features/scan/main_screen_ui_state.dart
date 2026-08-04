@@ -223,7 +223,8 @@ bool _effectivelyOff(ProtectionOrchestratorState orch) {
       !orch.backgroundMayBeActive &&
       orch.foregroundMechanics == ForegroundMechanics.inactive &&
       (orch.backgroundMechanics == BackgroundServiceMechanics.stopped ||
-          orch.backgroundMechanics == BackgroundServiceMechanics.unresponsive) &&
+          orch.backgroundMechanics ==
+              BackgroundServiceMechanics.unresponsive) &&
       (orch.lastConfirmedTuple == null ||
           !orch.lastConfirmedTuple!.protectionEnabled);
 }
@@ -261,28 +262,23 @@ MainScreenUiState _transitionState({
         'Turning on protection',
         'Starting nearby check…',
       ),
-    ProtectionTransitionPhase.switchingToBackground =>
-      (
+    ProtectionTransitionPhase.switchingToBackground => (
         'Switching to background',
         'Moving nearby checks to the background…',
       ),
-    ProtectionTransitionPhase.switchingToForeground =>
-      (
+    ProtectionTransitionPhase.switchingToForeground => (
         'Switching to foreground',
         'Moving nearby checks into the open app…',
       ),
-    ProtectionTransitionPhase.reconciling =>
-      (
+    ProtectionTransitionPhase.reconciling => (
         'Updating protection',
         'Checking protection status…',
       ),
-    ProtectionTransitionPhase.rollingBack =>
-      (
+    ProtectionTransitionPhase.rollingBack => (
         'Adjusting protection',
         'Finishing a previous change…',
       ),
-    ProtectionTransitionPhase.finalisingStop =>
-      (
+    ProtectionTransitionPhase.finalisingStop => (
         'Turning off protection',
         'Stopping nearby-device checks…',
       ),
@@ -396,8 +392,8 @@ MainScreenUiState? _issuePresentation(
     secondaryAction: bits.secondaryAction,
     secondaryLabel: bits.secondaryLabel,
     backgroundPreferred: preferred,
-    backgroundToggleEnabled:
-        inputs.isAndroid && bits.primaryAction != MainScreenPrimaryAction.turningOff,
+    backgroundToggleEnabled: inputs.isAndroid &&
+        bits.primaryAction != MainScreenPrimaryAction.turningOff,
     backgroundToggleStatus: _toggleStatus(
       isAndroid: inputs.isAndroid,
       preferred: preferred,

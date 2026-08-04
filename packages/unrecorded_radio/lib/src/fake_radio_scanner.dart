@@ -101,7 +101,7 @@ class FakeRadioScanner implements RadioScanner {
     _timer = null;
     return _serialized(() async {
       if (!_scanning) {
-        return RadioAlreadyStopped();
+        return const RadioAlreadyStopped();
       }
 
       final failure = stopFailure;
@@ -121,7 +121,7 @@ class FakeRadioScanner implements RadioScanner {
       if (controller != null && !controller.isClosed) {
         await controller.close();
       }
-      return RadioStopped();
+      return const RadioStopped();
     });
   }
 
@@ -138,9 +138,7 @@ class FakeRadioScanner implements RadioScanner {
       _controller!.add(_generateBatch());
     });
 
-    if (!_cancelRequested &&
-        _controller != null &&
-        !_controller!.isClosed) {
+    if (!_cancelRequested && _controller != null && !_controller!.isClosed) {
       _controller!.add(_generateBatch());
     }
   }

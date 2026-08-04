@@ -1,4 +1,3 @@
-import 'radio_scan_result.dart';
 import 'radio_start_result.dart';
 import 'radio_stop_result.dart';
 

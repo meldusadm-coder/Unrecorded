@@ -40,8 +40,10 @@ void main() {
   late List<ScannerOwner> owners;
   late ProtectionOrchestrator orch;
 
-  Future<ForegroundStartResult> Function({required ScannerLease lease}) startFg = ({required lease}) async => const ForegroundStarted();
-  Future<ForegroundPauseResult> Function() pauseFg = () async => const ForegroundPaused();
+  Future<ForegroundStartResult> Function({required ScannerLease lease})
+      startFg = ({required lease}) async => const ForegroundStarted();
+  Future<ForegroundPauseResult> Function() pauseFg =
+      () async => const ForegroundPaused();
 
   ProtectionOrchestrator build({
     bool supportBackground = true,
@@ -243,5 +245,3 @@ void main() {
     gate.complete(const ForegroundStarted());
   });
 }
-
-

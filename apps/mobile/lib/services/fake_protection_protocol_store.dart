@@ -71,7 +71,7 @@ class FakeProtectionProtocolStore implements ProtectionProtocolStore {
       _ready = true;
       return ProtocolCommitConfirmed(_lastConfirmed!);
     }
-    final migrated = ProtectionProtocolTuple(
+    final migrated = const ProtectionProtocolTuple(
       schemaVersion: kProtectionProtocolSchemaVersion,
       revision: 1,
       backgroundModePreferred: false,
@@ -591,7 +591,8 @@ class FakeProtectionProtocolStore implements ProtectionProtocolStore {
     }
   }
 
-  Future<ProtocolCommitResult> _persist(ProtectionProtocolTuple intended) async {
+  Future<ProtocolCommitResult> _persist(
+      ProtectionProtocolTuple intended,) async {
     if (failNextCommit) {
       failNextCommit = false;
       _persistenceUncertain = true;

@@ -125,7 +125,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('• All scanning happens on your device. Nothing is uploaded.'),
+          const Text(
+              '• All scanning happens on your device. Nothing is uploaded.',),
           const SizedBox(height: 8),
           const Text(
             '• Unrecorded works without sign-up, login, or any account.',
@@ -285,7 +286,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                 color: theme.colorScheme.primary,
               ),
               title: const Text('Privacy & data'),
-              subtitle: const Text('Local-first scanning, no account, no cloud'),
+              subtitle:
+                  const Text('Local-first scanning, no account, no cloud'),
               trailing: const UnrecordedListTrailing(),
               onTap: _openPrivacySheet,
             ),

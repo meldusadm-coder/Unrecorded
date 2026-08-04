@@ -39,7 +39,10 @@ class ProtectionHero extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _HeroIcon(kind: state.heroKind, accent: accent, risk: state.riskLevel),
+                  _HeroIcon(
+                      kind: state.heroKind,
+                      accent: accent,
+                      risk: state.riskLevel,),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(

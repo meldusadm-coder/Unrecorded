@@ -134,7 +134,7 @@ class ScriptedRadioScanner implements RadioScanner {
     releaseStart();
     return _serialized(() async {
       if (!_scanning) {
-        return RadioAlreadyStopped();
+        return const RadioAlreadyStopped();
       }
 
       final failure = stopFailure;
@@ -152,7 +152,7 @@ class ScriptedRadioScanner implements RadioScanner {
       if (controller != null && !controller.isClosed) {
         await controller.close();
       }
-      return RadioStopped();
+      return const RadioStopped();
     });
   }
 }

@@ -77,15 +77,15 @@ class SingleEngineProtectionProtocolStore implements ProtectionProtocolStore {
     _stopFenceRaised = true;
     final ready = await _ensureReady();
     final current = switch (ready) {
-      ProtocolCommitConfirmed(:final tuple) => tuple,
-      ProtocolCommitPersistenceUncertain(
-        :final intendedTuple,
-        :final lastConfirmedTuple
-      ) =>
-        intendedTuple ?? lastConfirmedTuple,
-      ProtocolCommitStale(:final current) => current,
-      ProtocolCommitRejected(:final current) => current,
-    } ??
+          ProtocolCommitConfirmed(:final tuple) => tuple,
+          ProtocolCommitPersistenceUncertain(
+            :final intendedTuple,
+            :final lastConfirmedTuple
+          ) =>
+            intendedTuple ?? lastConfirmedTuple,
+          ProtocolCommitStale(:final current) => current,
+          ProtocolCommitRejected(:final current) => current,
+        } ??
         _privateAuthority ??
         _lastConfirmed;
 
@@ -407,7 +407,8 @@ class SingleEngineProtectionProtocolStore implements ProtectionProtocolStore {
     }
   }
 
-  Future<ProtocolCommitResult> _persist(ProtectionProtocolTuple intended) async {
+  Future<ProtocolCommitResult> _persist(
+      ProtectionProtocolTuple intended,) async {
     _privateAuthority = intended;
     final ok = _commitFn?.call(intended) ?? await _writePrefs(intended);
     if (ok) {

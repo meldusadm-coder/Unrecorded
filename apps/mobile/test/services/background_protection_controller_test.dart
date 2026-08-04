@@ -1,7 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:unrecorded_mobile/services/background_protection_snapshot.dart';
-import 'package:unrecorded_mobile/services/background_protection_state.dart';
 import 'package:unrecorded_mobile/services/protection_orchestrator_providers.dart';
 import 'package:unrecorded_mobile/services/protection_protocol_models.dart';
 import 'package:unrecorded_mobile/services/protection_state.dart';

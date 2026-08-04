@@ -660,9 +660,9 @@ class _StreamScanner implements RadioScanner {
 
   @override
   Future<RadioStopResult> stop() async {
-    if (!_isScanning) return RadioAlreadyStopped();
+    if (!_isScanning) return const RadioAlreadyStopped();
     _isScanning = false;
-    return RadioStopped();
+    return const RadioStopped();
   }
 }
 
@@ -677,5 +677,3 @@ class _CountingScanner extends _StreamScanner {
     return super.start();
   }
 }
-
-

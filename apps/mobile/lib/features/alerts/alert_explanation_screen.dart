@@ -61,7 +61,8 @@ class AlertExplanationScreen extends StatelessWidget {
             ),
             const UnrecordedDisclosureAccordion(
               title: 'What the app cannot detect',
-              body: '• Devices that do not use Bluetooth or hide their identity.\n'
+              body:
+                  '• Devices that do not use Bluetooth or hide their identity.\n'
                   '• Whether a device is actually recording.\n'
                   '• Cameras that are not part of a BLE-enabled wearable.',
             ),
@@ -75,7 +76,8 @@ class AlertExplanationScreen extends StatelessWidget {
             ),
             const UnrecordedDisclosureAccordion(
               title: 'Scanning on Android',
-              body: 'On Android 12 and later, Unrecorded requests Bluetooth scan '
+              body:
+                  'On Android 12 and later, Unrecorded requests Bluetooth scan '
                   'permission without using your location for scanning '
                   '(neverForLocation). Some BLE advertisements may still be '
                   'filtered by the system for privacy.\n\n'
@@ -87,11 +89,12 @@ class AlertExplanationScreen extends StatelessWidget {
             ),
             const UnrecordedDisclosureAccordion(
               title: 'Repeated sightings',
-              body: 'If the same possible-risk signal is seen more than once in a '
+              body:
+                  'If the same possible-risk signal is seen more than once in a '
                   'session, confidence may increase modestly. Stale signals '
                   'expire after about a minute without a new observation.',
             ),
-            UnrecordedDisclosureAccordion(
+            const UnrecordedDisclosureAccordion(
               title: AppCopy.recentRiskExplanationSectionTitle,
               body: AppCopy.recentRiskExplanationSectionBody,
             ),

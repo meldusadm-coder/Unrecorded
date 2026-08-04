@@ -69,7 +69,7 @@ class ScannerManager {
             ),
             mayStillBeScanning: true,
           )
-        : RadioStopped();
+        : const RadioStopped();
   }
 
   Future<RadioStartResult?> _beginScanWindow({
@@ -280,4 +280,3 @@ class ScannerManager {
     _windowTimer = null;
   }
 }
-

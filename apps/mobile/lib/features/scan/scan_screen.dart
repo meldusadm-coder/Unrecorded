@@ -9,7 +9,6 @@ import '../../copy/feedback_copy.dart';
 import '../../router.dart';
 import '../../services/notification_status_provider.dart';
 import '../../services/protection_orchestrator_providers.dart';
-import '../../services/recent_risk_controller.dart';
 import '../../services/scanner_provider.dart';
 import '../../services/widget_sync_service.dart';
 import 'background_protection_toggle.dart';
@@ -106,9 +105,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen>
               tone: ui.primaryAction == MainScreenPrimaryAction.turnOn
                   ? PrimaryActionTone.primary
                   : PrimaryActionTone.danger,
-              onPressed: ui.primaryEnabled
-                  ? () => _handlePrimary(ui)
-                  : null,
+              onPressed: ui.primaryEnabled ? () => _handlePrimary(ui) : null,
             ),
             if (ui.secondaryAction != null && ui.secondaryLabel != null) ...[
               const SizedBox(height: 8),
@@ -183,7 +180,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen>
       case MainScreenNoticeKind.notificationsOff:
         await openAppSettings();
       case MainScreenNoticeKind.recentRisk:
-        if (mounted) context.push(recentRiskRoute);
+        if (mounted) await context.push(recentRiskRoute);
       case MainScreenNoticeKind.recovery:
         await _handleAction(ui.primaryAction);
       case null:
