@@ -7,6 +7,7 @@ import 'package:unrecorded_mobile/features/scan/scan_state.dart';
 import 'package:unrecorded_mobile/services/scan_lifecycle_coordinator.dart';
 import 'package:unrecorded_mobile/services/scan_runtime.dart';
 import 'package:unrecorded_mobile/services/scanner_cadence_config.dart';
+import 'package:unrecorded_mobile/services/protection_state.dart';
 import 'package:unrecorded_mobile/services/scanner_provider.dart';
 import 'package:unrecorded_mobile/services/signal_ui_mapper.dart';
 import 'package:unrecorded_radio/unrecorded_radio.dart';
@@ -49,7 +50,7 @@ ScanController _controller({
     coordinator: coordinator,
     pipeline: pipeline,
     mapper: const SignalUiMapper(),
-    isBackgroundOwnsScanning: () => false,
+    backgroundClaim: BackgroundOwnershipClaim(),
   );
 }
 
@@ -68,7 +69,7 @@ void main() {
       ),
     );
 
-    await controller.startProtection(persist: false);
+    await controller.startProtection();
 
     expect(controller.state.status, ScanStatus.permissionDenied);
     expect(controller.state.protectionRequested, isTrue);
@@ -84,11 +85,11 @@ void main() {
       runtime: _TestRuntime(const ScanPreflightResult.ok()),
     );
 
-    await controller.startProtection(persist: false);
+    await controller.startProtection();
 
     expect(controller.state.status, ScanStatus.scanning);
     await streamController.close();
-    await controller.pauseProtection(persist: false);
+    await controller.pauseProtection();
   });
 
   test('startProtection sets bluetoothUnsupported status', () async {
@@ -101,7 +102,7 @@ void main() {
       ),
     );
 
-    await controller.startProtection(persist: false);
+    await controller.startProtection();
 
     expect(controller.state.status, ScanStatus.bluetoothUnsupported);
   });
@@ -114,7 +115,7 @@ void main() {
       ),
     );
 
-    await controller.startProtection(persist: false);
+    await controller.startProtection();
 
     expect(controller.state.status, ScanStatus.bluetoothOff);
   });
@@ -129,7 +130,7 @@ void main() {
       ),
     );
 
-    await controller.startProtection(persist: false);
+    await controller.startProtection();
 
     expect(controller.state.status, ScanStatus.permissionPermanentlyDenied);
   });
@@ -143,13 +144,13 @@ void main() {
       runtime: _TestRuntime(const ScanPreflightResult.ok()),
     );
 
-    await controller.startProtection(persist: false);
+    await controller.startProtection();
     streamController.addError(Exception('boom'));
     await Future<void>.delayed(const Duration(milliseconds: 50));
 
     expect(controller.state.status, ScanStatus.error);
     await streamController.close();
-    await controller.pauseProtection(persist: false);
+    await controller.pauseProtection();
   });
 
   test('can retry startProtection after stream error', () async {
@@ -161,15 +162,15 @@ void main() {
       runtime: _TestRuntime(const ScanPreflightResult.ok()),
     );
 
-    await controller.startProtection(persist: false);
+    await controller.startProtection();
     streamController.addError(Exception('boom'));
     await Future<void>.delayed(const Duration(milliseconds: 30));
     expect(controller.state.status, ScanStatus.error);
 
-    await controller.startProtection(persist: false);
+    await controller.startProtection();
     expect(controller.state.status, ScanStatus.scanning);
     await streamController.close();
-    await controller.pauseProtection(persist: false);
+    await controller.pauseProtection();
   });
 
   test('high risk results set possibleRiskDetected', () async {
@@ -181,7 +182,7 @@ void main() {
       runtime: _TestRuntime(const ScanPreflightResult.ok()),
     );
 
-    await controller.startProtection(persist: false);
+    await controller.startProtection();
 
     streamController.add([
       RadioScanResult(
@@ -197,7 +198,7 @@ void main() {
     expect(controller.state.status, ScanStatus.possibleRiskDetected);
     expect(controller.state.lastCheckedAt, isNotNull);
     await streamController.close();
-    await controller.pauseProtection(persist: false);
+    await controller.pauseProtection();
   });
 
   test('scan window end does not count cached elevation toward alert',
@@ -216,7 +217,7 @@ void main() {
       ),
     );
 
-    await controller.startProtection(persist: false);
+    await controller.startProtection();
 
     streamController.add([
       RadioScanResult(
@@ -234,7 +235,7 @@ void main() {
     expect(controller.state.status, isNot(ScanStatus.possibleRiskDetected));
 
     await streamController.close();
-    await controller.pauseProtection(persist: false);
+    await controller.pauseProtection();
   });
 
   test('two elevated batches confirm alert', () async {
@@ -248,7 +249,7 @@ void main() {
       requiredElevatedScans: 2,
     );
 
-    await controller.startProtection(persist: false);
+    await controller.startProtection();
 
     final batch = [
       RadioScanResult(
@@ -266,7 +267,7 @@ void main() {
 
     expect(controller.state.status, ScanStatus.possibleRiskDetected);
     await streamController.close();
-    await controller.pauseProtection(persist: false);
+    await controller.pauseProtection();
   });
 
   test('startup grace shows confirmingRisk before alert', () async {
@@ -280,7 +281,7 @@ void main() {
       requiredElevatedScans: 2,
     );
 
-    await controller.startProtection(persist: false);
+    await controller.startProtection();
 
     streamController.add([
       RadioScanResult(
@@ -299,7 +300,7 @@ void main() {
     );
     expect(controller.state.riskLevel, RiskLevel.low);
     await streamController.close();
-    await controller.pauseProtection(persist: false);
+    await controller.pauseProtection();
   });
 
   test('simulateHighRiskAlert sets possibleRiskDetected', () {
@@ -341,7 +342,7 @@ void main() {
       requiredElevatedScans: 1,
     );
 
-    await controller.startProtection(persist: false);
+    await controller.startProtection();
 
     final batch = [
       RadioScanResult(
@@ -372,7 +373,7 @@ void main() {
     expect(controller.state.showsRiskAlert, isFalse);
 
     await streamController.close();
-    await controller.pauseProtection(persist: false);
+    await controller.pauseProtection();
   });
 
   test('dismissed alert reappears when contributing risky devices change',
@@ -387,7 +388,7 @@ void main() {
       requiredElevatedScans: 1,
     );
 
-    await controller.startProtection(persist: false);
+    await controller.startProtection();
 
     streamController.add([
       RadioScanResult(
@@ -421,7 +422,7 @@ void main() {
     expect(controller.state.showsRiskAlert, isTrue);
 
     await streamController.close();
-    await controller.pauseProtection(persist: false);
+    await controller.pauseProtection();
   });
 
   test('a fresh alert after risk clears resets dismissal', () async {
@@ -435,7 +436,7 @@ void main() {
       requiredElevatedScans: 1,
     );
 
-    await controller.startProtection(persist: false);
+    await controller.startProtection();
 
     final riskBatch = [
       RadioScanResult(
@@ -474,7 +475,7 @@ void main() {
     expect(controller.state.showsRiskAlert, isTrue);
 
     await streamController.close();
-    await controller.pauseProtection(persist: false);
+    await controller.pauseProtection();
   });
 
   test('non-Android auto mode is exposed as demo mode', () async {
@@ -484,12 +485,12 @@ void main() {
       scannerMode: ScannerMode.auto,
     );
 
-    await controller.startProtection(persist: false);
+    await controller.startProtection();
 
     expect(controller.state.status, ScanStatus.scanning);
     expect(controller.state.isDemoMode, isTrue);
 
-    await controller.pauseProtection(persist: false);
+    await controller.pauseProtection();
   });
 
   test('duplicate startProtection does not create duplicate scan loops',
@@ -502,12 +503,12 @@ void main() {
       runtime: _TestRuntime(const ScanPreflightResult.ok()),
     );
 
-    await controller.startProtection(persist: false);
-    await controller.startProtection(persist: false);
+    await controller.startProtection();
+    await controller.startProtection();
 
-    expect(scanner.scanCallCount, 1);
+    expect(scanner.startCallCount, 1);
     await streamController.close();
-    await controller.pauseProtection(persist: false);
+    await controller.pauseProtection();
   });
 
   test('low batch after elevated batch resets confirmation', () async {
@@ -521,7 +522,7 @@ void main() {
       requiredElevatedScans: 2,
     );
 
-    await controller.startProtection(persist: false);
+    await controller.startProtection();
     streamController.add([
       RadioScanResult(
         id: 'risk',
@@ -559,7 +560,7 @@ void main() {
     expect(controller.state.status, ScanStatus.confirmingRisk);
 
     await streamController.close();
-    await controller.pauseProtection(persist: false);
+    await controller.pauseProtection();
   });
 
   test('demo mode start sets isDemoMode true', () async {
@@ -569,9 +570,9 @@ void main() {
       scannerMode: ScannerMode.demo,
     );
 
-    await controller.startProtection(persist: false);
+    await controller.startProtection();
     expect(controller.state.isDemoMode, isTrue);
-    await controller.pauseProtection(persist: false);
+    await controller.pauseProtection();
   });
 
   test('possible risk and other nearby signals are partitioned', () async {
@@ -585,7 +586,7 @@ void main() {
       requiredElevatedScans: 1,
     );
 
-    await controller.startProtection(persist: false);
+    await controller.startProtection();
     streamController.add([
       RadioScanResult(
         id: 'risk',
@@ -619,7 +620,7 @@ void main() {
     );
 
     await streamController.close();
-    await controller.pauseProtection(persist: false);
+    await controller.pauseProtection();
   });
 
   test('pauseProtection sets paused state', () async {
@@ -629,9 +630,9 @@ void main() {
       scannerMode: ScannerMode.demo,
     );
 
-    await controller.startProtection(persist: false);
+    await controller.startProtection();
     controller.simulateHighRiskAlert();
-    await controller.pauseProtection(persist: false);
+    await controller.pauseProtection();
 
     expect(controller.state.status, ScanStatus.paused);
     expect(controller.state.protectionRequested, isFalse);
@@ -652,25 +653,27 @@ class _StreamScanner implements RadioScanner {
   bool get isScanning => _isScanning;
 
   @override
-  Stream<List<RadioScanResult>> scan() {
+  Future<RadioStartResult> start() async {
     _isScanning = true;
-    return _stream;
+    return RadioStarted(_stream);
   }
 
   @override
-  Future<void> stop() async {
+  Future<RadioStopResult> stop() async {
+    if (!_isScanning) return const RadioAlreadyStopped();
     _isScanning = false;
+    return const RadioStopped();
   }
 }
 
 class _CountingScanner extends _StreamScanner {
   _CountingScanner(super.stream);
 
-  var scanCallCount = 0;
+  var startCallCount = 0;
 
   @override
-  Stream<List<RadioScanResult>> scan() {
-    scanCallCount++;
-    return super.scan();
+  Future<RadioStartResult> start() async {
+    startCallCount++;
+    return super.start();
   }
 }

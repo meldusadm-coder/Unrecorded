@@ -6,6 +6,7 @@ import 'package:unrecorded_ui/unrecorded_ui.dart';
 
 import '../../services/recent_risk_controller.dart';
 import '../../utils/time_format.dart';
+import '../scan/unrecorded_disclosure_sheet.dart';
 
 /// Lightweight explanation when live scan details are no longer available.
 class RecentRiskScreen extends ConsumerWidget {
@@ -103,17 +104,21 @@ class RecentRiskScreen extends ConsumerWidget {
               ),
             const SizedBox(height: 12),
             Text(
-              AppCopy.recentRiskPrivacyNote,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              AppCopy.notProofOfRecording,
+              AppCopy.recentRiskPrivacyReminder,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
                 fontStyle: FontStyle.italic,
+              ),
+            ),
+            const SizedBox(height: 8),
+            UnrecordedDisclosureSheet.trigger(
+              context: context,
+              label: 'How recent reminders work',
+              sheetTitle: 'How recent reminders work',
+              sheetBody: Text(
+                '${AppCopy.recentRiskReminderHelp}\n\n'
+                '${AppCopy.recentRiskPrivacyNote}',
+                style: theme.textTheme.bodyMedium?.copyWith(height: 1.45),
               ),
             ),
             const SizedBox(height: 24),

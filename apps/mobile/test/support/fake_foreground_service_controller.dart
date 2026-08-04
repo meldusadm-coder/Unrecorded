@@ -45,6 +45,16 @@ class FakeForegroundServiceController implements ForegroundServiceController {
     return const ServiceRequestSuccess();
   }
 
+  @override
+  void sendStatusRequest({
+    required String sessionId,
+    required int epoch,
+  }) {
+    lastStatusRequest = (sessionId: sessionId, epoch: epoch);
+  }
+
+  ({String sessionId, int epoch})? lastStatusRequest;
+
   void emitTaskData(Object data) {
     for (final callback in callbacks.toList()) {
       callback(data);

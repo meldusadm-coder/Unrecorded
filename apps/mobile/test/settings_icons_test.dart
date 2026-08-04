@@ -37,11 +37,18 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
     expect(find.text(AppCopy.riskNotificationsTitle), findsOneWidget);
-    expect(find.text('Local-first'), findsOneWidget);
+    expect(find.text('Privacy & data'), findsWidgets);
 
     final alertsY = tester.getTopLeft(find.text('Alerts')).dy;
-    final localFirstY = tester.getTopLeft(find.text('Local-first')).dy;
-    expect(alertsY, lessThan(localFirstY));
+    final privacyY = tester.getTopLeft(find.text('Privacy & data').first).dy;
+    expect(alertsY, lessThan(privacyY));
+
+    await tester.tap(find.byKey(const Key('privacy_data_tile')));
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('All scanning happens on your device'),
+      findsWidgets,
+    );
   });
 
   testWidgets('settings privacy tiles use brand icons not broken_image',

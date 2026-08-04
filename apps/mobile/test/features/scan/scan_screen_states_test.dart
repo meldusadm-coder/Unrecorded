@@ -1,7 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:unrecorded_core/unrecorded_core.dart';
 import 'package:unrecorded_mobile/features/scan/scan_state.dart';
 import 'package:unrecorded_mobile/features/scan/signal_ui_model.dart';
+import 'package:unrecorded_mobile/features/scan/protection_hero.dart';
 
 import '../../support/scan_test_harness.dart';
 
@@ -32,10 +34,11 @@ void main() {
     for (final state in states) {
       await pumpScanScreen(tester, state);
       expect(find.text('Unrecorded'), findsOneWidget);
+      expect(find.byType(ProtectionHero), findsOneWidget);
     }
   });
 
-  testWidgets('shows demo banner when demo mode protection is active',
+  testWidgets('shows demo chip when demo mode protection is active',
       (tester) async {
     await pumpScanScreen(
       tester,
@@ -45,10 +48,10 @@ void main() {
         isDemoMode: true,
       ),
     );
-    expect(find.text(AppCopy.demoModeBanner), findsOneWidget);
+    expect(find.text('Demo'), findsOneWidget);
   });
 
-  testWidgets('possible risk state shows alert helper and uncertainty copy',
+  testWidgets('possible risk state shows hero alert and uncertainty copy',
       (tester) async {
     await pumpScanScreen(
       tester,
@@ -72,6 +75,17 @@ void main() {
       ),
     );
 
-    expect(find.text(AppCopy.alertCardTitle), findsWidgets);
+    expect(find.text(AppCopy.possibleRiskTitle), findsWidgets);
+    expect(find.text(AppCopy.notProofOfRecording), findsOneWidget);
+    expect(find.text('View details'), findsOneWidget);
+    expect(find.text('Dismiss'), findsOneWidget);
+    expect(find.text('Ray-Ban Meta'), findsWidgets);
+    expect(find.byKey(const Key('scan_feedback_link')), findsNothing);
+  });
+
+  testWidgets('off state shows turn on protection', (tester) async {
+    await pumpScanScreen(tester, const ScanState());
+    expect(find.text(AppCopy.turnOnProtection), findsOneWidget);
+    expect(find.text('Protection is off'), findsOneWidget);
   });
 }

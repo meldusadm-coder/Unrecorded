@@ -16,6 +16,7 @@ import '../../services/notification_risk_threshold.dart';
 import '../../services/notification_status_provider.dart';
 import '../../services/risk_notification_service.dart';
 import '../scan/background_protection_toggle.dart';
+import '../scan/unrecorded_disclosure_sheet.dart';
 import 'debug_testing_section.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -25,14 +26,29 @@ class SettingsScreen extends ConsumerStatefulWidget {
   ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+class _SettingsScreenState extends ConsumerState<SettingsScreen>
+    with WidgetsBindingObserver {
   bool? _riskNotificationsEnabled;
   NotificationRiskThreshold? _notificationRiskThreshold;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadNotificationPrefs();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      refreshNotificationOsStatus(ref);
+    }
   }
 
   Future<void> _loadNotificationPrefs() async {
@@ -62,7 +78,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
         );
-        ref.invalidate(notificationsOsEnabledProvider);
+        refreshNotificationOsStatus(ref);
         return;
       }
     } else {
@@ -72,7 +88,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final prefs = await NotificationPrefs.load();
     await prefs.setRiskNotificationsEnabled(enabled);
     ref.invalidate(riskNotificationsEnabledProvider);
-    ref.invalidate(notificationsOsEnabledProvider);
+    refreshNotificationOsStatus(ref);
     if (!mounted) return;
     setState(() => _riskNotificationsEnabled = enabled);
   }
@@ -99,6 +115,48 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
       );
     }
+  }
+
+  void _openPrivacySheet() {
+    final adsRemoved = ref.read(adsRemovedProvider);
+    UnrecordedDisclosureSheet.show(
+      context: context,
+      title: 'Privacy & data',
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            '• All scanning happens on your device. Nothing is uploaded.',
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            '• Unrecorded works without sign-up, login, or any account.',
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            '• Scan data stays on your device unless you choose otherwise.',
+          ),
+          const SizedBox(height: 8),
+          const Text('• The app does not include analytics or telemetry.'),
+          const SizedBox(height: 8),
+          Text(
+            adsRemoved
+                ? '• Ads are removed on this device. Thank you for your support.'
+                : '• Optional banner ads may appear. Scan data is never sent to ad networks.',
+          ),
+          const SizedBox(height: 12),
+          const Text(PrivacyDisclaimer.privacyModel),
+        ],
+      ),
+    );
+  }
+
+  void _openFundingSheet() {
+    UnrecordedDisclosureSheet.show(
+      context: context,
+      title: PrivacyDisclaimer.fundingNoteShort,
+      body: const Text(PrivacyDisclaimer.fundingNote),
+    );
   }
 
   @override
@@ -139,8 +197,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ? null
                   : _setRiskNotifications,
             ),
-            const SizedBox(height: 8),
-            const HelperText(text: AppCopy.notificationsHelpBody),
+            UnrecordedDisclosureSheet.trigger(
+              context: context,
+              label: 'How notification alerts work',
+              sheetTitle: 'How notification alerts work',
+              sheetBody: const Text(AppCopy.notificationsHelpBody),
+            ),
             if (_riskNotificationsEnabled == true) ...[
               const SizedBox(height: 8),
               DropdownMenu<NotificationRiskThreshold>(
@@ -197,75 +259,52 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     .setWindow(value);
               },
             ),
-            const SizedBox(height: 8),
-            const HelperText(text: AppCopy.recentRiskReminderHelp),
+            UnrecordedDisclosureSheet.trigger(
+              context: context,
+              label: 'How recent reminders work',
+              sheetTitle: 'How recent reminders work',
+              sheetBody: const Text(AppCopy.recentRiskReminderHelp),
+            ),
             const SizedBox(height: 16),
             const BackgroundProtectionToggle(),
             const SizedBox(height: 24),
             PrivacyNoticeCard(
-              text: PrivacyDisclaimer.privacyModel,
+              text: PrivacyDisclaimer.privacyModelConcise,
               icon: UnrecordedIcon(
                 asset: UnrecordedIconAsset.privacy,
                 size: 20,
                 color: theme.colorScheme.onSurfaceVariant,
               ),
+              actionLabel: 'Privacy & data',
+              onAction: _openPrivacySheet,
             ),
-            const SizedBox(height: 20),
-            _tile(
-              theme,
-              leading: UnrecordedIcon(
-                asset: UnrecordedIconAsset.device,
-                size: 24,
-                color: theme.colorScheme.primary,
-              ),
-              title: 'Local-first',
-              subtitle:
-                  'All scanning happens on your device. Nothing is uploaded.',
-            ),
-            _tile(
-              theme,
-              leading: UnrecordedIcon(
-                asset: UnrecordedIconAsset.protection,
-                size: 24,
-                color: theme.colorScheme.primary,
-              ),
-              title: 'No account required',
-              subtitle:
-                  'Unrecorded works without sign-up, login, or any account.',
-            ),
-            _tile(
-              theme,
+            ListTile(
+              key: const Key('privacy_data_tile'),
+              contentPadding: EdgeInsets.zero,
               leading: UnrecordedIcon(
                 asset: UnrecordedIconAsset.privacy,
                 size: 24,
                 color: theme.colorScheme.primary,
               ),
-              title: 'No cloud upload',
+              title: const Text('Privacy & data'),
               subtitle:
-                  'Scan data stays on your device unless you choose otherwise.',
+                  const Text('Local-first scanning, no account, no cloud'),
+              trailing: const UnrecordedListTrailing(),
+              onTap: _openPrivacySheet,
             ),
-            _tile(
-              theme,
-              leading: UnrecordedIcon(
-                asset: UnrecordedIconAsset.info,
-                size: 24,
-                color: theme.colorScheme.primary,
+            if (adsRemoved)
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: UnrecordedIcon(
+                  asset: UnrecordedIconAsset.widgetIcon,
+                  size: 24,
+                  color: theme.colorScheme.primary,
+                ),
+                title: const Text('Ads removed'),
+                subtitle: const Text(
+                  'Ads are removed on this device. Thank you for your support.',
+                ),
               ),
-              title: 'No analytics or tracking',
-              subtitle: 'The app does not include analytics or telemetry.',
-            ),
-            _tile(
-              theme,
-              leading: UnrecordedIcon(
-                asset: UnrecordedIconAsset.widgetIcon,
-                size: 24,
-                color: theme.colorScheme.primary,
-              ),
-              title: 'Small bottom ads',
-              subtitle: adsRemoved
-                  ? 'Ads are removed on this device. Thank you for your support.'
-                  : 'Optional banner ads may appear. Scan data is never sent to ad networks.',
-            ),
             privacyOptionsRequired.maybeWhen(
               data: (required) {
                 if (!required) return const SizedBox.shrink();
@@ -286,7 +325,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               },
               orElse: () => const SizedBox.shrink(),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const AppLogo(size: 24),
@@ -296,13 +335,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               onTap: () => context.push('/remove-ads'),
             ),
             const Divider(height: 32),
-            Text('Funding', style: theme.textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Text(
-              PrivacyDisclaimer.fundingNote,
-              style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text(PrivacyDisclaimer.fundingNoteShort),
+              subtitle: const Text('Ads and optional support purchases'),
+              trailing: const UnrecordedListTrailing(),
+              onTap: _openFundingSheet,
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 16),
             Text('Feedback', style: theme.textTheme.titleMedium),
             const SizedBox(height: 4),
             ListTile(
@@ -338,20 +378,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _tile(
-    ThemeData theme, {
-    required Widget leading,
-    required String title,
-    required String subtitle,
-  }) {
-    return ListTile(
-      leading: leading,
-      title: Text(title),
-      subtitle: Text(subtitle),
-      contentPadding: EdgeInsets.zero,
     );
   }
 }

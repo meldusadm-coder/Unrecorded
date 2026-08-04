@@ -138,8 +138,6 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           children: [
             const HelperText(text: MonetisationCopy.removeAdsBody),
-            const SizedBox(height: 8),
-            const HelperText(text: MonetisationCopy.removeAdsFreeNote),
             const SizedBox(height: 20),
             Card(
               child: Padding(
@@ -201,10 +199,6 @@ class _RemoveAdsScreenState extends ConsumerState<RemoveAdsScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           children: [
             const HelperText(text: MonetisationCopy.removeAdsBody),
-            const SizedBox(height: 8),
-            const HelperText(text: MonetisationCopy.removeAdsFreeNote),
-            const SizedBox(height: 8),
-            const HelperText(text: MonetisationCopy.removeAdsAmountHint),
             const SizedBox(height: 24),
             Text(
               MonetisationCopy.removeAdsAmountLabel,

@@ -9,6 +9,7 @@ import 'package:unrecorded_mobile/services/protection_status_notification.dart';
 import 'package:unrecorded_mobile/services/risk_notification_service.dart';
 import 'package:unrecorded_mobile/services/scan_lifecycle_coordinator.dart';
 import 'package:unrecorded_mobile/services/scan_runtime.dart';
+import 'package:unrecorded_mobile/services/protection_state.dart';
 import 'package:unrecorded_mobile/services/scanner_provider.dart';
 import 'package:unrecorded_mobile/services/signal_ui_mapper.dart';
 import 'package:unrecorded_radio/unrecorded_radio.dart';
@@ -82,7 +83,7 @@ ScanController _controllerWithNotifications(
     coordinator: coordinator,
     pipeline: pipeline,
     mapper: const SignalUiMapper(),
-    isBackgroundOwnsScanning: () => false,
+    backgroundClaim: BackgroundOwnershipClaim(),
     onStateChanged: (previous, state) {
       unawaited(
         notifications.syncProtectionStatusNotification(
@@ -129,7 +130,7 @@ void main() {
       scanner: FakeRadioScanner(),
     );
 
-    await controller.startProtection(persist: false);
+    await controller.startProtection();
 
     expect(notifications.lastSyncedState?.protectionRequested, isTrue);
     expect(
@@ -137,7 +138,7 @@ void main() {
       isTrue,
     );
 
-    await controller.pauseProtection(persist: false);
+    await controller.pauseProtection();
     expect(notifications.riskAlertCancelled, isTrue);
   });
 
@@ -148,7 +149,7 @@ void main() {
       scanner: FakeRadioScanner(),
     );
 
-    await controller.startProtection(persist: false);
+    await controller.startProtection();
     controller.simulateHighRiskAlert();
 
     expect(controller.state.status, ScanStatus.possibleRiskDetected);
@@ -167,7 +168,7 @@ void main() {
       recentRiskVisible: true,
     );
 
-    await controller.startProtection(persist: false);
+    await controller.startProtection();
 
     expect(notifications.lastRecentRiskVisible, isTrue);
     final content = protectionStatusNotificationContentFor(
@@ -201,7 +202,7 @@ void main() {
       scannerMode: ScannerMode.auto,
     );
 
-    await controller.startProtection(persist: false);
+    await controller.startProtection();
     expect(controller.state.isBlocked, isTrue);
     expect(
       shouldShowProtectionStatusNotification(controller.state),

@@ -6,14 +6,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-enum ScannerMode { auto, demo }
+import 'scan_preflight_failure.dart';
 
-enum ScanPreflightFailure {
-  permissionDenied,
-  permissionPermanentlyDenied,
-  bluetoothUnsupported,
-  bluetoothOff
-}
+export 'scan_preflight_failure.dart';
+
+enum ScannerMode { auto, demo }
 
 class ScanPreflightResult {
   const ScanPreflightResult._(this.failure);

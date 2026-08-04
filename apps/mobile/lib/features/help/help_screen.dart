@@ -6,6 +6,7 @@ import 'package:unrecorded_mobile/services/scanner_provider.dart';
 import 'package:unrecorded_ui/unrecorded_ui.dart';
 
 import '../../copy/feedback_copy.dart';
+import '../scan/unrecorded_disclosure_sheet.dart';
 
 class HelpScreen extends ConsumerWidget {
   const HelpScreen({super.key});
@@ -40,11 +41,6 @@ class HelpScreen extends ConsumerWidget {
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
-            const HelperText(
-              text: 'If Unrecorded detects a possible recording risk nearby, '
-                  'you may see an alert like this:',
-            ),
-            const SizedBox(height: 12),
             RiskAlertCard(
               title: AppCopy.alertCardTitle,
               body: AppCopy.alertCardBody,
@@ -65,59 +61,59 @@ class HelpScreen extends ConsumerWidget {
                 );
               },
             ),
-            const SizedBox(height: 12),
-            const HelperText(text: AppCopy.alertExampleFooter),
-            const Divider(height: 32),
-            Text(
-              AppCopy.recentRiskMissedAlertTitle,
-              style: theme.textTheme.titleMedium,
-            ),
             const SizedBox(height: 8),
-            const HelperText(text: AppCopy.recentRiskMissedAlertBody),
-            const Divider(height: 32),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const UnrecordedIcon(
-                asset: UnrecordedIconAsset.info,
-                size: 24,
-              ),
-              title: const Text('How detection works'),
-              subtitle: const Text(
-                'Risk levels, limitations, and what the app can detect',
-              ),
-              trailing: const UnrecordedListTrailing(),
-              onTap: () => context.push('/alert-info'),
-            ),
-            if (isAndroid) ...[
-              const Divider(height: 32),
-              Row(
-                children: [
-                  const UnrecordedIcon(
-                    asset: UnrecordedIconAsset.widgetIcon,
-                    size: 24,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      AppCopy.widgetHelpTitle,
-                      style: theme.textTheme.titleMedium,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              const HelperText(text: AppCopy.widgetHelpBody),
-              const SizedBox(height: 8),
-              const HelperText(text: AppCopy.widgetHelpLimitations),
-            ],
-            const Divider(height: 32),
             Text(
-              AppCopy.notificationsHelpTitle,
-              style: theme.textTheme.titleMedium,
+              AppCopy.alertExampleFooter,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                height: 1.4,
+              ),
             ),
-            const SizedBox(height: 8),
-            const HelperText(text: AppCopy.notificationsHelpBody),
-            const Divider(height: 32),
+            const Divider(height: 24),
+            const UnrecordedDisclosureAccordion(
+              title: 'What does an alert mean?',
+              body: 'A possible-risk alert means nearby Bluetooth signals '
+                  'matched patterns associated with smart glasses or wearable '
+                  'recording devices. It is a prompt to be more aware — not '
+                  'proof that anyone is recording.',
+            ),
+            const UnrecordedDisclosureAccordion(
+              title: AppCopy.recentRiskMissedAlertTitle,
+              body: AppCopy.recentRiskMissedAlertBody,
+            ),
+            const UnrecordedDisclosureAccordion(
+              title: 'How detection works',
+              body: 'Unrecorded compares nearby Bluetooth signals with known '
+                  'wearable patterns, then shows a calm possible-risk warning '
+                  'when indicators rise. Open How detection works from an '
+                  'alert for risk levels and limitations.',
+            ),
+            const UnrecordedDisclosureAccordion(
+              title: 'Why permissions are needed',
+              body: AppCopy.permissionHelper,
+            ),
+            if (isAndroid)
+              const UnrecordedDisclosureAccordion(
+                title: 'Background protection and notification Stop',
+                body:
+                    'Background protection keeps checking nearby signals with '
+                    'a persistent notification while Android allows it. '
+                    'Notification Stop turns protection off and keeps your '
+                    'preferred background mode for next time. Android or '
+                    'battery settings may still interrupt background work — '
+                    'uninterrupted operation is not guaranteed.',
+              ),
+            if (isAndroid)
+              const UnrecordedDisclosureAccordion(
+                title: AppCopy.widgetHelpTitle,
+                body: '${AppCopy.widgetHelpBody}\n\n'
+                    '${AppCopy.widgetHelpLimitations}',
+              ),
+            const UnrecordedDisclosureAccordion(
+              title: AppCopy.notificationsHelpTitle,
+              body: AppCopy.notificationsHelpBody,
+            ),
+            const Divider(height: 24),
             ListTile(
               key: const Key('help_feedback_tile'),
               contentPadding: EdgeInsets.zero,
@@ -132,9 +128,13 @@ class HelpScreen extends ConsumerWidget {
               trailing: const UnrecordedListTrailing(),
               onTap: () => context.push('/feedback'),
             ),
-            const Divider(height: 32),
-            const HelperText(
-              text: PrivacyDisclaimer.detectionDisclaimer,
+            const SizedBox(height: 16),
+            Text(
+              PrivacyDisclaimer.detectionDisclaimer,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                height: 1.4,
+              ),
             ),
           ],
         ),
