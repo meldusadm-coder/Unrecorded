@@ -592,7 +592,8 @@ class FakeProtectionProtocolStore implements ProtectionProtocolStore {
   }
 
   Future<ProtocolCommitResult> _persist(
-      ProtectionProtocolTuple intended,) async {
+    ProtectionProtocolTuple intended,
+  ) async {
     if (failNextCommit) {
       failNextCommit = false;
       _persistenceUncertain = true;

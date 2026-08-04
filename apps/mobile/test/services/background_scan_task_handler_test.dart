@@ -188,8 +188,10 @@ void main() {
     await engine.start();
 
     expect(engine.isScannerReady, isFalse);
-    expect(snapshots.last.stoppedReason,
-        BackgroundProtectionStoppedReason.blocked,);
+    expect(
+      snapshots.last.stoppedReason,
+      BackgroundProtectionStoppedReason.blocked,
+    );
     expect(
       snapshots.last.taskBlockedCause,
       ScanPreflightFailure.permissionDenied,

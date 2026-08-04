@@ -305,7 +305,9 @@ class ProtectionOrchestrator
         ),
       );
       _completeFailed(
-          opId, BackgroundProtectionIssue.protocolPersistenceFailed,);
+        opId,
+        BackgroundProtectionIssue.protocolPersistenceFailed,
+      );
       return;
     }
     if (ready is! ProtocolCommitConfirmed) {
@@ -326,13 +328,15 @@ class ProtectionOrchestrator
     if (tuple.backgroundModePreferred && _supportBackground) {
       _publish(
         state.copyWith(
-            transition: ProtectionTransitionPhase.enablingBackground,),
+          transition: ProtectionTransitionPhase.enablingBackground,
+        ),
       );
       await _effectEnableBackground(opId, tuple);
     } else {
       _publish(
         state.copyWith(
-            transition: ProtectionTransitionPhase.enablingForeground,),
+          transition: ProtectionTransitionPhase.enablingForeground,
+        ),
       );
       await _effectEnableForeground(opId, tuple);
     }
@@ -701,7 +705,9 @@ class ProtectionOrchestrator
       );
       _active = null;
       _completeFailed(
-          opId, BackgroundProtectionIssue.protocolPersistenceFailed,);
+        opId,
+        BackgroundProtectionIssue.protocolPersistenceFailed,
+      );
       return;
     }
     if (ready is! ProtocolCommitConfirmed) {
@@ -849,7 +855,8 @@ class ProtectionOrchestrator
             _foregroundLease != null)
         ? _pauseForeground()
         : Future<ForegroundPauseResult>.value(
-            const ForegroundAlreadyInactive(),);
+            const ForegroundAlreadyInactive(),
+          );
     final stopService = (state.backgroundMayBeActive ||
             state.confirmedOwner == ScannerOwner.background ||
             _claim.isHeld)
@@ -884,7 +891,9 @@ class ProtectionOrchestrator
       );
       _active = null;
       _completeFailed(
-          opId, BackgroundProtectionIssue.protocolPersistenceFailed,);
+        opId,
+        BackgroundProtectionIssue.protocolPersistenceFailed,
+      );
       return;
     }
 
@@ -1241,7 +1250,9 @@ class ProtectionOrchestrator
     }
     if (result is ProtocolCommitPersistenceUncertain) {
       _completeFailed(
-          opId, BackgroundProtectionIssue.protocolPersistenceFailed,);
+        opId,
+        BackgroundProtectionIssue.protocolPersistenceFailed,
+      );
       return null;
     }
     _completeFailed(opId, BackgroundProtectionIssue.protocolUnavailable);

@@ -408,7 +408,8 @@ class SingleEngineProtectionProtocolStore implements ProtectionProtocolStore {
   }
 
   Future<ProtocolCommitResult> _persist(
-      ProtectionProtocolTuple intended,) async {
+    ProtectionProtocolTuple intended,
+  ) async {
     _privateAuthority = intended;
     final ok = _commitFn?.call(intended) ?? await _writePrefs(intended);
     if (ok) {

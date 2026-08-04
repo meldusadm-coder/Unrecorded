@@ -126,7 +126,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-              '• All scanning happens on your device. Nothing is uploaded.',),
+            '• All scanning happens on your device. Nothing is uploaded.',
+          ),
           const SizedBox(height: 8),
           const Text(
             '• Unrecorded works without sign-up, login, or any account.',

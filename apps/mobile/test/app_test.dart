@@ -135,8 +135,10 @@ void main() {
 
     await tester.tap(find.byKey(const Key('privacy_data_tile')));
     await tester.pumpAndSettle();
-    expect(find.textContaining('All scanning happens on your device'),
-        findsWidgets,);
+    expect(
+      find.textContaining('All scanning happens on your device'),
+      findsWidgets,
+    );
 
     final alertsY =
         tester.getTopLeft(find.text(AppCopy.riskNotificationsTitle)).dy;
