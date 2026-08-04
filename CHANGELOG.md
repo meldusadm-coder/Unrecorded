@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.9.1+17
+
+### Added
+- Confirmation dialog before turning off background protection, with clear
+  guidance that scanning then continues only while the app is open.
+
+### Changed
+- Background protection is on by default for all installs (one-shot migrate).
+- Background toggle copy is shorter when on; off state reminds users to leave
+  the app open for reliable checks.
+- Settings keeps a single Privacy & data entry (duplicate notice card removed).
+- Agent design artifacts under `docs/superpowers/` are no longer tracked.
+
+### Fixed
+- Turn off protection stays tappable while protecting, during transitions, and
+  while stop is finalising; Stop times out to recovery instead of hanging busy.
+- Turning background off while protecting immediately switches to foreground-only
+  scanning (after confirmation).
+
+
 ## 0.9.0+16
 
 ### Added
