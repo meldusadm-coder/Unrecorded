@@ -3,6 +3,7 @@ import 'package:unrecorded_core/unrecorded_core.dart';
 import 'package:unrecorded_mobile/features/scan/main_screen_ui_state.dart';
 import 'package:unrecorded_mobile/features/scan/protection_accent.dart';
 import 'package:unrecorded_mobile/features/scan/scan_state.dart';
+import 'package:unrecorded_mobile/services/protection_protocol_models.dart';
 import 'package:unrecorded_mobile/services/protection_state.dart';
 
 void main() {
@@ -125,6 +126,40 @@ void main() {
       expect(ui.heroKind, MainScreenHeroKind.protecting);
       expect(ui.primaryAction, MainScreenPrimaryAction.turnOff);
       expect(ui.primaryEnabled, isTrue);
+    });
+
+    test('stale mirrored scan does not keep Protecting after explicit Stop',
+        () {
+      final ui = mapMainScreenUiState(
+        const MainScreenUiInputs(
+          orchestrator: ProtectionOrchestratorState(
+            lastConfirmedTuple: ProtectionProtocolTuple(
+              schemaVersion: 1,
+              revision: 3,
+              backgroundModePreferred: true,
+              protectionEnabled: false,
+              backgroundRuntimeEnabled: false,
+              explicitlyStopped: true,
+              activeTaskSessionId: null,
+              activeTaskEpoch: null,
+              activeTaskIncarnationId: null,
+              nextTaskGeneration: 2,
+              activeStartAttemptId: null,
+              activeStartProcessId: null,
+              taskPhase: ProtocolTaskPhase.none,
+              nativeStartUnresolved: false,
+            ),
+          ),
+          scan: ScanState(
+            status: ScanStatus.scanning,
+            protectionRequested: true,
+          ),
+          isAndroid: true,
+        ),
+      );
+      expect(ui.heroKind, MainScreenHeroKind.off);
+      expect(ui.primaryAction, MainScreenPrimaryAction.turnOn);
+      expect(ui.primaryLabel, AppCopy.turnOnProtection);
     });
 
     test('live possible-risk owns hero and suppresses ads', () {
