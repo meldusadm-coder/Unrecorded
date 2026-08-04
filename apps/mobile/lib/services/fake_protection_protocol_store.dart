@@ -616,6 +616,18 @@ class FakeProtectionProtocolStore implements ProtectionProtocolStore {
 
   @visibleForTesting
   bool get isReady => _ready;
+
+  /// Test-only: force persistence-uncertain so getState returns a null tuple.
+  @visibleForTesting
+  void markPersistenceUncertainForTest() {
+    _persistenceUncertain = true;
+  }
+
+  /// Test-only: raise the process Stop fence without committing Stop.
+  @visibleForTesting
+  void raiseStopFenceForTest() {
+    _stopFenceRaised = true;
+  }
 }
 
 sealed class _Mut {

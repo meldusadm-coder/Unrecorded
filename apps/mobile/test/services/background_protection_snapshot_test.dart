@@ -55,4 +55,82 @@ void main() {
     expect(state.otherNearbySignals, isEmpty);
     expect(state.protectionRequested, isTrue);
   });
+
+  test('ownership-capable requires full session/lease identity', () {
+    const incomplete = BackgroundProtectionSnapshot(
+      status: ScanStatus.scanning,
+      riskLevel: RiskLevel.low,
+      score: 0,
+      reasonLabels: [],
+      possibleRiskCount: 0,
+      otherNearbyCount: 0,
+      isDemoMode: false,
+      serviceRunning: true,
+      sessionId: 'task-1',
+      sessionEpoch: 1,
+      engineIncarnationId: 'inc-1',
+      // scannerLeaseId missing
+    );
+    expect(incomplete.isOwnershipCapable, isFalse);
+
+    const complete = BackgroundProtectionSnapshot(
+      status: ScanStatus.scanning,
+      riskLevel: RiskLevel.low,
+      score: 0,
+      reasonLabels: [],
+      possibleRiskCount: 0,
+      otherNearbyCount: 0,
+      isDemoMode: false,
+      serviceRunning: true,
+      sessionId: 'task-1',
+      sessionEpoch: 1,
+      engineIncarnationId: 'inc-1',
+      scannerLeaseId: 'lease-1',
+      messageSequence: 2,
+      scannerPhase: BackgroundScannerPhase.scanning,
+      riskEpisodeId: 'ep-1',
+    );
+    expect(complete.isOwnershipCapable, isTrue);
+
+    final decoded = BackgroundProtectionSnapshot.fromJson(complete.toJson());
+    expect(decoded!.sessionId, 'task-1');
+    expect(decoded.scannerLeaseId, 'lease-1');
+    expect(decoded.messageSequence, 2);
+    expect(decoded.scannerPhase, BackgroundScannerPhase.scanning);
+    expect(decoded.riskEpisodeId, 'ep-1');
+  });
+
+  test('explicit notification stop round-trips protocol fields', () {
+    const original = BackgroundProtectionSnapshot(
+      status: ScanStatus.paused,
+      riskLevel: RiskLevel.low,
+      score: 0,
+      reasonLabels: [],
+      possibleRiskCount: 0,
+      otherNearbyCount: 0,
+      isDemoMode: false,
+      serviceRunning: false,
+      stoppedReason: BackgroundProtectionStoppedReason.explicitNotificationStop,
+      sessionId: 'task-1',
+      sessionEpoch: 4,
+      engineIncarnationId: 'inc-1',
+      scannerLeaseId: 'lease-1',
+      messageSequence: 9,
+      scannerPhase: BackgroundScannerPhase.stopped,
+      stopTransactionOutcome: StopTransactionOutcome.confirmed,
+      stopConfirmedRevision: 12,
+      scannerStopOutcome: 'stopped',
+      leaseReleased: true,
+    );
+
+    final decoded = BackgroundProtectionSnapshot.fromJson(original.toJson());
+    expect(
+      decoded!.stoppedReason,
+      BackgroundProtectionStoppedReason.explicitNotificationStop,
+    );
+    expect(decoded.stopTransactionOutcome, StopTransactionOutcome.confirmed);
+    expect(decoded.stopConfirmedRevision, 12);
+    expect(decoded.scannerStopOutcome, 'stopped');
+    expect(decoded.leaseReleased, isTrue);
+  });
 }
