@@ -9,21 +9,17 @@ object ProtectionProtocolEngine {
     fun migrateFromLegacy(snapshot: LegacySnapshot): ProtectionProtocolTuple {
         val explicitlyStopped = snapshot.explicitlyStopped
         val protectionEnabled: Boolean
-        val backgroundModePreferred: Boolean
         if (explicitlyStopped) {
-            // Explicit Stop dominates. Old Stop vs toggle-off is ambiguous → conservative
-            // foreground preferred (false).
+            // Explicit Stop dominates overall intent.
             protectionEnabled = false
-            backgroundModePreferred = false
         } else {
             protectionEnabled =
                 snapshot.protectionEnabled || snapshot.backgroundProtectionEnabled
-            backgroundModePreferred = snapshot.backgroundProtectionEnabled
         }
         return clearedSessionTuple(
             schemaVersion = ProtectionProtocolTuple.CURRENT_SCHEMA_VERSION,
             revision = 1L,
-            backgroundModePreferred = backgroundModePreferred,
+            backgroundModePreferred = true,
             protectionEnabled = protectionEnabled,
             explicitlyStopped = explicitlyStopped,
             nextTaskGeneration = 1L,

@@ -36,6 +36,7 @@ class ProtectionOrchestrator
     Duration protocolTimeout = const Duration(seconds: 5),
     Duration foregroundTimeout = const Duration(seconds: 15),
     Duration readinessTimeout = const Duration(seconds: 20),
+    Duration stopTimeout = const Duration(seconds: 20),
     String? processId,
     Random? random,
   })  : _store = protocolStore,
@@ -50,6 +51,7 @@ class ProtectionOrchestrator
         _protocolTimeout = protocolTimeout,
         _foregroundTimeout = foregroundTimeout,
         _readinessTimeout = readinessTimeout,
+        _stopTimeout = stopTimeout,
         _processId = processId ?? 'main',
         _random = random ?? Random(),
         super(const ProtectionOrchestratorState()) {
@@ -71,6 +73,7 @@ class ProtectionOrchestrator
   final Duration _protocolTimeout;
   final Duration _foregroundTimeout;
   final Duration _readinessTimeout;
+  final Duration _stopTimeout;
   final String _processId;
   final Random _random;
 
@@ -115,15 +118,25 @@ class ProtectionOrchestrator
   }
 
   Future<ProtectionCommandOutcome> setBackgroundModePreferred(bool value) {
+    final protecting = state.confirmedOwner != ScannerOwner.none &&
+        state.lastConfirmedTuple?.protectionEnabled == true;
+    final phase = !protecting
+        ? ProtectionTransitionPhase.idle
+        : (value
+            ? ProtectionTransitionPhase.switchingToBackground
+            : ProtectionTransitionPhase.switchingToForeground);
     return _admit(
       kind: _CommandKind.setMode,
-      transition: ProtectionTransitionPhase.idle,
+      transition: phase,
       equalityNoOp: () {
         final tuple = state.lastConfirmedTuple;
         return tuple != null &&
             tuple.backgroundModePreferred == value &&
             state.transition == ProtectionTransitionPhase.idle &&
-            !state.retainedCleanup;
+            !state.retainedCleanup &&
+            (!protecting ||
+                (value && state.confirmedOwner == ScannerOwner.background) ||
+                (!value && state.confirmedOwner == ScannerOwner.foreground));
       },
       run: (opId) => _effectSetMode(opId, value),
     );
@@ -637,23 +650,103 @@ class ProtectionOrchestrator
       return;
     }
 
-    final tuple = ready.tuple;
-    // Preference-only while Off: no mechanics.
-    if (tuple.protectionEnabled && state.confirmedOwner != ScannerOwner.none) {
-      // Switching mode while protecting is a handoff â€” stub to failed for now
-      // when background unsupported; otherwise route through switch effects.
+    var tuple = ready.tuple;
+    final protecting =
+        tuple.protectionEnabled && state.confirmedOwner != ScannerOwner.none;
+
+    if (protecting) {
       if (preferred && !_supportBackground) {
         _completeFailed(opId, BackgroundProtectionIssue.backgroundNotSupported);
         return;
       }
-      // For Off-only preference changes in this checkpoint when already Off.
+
+      if (preferred && state.confirmedOwner == ScannerOwner.foreground) {
+        final result = await _commitPreferred(opId, tuple, preferred: true);
+        if (result == null || !_isCurrent(opId)) return;
+        tuple = result;
+        await _effectEnableBackground(opId, tuple);
+        return;
+      }
+
+      if (!preferred && state.confirmedOwner == ScannerOwner.background) {
+        final switched = await _withTimeout(
+          opId,
+          _protocolTimeout,
+          () =>
+              _store.switchToForegroundIntent(expectedRevision: tuple.revision),
+          onTimeout: () {
+            _completeFailed(
+              opId,
+              BackgroundProtectionIssue.protocolUnavailable,
+            );
+          },
+        );
+        if (switched == null || !_isCurrent(opId)) return;
+        if (switched is ProtocolCommitStale) {
+          final retry = await _store.switchToForegroundIntent(
+            expectedRevision: switched.current.revision,
+          );
+          if (retry is! ProtocolCommitConfirmed) {
+            _completeFailed(
+              opId,
+              BackgroundProtectionIssue.protocolPersistenceFailed,
+            );
+            return;
+          }
+          tuple = retry.tuple;
+        } else if (switched is ProtocolCommitConfirmed) {
+          tuple = switched.tuple;
+        } else {
+          _completeFailed(
+            opId,
+            BackgroundProtectionIssue.protocolPersistenceFailed,
+          );
+          return;
+        }
+
+        _publish(state.copyWith(lastConfirmedTuple: tuple));
+        await _foregroundService.stop();
+        if (_claim.isHeld) _claim.release();
+        final heldLease = (await _store.getState()).lease;
+        if (heldLease != null) {
+          await _store.releaseLease(leaseId: heldLease.leaseId);
+        }
+        if (!_isCurrent(opId)) return;
+        _publish(
+          state.copyWith(
+            confirmedOwner: ScannerOwner.none,
+            backgroundMechanics: BackgroundServiceMechanics.stopped,
+            backgroundMayBeActive: false,
+          ),
+        );
+        await _effectEnableForeground(opId, tuple);
+        return;
+      }
     }
 
+    final result = await _commitPreferred(opId, tuple, preferred: preferred);
+    if (result == null || !_isCurrent(opId)) return;
+    _publish(
+      state.copyWith(
+        lastConfirmedTuple: result,
+        transition: ProtectionTransitionPhase.idle,
+        activeOperationId: null,
+      ),
+    );
+    _active = null;
+    _completeOnce(opId, const ProtectionCompleted());
+  }
+
+  Future<ProtectionProtocolTuple?> _commitPreferred(
+    String opId,
+    ProtectionProtocolTuple tuple, {
+    required bool preferred,
+  }) async {
     final result = await _store.setBackgroundModePreferred(
       expectedRevision: tuple.revision,
       preferred: preferred,
     );
-    if (!_isCurrent(opId)) return;
+    if (!_isCurrent(opId)) return null;
 
     if (result is ProtocolCommitStale) {
       final retry = await _store.setBackgroundModePreferred(
@@ -661,33 +754,21 @@ class ProtectionOrchestrator
         preferred: preferred,
       );
       if (retry is ProtocolCommitConfirmed) {
-        _publish(
-          state.copyWith(
-            lastConfirmedTuple: retry.tuple,
-            transition: ProtectionTransitionPhase.idle,
-            activeOperationId: null,
-          ),
-        );
-        _active = null;
-        _completeOnce(opId, const ProtectionCompleted());
-        return;
+        return retry.tuple;
       }
+      _completeFailed(
+        opId,
+        BackgroundProtectionIssue.protocolPersistenceFailed,
+      );
+      return null;
     }
 
     if (result is ProtocolCommitConfirmed) {
-      _publish(
-        state.copyWith(
-          lastConfirmedTuple: result.tuple,
-          transition: ProtectionTransitionPhase.idle,
-          activeOperationId: null,
-        ),
-      );
-      _active = null;
-      _completeOnce(opId, const ProtectionCompleted());
-      return;
+      return result.tuple;
     }
 
     _completeFailed(opId, BackgroundProtectionIssue.protocolPersistenceFailed);
+    return null;
   }
 
   Future<void> _effectReconcile(String opId) async {
@@ -848,6 +929,35 @@ class ProtectionOrchestrator
   }
 
   Future<void> _effectStop(String opId) async {
+    final completed = await _withTimeout<bool>(
+      opId,
+      _stopTimeout,
+      () async {
+        await _effectStopBody(opId);
+        return true;
+      },
+      onTimeout: () {
+        _publish(
+          state.copyWith(
+            confirmedOwner: ScannerOwner.none,
+            foregroundMechanics: state.foregroundMayBeActive
+                ? ForegroundMechanics.uncertain
+                : ForegroundMechanics.inactive,
+            backgroundMechanics: BackgroundServiceMechanics.unresponsive,
+            issue: BackgroundProtectionIssue.serviceStopFailed,
+            transition: ProtectionTransitionPhase.idle,
+            activeOperationId: null,
+            retainedCleanup: true,
+          ),
+        );
+        if (_active?.id == opId) _active = null;
+        _completeFailed(opId, BackgroundProtectionIssue.serviceStopFailed);
+      },
+    );
+    if (completed == null) return;
+  }
+
+  Future<void> _effectStopBody(String opId) async {
     // Persistence and physical shutdown in parallel.
     final stopPersist = _store.commitExplicitStop();
     final pauseFuture = (state.foregroundMayBeActive ||
@@ -870,8 +980,11 @@ class ProtectionOrchestrator
     }
 
     final persistResult = await stopPersist;
+    if (!_isCurrent(opId)) return;
     final pauseResult = await pauseFuture;
+    if (!_isCurrent(opId)) return;
     await stopService;
+    if (!_isCurrent(opId)) return;
 
     if (_disposedFlag) {
       _completeOnce(opId, const ProtectionDisposed());
@@ -925,6 +1038,7 @@ class ProtectionOrchestrator
       await _store.releaseLease(leaseId: lease.leaseId);
       _foregroundLease = null;
     }
+    if (!_isCurrent(opId)) return;
 
     // Finalise session if present and native start resolved.
     final tuple = state.lastConfirmedTuple;
@@ -935,6 +1049,7 @@ class ProtectionOrchestrator
         expectedRevision: tuple.revision,
         sessionId: tuple.activeTaskSessionId!,
       );
+      if (!_isCurrent(opId)) return;
       if (finalised is ProtocolCommitConfirmed) {
         _publish(state.copyWith(lastConfirmedTuple: finalised.tuple));
       }
@@ -955,6 +1070,8 @@ class ProtectionOrchestrator
       }());
     }
     _setOwner(ScannerOwner.none);
+
+    if (!_isCurrent(opId)) return;
 
     _publish(
       state.copyWith(

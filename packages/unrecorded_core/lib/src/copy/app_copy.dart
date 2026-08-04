@@ -137,13 +137,27 @@ class AppCopy {
       'settings allow it, but watch delivery depends on Android, Wear OS, '
       'permissions, Bluetooth, battery settings, and the connected device.';
 
-  // Background protection (Android foreground service, opt-in)
+  // Background protection (Android foreground service; on by default)
   static const String backgroundProtectionTitle = 'Background protection';
 
   static const String backgroundProtectionSubtitle =
       'Keep scanning while protection is active. Runs with a persistent '
       'notification. Android or battery settings may stop background '
       'protection. Not proof of recording.';
+
+  static const String backgroundProtectionOnSubtitle =
+      'On — keeps checking with a notification';
+
+  static const String backgroundProtectionOffSubtitle =
+      'Off — best to leave the app open';
+
+  static const String backgroundProtectionTurnOffDialogTitle =
+      'Turn off background protection?';
+
+  static const String backgroundProtectionTurnOffDialogBody =
+      'Scanning will continue only while the app is open. '
+      'For the most reliable checks, leave Unrecorded open. '
+      'This is not proof of recording.';
 
   static const String backgroundProtectionNotificationTitle =
       'Unrecorded protection is active';

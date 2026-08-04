@@ -126,7 +126,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            '• All scanning happens on your device. Nothing is uploaded.',
+            '• All scanning happens on your device. Nothing is uploaded. '
+            'Scanning stays on this device.',
           ),
           const SizedBox(height: 8),
           const Text(
@@ -268,16 +269,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
             const SizedBox(height: 16),
             const BackgroundProtectionToggle(),
             const SizedBox(height: 24),
-            PrivacyNoticeCard(
-              text: PrivacyDisclaimer.privacyModelConcise,
-              icon: UnrecordedIcon(
-                asset: UnrecordedIconAsset.privacy,
-                size: 20,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-              actionLabel: 'Privacy & data',
-              onAction: _openPrivacySheet,
-            ),
             ListTile(
               key: const Key('privacy_data_tile'),
               contentPadding: EdgeInsets.zero,
