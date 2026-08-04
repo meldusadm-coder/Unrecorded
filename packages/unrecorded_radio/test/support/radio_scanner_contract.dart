@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:unrecorded_radio/unrecorded_radio.dart';
+import 'package:unrecorded_radio/unrecorded_radio_testing.dart';
 
 class RadioScannerContractHarness {
   const RadioScannerContractHarness({
@@ -17,22 +18,32 @@ class RadioScannerContractHarness {
   final Future<void> Function()? complete;
 }
 
+Future<Stream<List<RadioScanResult>>> _requireStarted(
+  RadioScanner scanner,
+) async {
+  final result = await scanner.start();
+  expect(result, isA<RadioStarted>(), reason: 'start() should succeed');
+  return (result as RadioStarted).batches;
+}
+
 void runRadioScannerContract(
   String name,
   RadioScannerContractHarness Function() createHarness,
 ) {
   group('RadioScanner contract: $name', () {
-    test('isScanning false before scan and stop safe when idle', () async {
+    test('isScanning false before start and stop safe when idle', () async {
       final harness = createHarness();
       expect(harness.scanner.isScanning, isFalse);
-      await harness.scanner.stop();
+      final stopResult = await harness.scanner.stop();
+      expect(stopResult, isA<RadioAlreadyStopped>());
       expect(harness.scanner.isScanning, isFalse);
     });
 
-    test('scan starts emission and isScanning becomes true', () async {
+    test('start confirms emission and isScanning becomes true', () async {
       final harness = createHarness();
       final firstBatch = Completer<List<RadioScanResult>>();
-      final sub = harness.scanner.scan().listen((batch) {
+      final batches = await _requireStarted(harness.scanner);
+      final sub = batches.listen((batch) {
         if (!firstBatch.isCompleted) firstBatch.complete(batch);
       });
       if (harness.emitBatch != null) {
@@ -49,7 +60,8 @@ void runRadioScannerContract(
     test('after stop no further batches are delivered', () async {
       final harness = createHarness();
       final received = <List<RadioScanResult>>[];
-      final sub = harness.scanner.scan().listen(received.add);
+      final batches = await _requireStarted(harness.scanner);
+      final sub = batches.listen(received.add);
 
       if (harness.emitBatch != null) {
         await harness.emitBatch!([
@@ -58,9 +70,10 @@ void runRadioScannerContract(
       } else {
         await Future<void>.delayed(const Duration(milliseconds: 20));
       }
-      final beforeStopCount = received.length;
-      await harness.scanner.stop();
+      final stopResult = await harness.scanner.stop();
+      expect(stopResult, isA<RadioStopped>());
       expect(harness.scanner.isScanning, isFalse);
+      final beforeStopCount = received.length;
 
       if (harness.emitBatch != null) {
         await harness.emitBatch!([
@@ -72,9 +85,10 @@ void runRadioScannerContract(
       expect(sub.isPaused, isFalse);
     });
 
-    test('subscription cancel stops scanning', () async {
+    test('subscription cancel alone does not stop scanning', () async {
       final harness = createHarness();
-      final sub = harness.scanner.scan().listen((_) {});
+      final batches = await _requireStarted(harness.scanner);
+      final sub = batches.listen((_) {});
       if (harness.emitBatch != null) {
         await harness.emitBatch!([
           RadioScanResult(id: 'device:1', observedAt: DateTime(2025, 1, 1)),
@@ -84,13 +98,19 @@ void runRadioScannerContract(
       }
       await sub.cancel();
       await Future<void>.delayed(const Duration(milliseconds: 20));
+      // Lifecycle stop is explicit; cancelling the batch subscription alone
+      // does not release the scanner lease.
+      expect(harness.scanner.isScanning, isTrue);
+      final stopResult = await harness.scanner.stop();
+      expect(stopResult, isA<RadioStopped>());
       expect(harness.scanner.isScanning, isFalse);
     });
 
     test('repeated start stop does not leak scanner state', () async {
       final harness = createHarness();
       for (var i = 0; i < 2; i++) {
-        final sub = harness.scanner.scan().listen((_) {});
+        final batches = await _requireStarted(harness.scanner);
+        final sub = batches.listen((_) {});
         if (harness.emitBatch != null) {
           await harness.emitBatch!([
             RadioScanResult(id: 'device:$i', observedAt: DateTime(2025, 1, 1)),
@@ -107,7 +127,8 @@ void runRadioScannerContract(
     test('supports empty batches and duplicate device IDs', () async {
       final harness = createHarness();
       final received = <List<RadioScanResult>>[];
-      harness.scanner.scan().listen(received.add);
+      final batches = await _requireStarted(harness.scanner);
+      batches.listen(received.add);
 
       if (harness.emitBatch != null) {
         await harness.emitBatch!(const []);
@@ -128,7 +149,8 @@ void runRadioScannerContract(
       if (harness.emitError == null) return;
 
       final errors = <Object>[];
-      harness.scanner.scan().listen((_) {}, onError: errors.add);
+      final batches = await _requireStarted(harness.scanner);
+      batches.listen((_) {}, onError: errors.add);
       await harness.emitError!(StateError('simulated scan error'));
       await Future<void>.delayed(const Duration(milliseconds: 20));
       expect(errors, isNotEmpty);
@@ -140,11 +162,32 @@ void runRadioScannerContract(
       if (harness.complete == null) return;
 
       var done = false;
-      harness.scanner.scan().listen((_) {}, onDone: () => done = true);
+      final batches = await _requireStarted(harness.scanner);
+      batches.listen((_) {}, onDone: () => done = true);
       await harness.complete!();
       await Future<void>.delayed(const Duration(milliseconds: 20));
       expect(done, isTrue);
       expect(harness.scanner.isScanning, isFalse);
+    });
+
+    test('stop during delayed start yields cancelledAndStopped', () async {
+      // Only ScriptedRadioScanner exposes holdStart; skip others.
+      final harness = createHarness();
+      final scanner = harness.scanner;
+      if (scanner is! ScriptedRadioScanner) return;
+
+      scanner.holdStart();
+      final startFuture = scanner.start();
+      await Future<void>.delayed(Duration.zero);
+      final stopResult = await scanner.stop();
+      final startResult = await startFuture;
+
+      expect(startResult, isA<RadioStartCancelledAndStopped>());
+      expect(
+        stopResult,
+        anyOf(isA<RadioAlreadyStopped>(), isA<RadioStopped>()),
+      );
+      expect(scanner.isScanning, isFalse);
     });
   });
 }

@@ -13,7 +13,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
     <application
         android:label="Unrecorded"
-        android:name="${applicationName}"
+        android:name=".UnrecordedApplication"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

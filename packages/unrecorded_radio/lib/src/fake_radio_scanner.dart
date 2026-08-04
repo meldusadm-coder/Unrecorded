@@ -4,6 +4,9 @@ import 'dart:math';
 import 'fake_demo_scenario.dart';
 import 'radio_scan_result.dart';
 import 'radio_scanner.dart';
+import 'radio_scanner_exception.dart';
+import 'radio_start_result.dart';
+import 'radio_stop_result.dart';
 
 /// A fake scanner that emits realistic sample data.
 ///
@@ -13,49 +16,131 @@ class FakeRadioScanner implements RadioScanner {
     this.scenario = FakeDemoScenario.random,
     Random? random,
     this.tickInterval = const Duration(seconds: 3),
+    this.startDelay = Duration.zero,
+    this.startFailure,
+    this.stopFailure,
+    this.stopFailureMayStillBeScanning = true,
   }) : _random = random ?? Random();
 
   final FakeDemoScenario scenario;
   final Duration tickInterval;
 
+  /// Artificial delay before [start] confirms success (or failure).
+  final Duration startDelay;
+
+  /// When set, [start] returns [RadioStartFailed] after [startDelay].
+  final RadioScannerException? startFailure;
+
+  /// When set, [stop] returns [RadioStopFailed] instead of stopping.
+  final RadioScannerException? stopFailure;
+
+  /// [RadioStopFailed.mayStillBeScanning] when [stopFailure] is set.
+  final bool stopFailureMayStillBeScanning;
+
   StreamController<List<RadioScanResult>>? _controller;
   Timer? _timer;
   final Random _random;
-  bool _stopping = false;
+  bool _scanning = false;
+  bool _cancelRequested = false;
+  Future<void> _chain = Future<void>.value();
 
   @override
-  bool get isScanning => _controller != null && !_controller!.isClosed;
+  bool get isScanning => _scanning;
 
-  @override
-  Stream<List<RadioScanResult>> scan() {
-    _controller = StreamController<List<RadioScanResult>>(
-      onCancel: () => stop(),
-    );
-    _startEmitting();
-    return _controller!.stream;
+  Future<T> _serialized<T>(Future<T> Function() action) async {
+    final previous = _chain;
+    final gate = Completer<void>();
+    _chain = gate.future;
+    try {
+      await previous;
+      return await action();
+    } finally {
+      gate.complete();
+    }
   }
 
   @override
-  Future<void> stop() async {
-    if (_stopping) return;
-    _stopping = true;
+  Future<RadioStartResult> start() {
+    return _serialized(() async {
+      if (_scanning) {
+        return RadioStartFailed(
+          const RadioScannerException('Fake scan already active.'),
+          mayStillBeScanning: true,
+        );
+      }
+
+      _cancelRequested = false;
+
+      if (startDelay > Duration.zero) {
+        await Future<void>.delayed(startDelay);
+      }
+
+      if (_cancelRequested) {
+        return RadioStartCancelledAndStopped();
+      }
+
+      final failure = startFailure;
+      if (failure != null) {
+        return RadioStartFailed(failure, mayStillBeScanning: false);
+      }
+
+      _controller = StreamController<List<RadioScanResult>>.broadcast(
+        onListen: _startEmitting,
+      );
+      _scanning = true;
+      return RadioStarted(_controller!.stream);
+    });
+  }
+
+  @override
+  Future<RadioStopResult> stop() {
+    _cancelRequested = true;
+    // Cancel emission immediately so in-flight timer ticks cannot deliver
+    // batches after stop is requested (before the serialized stop runs).
     _timer?.cancel();
     _timer = null;
-    final controller = _controller;
-    if (controller != null && !controller.isClosed) {
-      await controller.close();
-    }
-    _controller = null;
-    _stopping = false;
+    return _serialized(() async {
+      if (!_scanning) {
+        return RadioAlreadyStopped();
+      }
+
+      final failure = stopFailure;
+      if (failure != null) {
+        return RadioStopFailed(
+          failure,
+          mayStillBeScanning: stopFailureMayStillBeScanning,
+        );
+      }
+
+      // Mark inactive before close so onCancel → stop() does not race with
+      // the serialized stop body (and does not double-close).
+      final controller = _controller;
+      _controller = null;
+      _scanning = false;
+      _cancelRequested = false;
+      if (controller != null && !controller.isClosed) {
+        await controller.close();
+      }
+      return RadioStopped();
+    });
   }
 
   void _startEmitting() {
+    // Avoid duplicate timers if a second listener attaches.
+    if (_timer != null) return;
     _timer = Timer.periodic(tickInterval, (_) {
-      if (_controller == null || _controller!.isClosed) return;
+      if (_cancelRequested ||
+          !_scanning ||
+          _controller == null ||
+          _controller!.isClosed) {
+        return;
+      }
       _controller!.add(_generateBatch());
     });
 
-    if (_controller != null && !_controller!.isClosed) {
+    if (!_cancelRequested &&
+        _controller != null &&
+        !_controller!.isClosed) {
       _controller!.add(_generateBatch());
     }
   }

@@ -8,7 +8,8 @@ import 'package:unrecorded_radio/unrecorded_radio.dart';
 
 import '../features/scan/scan_state.dart';
 import 'dev_testing_prefs.dart';
-import 'protection_prefs.dart';
+import 'protection_protocol_models.dart';
+import 'protection_state.dart';
 import 'recent_risk_controller.dart';
 import 'risk_notification_service.dart';
 import 'scan_lifecycle_coordinator.dart';
@@ -29,8 +30,20 @@ final scannerConfigInitProvider = FutureProvider<void>((ref) async {
 
 final scanRuntimeProvider = Provider<ScanRuntime>((ref) => const ScanRuntime());
 
-/// True while the foreground service owns the scan loop (main isolate mirrors only).
-final backgroundOwnsScanningProvider = StateProvider<bool>((ref) => false);
+/// Mutable gate shared by orchestrator and [ScanController].
+final backgroundOwnershipClaimProvider =
+    Provider<BackgroundOwnershipClaim>((ref) {
+  return BackgroundOwnershipClaim();
+});
+
+/// Confirmed scanner owner from the orchestrator (none/foreground/background).
+final scannerOwnerProvider =
+    StateProvider<ScannerOwner>((ref) => ScannerOwner.none);
+
+/// True while background owns scanning (compatibility for notification sync).
+final backgroundOwnsScanningProvider = Provider<bool>((ref) {
+  return ref.watch(scannerOwnerProvider) == ScannerOwner.background;
+});
 
 RadioScanner _scannerForConfig(ScannerConfig config) {
   if (config.mode == ScannerMode.demo) {
@@ -61,6 +74,7 @@ final scanControllerProvider =
     StateNotifierProvider<ScanController, ScanState>((ref) {
   final pipeline = ref.watch(detectionPipelineProvider);
   var latestScanState = const ScanState();
+  final claim = ref.watch(backgroundOwnershipClaimProvider);
   final controller = ScanController(
     coordinator: ScanLifecycleCoordinator(
       scannerFactory: () => ref.read(radioScannerProvider),
@@ -71,11 +85,12 @@ final scanControllerProvider =
     ),
     pipeline: pipeline,
     mapper: ref.read(signalUiMapperProvider),
-    isBackgroundOwnsScanning: () => ref.read(backgroundOwnsScanningProvider),
+    backgroundClaim: claim,
     onStateChanged: (previous, state) {
       latestScanState = state;
       final notifications = ref.read(riskNotificationServiceProvider);
-      final backgroundOwns = ref.read(backgroundOwnsScanningProvider);
+      final backgroundOwns =
+          ref.read(scannerOwnerProvider) == ScannerOwner.background;
 
       if (!backgroundOwns) {
         unawaited(
@@ -113,9 +128,10 @@ final scanControllerProvider =
     },
   );
 
-  ref.listen<bool>(backgroundOwnsScanningProvider, (previous, next) {
+  ref.listen<ScannerOwner>(scannerOwnerProvider, (previous, next) {
     final notifications = ref.read(riskNotificationServiceProvider);
-    if (previous == true && next == false) {
+    if (previous == ScannerOwner.background &&
+        next != ScannerOwner.background) {
       unawaited(
         notifications.syncProtectionStatusNotification(
           latestScanState,
@@ -123,13 +139,14 @@ final scanControllerProvider =
               _recentRiskVisibleForNotification(ref, latestScanState),
         ),
       );
-    } else if (previous == false && next == true) {
+    } else if (previous != ScannerOwner.background &&
+        next == ScannerOwner.background) {
       unawaited(notifications.cancelProtectionStatusNotification());
     }
   });
 
   ref.listen(recentRiskControllerProvider, (_, __) {
-    if (ref.read(backgroundOwnsScanningProvider)) return;
+    if (ref.read(scannerOwnerProvider) == ScannerOwner.background) return;
     unawaited(
       ref
           .read(riskNotificationServiceProvider)
@@ -143,7 +160,7 @@ final scanControllerProvider =
 
   ref.listen<ScannerConfig?>(scannerConfigProvider, (previous, next) {
     if (previous == null || next == null || previous == next) return;
-    unawaited(controller.onScannerConfigChanged());
+    // Configuration restart is owned by ProtectionOrchestrator.
   });
 
   return controller;
@@ -210,18 +227,17 @@ class ScannerConfigController {
   }
 }
 
+/// Mechanics-only scan controller. Does not write protection preferences.
 class ScanController extends StateNotifier<ScanState> {
   ScanController({
     required ScanLifecycleCoordinator coordinator,
     required DetectionPipeline pipeline,
     required SignalUiMapper mapper,
-    required bool Function() isBackgroundOwnsScanning,
+    required BackgroundOwnershipClaim backgroundClaim,
     void Function(ScanState previous, ScanState next)? onStateChanged,
-    Duration startupGraceDuration = const Duration(seconds: 5),
-    int requiredElevatedScans = 2,
   })  : _coordinator = coordinator,
         _mapper = mapper,
-        _isBackgroundOwnsScanning = isBackgroundOwnsScanning,
+        _backgroundClaim = backgroundClaim,
         _onStateChanged = onStateChanged,
         super(const ScanState()) {
     _coordinator.onStateChanged = _onCoordinatorState;
@@ -229,18 +245,15 @@ class ScanController extends StateNotifier<ScanState> {
 
   final ScanLifecycleCoordinator _coordinator;
   final SignalUiMapper _mapper;
-  final bool Function() _isBackgroundOwnsScanning;
+  final BackgroundOwnershipClaim _backgroundClaim;
   final void Function(ScanState previous, ScanState next)? _onStateChanged;
 
   bool _startInFlight = false;
-  ProtectionPrefs? _prefs;
 
   void _onCoordinatorState(ScanState partial, PipelineResult pipelineResult) {
     final (risk, other) =
         _mapper.partition(pipelineResult.snapshot.assessments);
 
-    // `alertDismissed` is UI-only; preserve it only while the same risky
-    // device(s) remain — not merely while status stays possibleRiskDetected.
     final newRiskKeys = _contributingRiskStableKeys(
       pipelineResult.snapshot.assessments,
     );
@@ -274,11 +287,6 @@ class ScanController extends StateNotifier<ScanState> {
     final previous = state;
     state = newState;
     _onStateChanged?.call(previous, newState);
-  }
-
-  Future<ProtectionPrefs> _ensurePrefs() async {
-    _prefs ??= await ProtectionPrefs.load();
-    return _prefs!;
   }
 
   void simulateHighRiskAlert() {
@@ -323,24 +331,18 @@ class ScanController extends StateNotifier<ScanState> {
     return true;
   }
 
-  Future<void> onScannerConfigChanged() async {
-    if (!state.protectionRequested || state.status == ScanStatus.paused) {
-      return;
-    }
-    final wasRequested = state.protectionRequested;
-    await _coordinator.pauseProtection();
-    if (wasRequested) {
-      await startProtection(persist: false);
-    }
-  }
-
   /// Applies state mirrored from the foreground-service task isolate.
   void applyMirroredState(ScanState mirrored) {
     _emit(mirrored);
   }
 
-  Future<void> startProtection({bool persist = true}) async {
-    if (_isBackgroundOwnsScanning()) return;
+  /// Mechanics-only start. [lease] is required for orchestrator-driven starts.
+  Future<ForegroundStartResult> startProtection({
+    ScannerLease? lease,
+  }) async {
+    if (_backgroundClaim.isHeld) {
+      return const ForegroundSuppressedByBackground();
+    }
 
     if (_startInFlight ||
         state.status == ScanStatus.scanning ||
@@ -348,16 +350,11 @@ class ScanController extends StateNotifier<ScanState> {
         state.status == ScanStatus.possibleRiskDetected ||
         state.status == ScanStatus.starting ||
         state.status == ScanStatus.confirmingRisk) {
-      return;
+      return const ForegroundAlreadyActive();
     }
 
     _startInFlight = true;
     try {
-      if (persist) {
-        final prefs = await _ensurePrefs();
-        await prefs.setProtectionEnabled(true);
-      }
-
       _emit(
         state.copyWith(
           protectionRequested: true,
@@ -374,36 +371,71 @@ class ScanController extends StateNotifier<ScanState> {
         ),
       );
 
-      final failure = await _coordinator.startProtection();
-      if (failure != null) {
+      final outcome = await _coordinator.startProtection();
+      if (outcome.preflight != null) {
         _emit(
           state.copyWith(
-            status: scanStatusForPreflightFailure(failure),
-            statusMessage: preflightMessageFor(failure),
+            status: scanStatusForPreflightFailure(outcome.preflight!),
+            statusMessage: preflightMessageFor(outcome.preflight!),
             protectionRequested: true,
           ),
         );
-        return;
+        return ForegroundStartPreflightFailed(outcome.preflight!);
       }
 
-      _emit(
-        state.copyWith(
-          status: ScanStatus.scanning,
-          isDemoMode: _coordinator.isDemoMode,
-          clearStatusMessage: true,
-        ),
-      );
+      switch (outcome.start) {
+        case RadioStarted():
+          _emit(
+            state.copyWith(
+              status: ScanStatus.scanning,
+              isDemoMode: _coordinator.isDemoMode,
+              clearStatusMessage: true,
+            ),
+          );
+          return const ForegroundStarted();
+        case null:
+          _emit(
+            state.copyWith(
+              status: ScanStatus.scanning,
+              isDemoMode: _coordinator.isDemoMode,
+              clearStatusMessage: true,
+            ),
+          );
+          return const ForegroundAlreadyActive();
+        case RadioStartCancelledAndStopped():
+          _emit(
+            state.copyWith(
+              status: ScanStatus.paused,
+              protectionRequested: true,
+            ),
+          );
+          return const ForegroundStartMechanicalFailed(
+            mayStillBeScanning: false,
+          );
+        case RadioStartFailed(:final mayStillBeScanning):
+          _emit(
+            state.copyWith(
+              status: ScanStatus.error,
+              statusMessage: AppCopy.scanErrorMessage,
+              protectionRequested: true,
+            ),
+          );
+          return ForegroundStartMechanicalFailed(
+            mayStillBeScanning: mayStillBeScanning,
+          );
+      }
     } finally {
       _startInFlight = false;
     }
   }
 
-  Future<void> pauseProtection({bool persist = true}) async {
-    if (persist) {
-      final prefs = await _ensurePrefs();
-      await prefs.setProtectionEnabled(false);
+  /// Mechanics-only pause. Does not clear durable protection intent.
+  Future<ForegroundPauseResult> pauseProtection() async {
+    if (state.status == ScanStatus.paused || state.status == ScanStatus.idle) {
+      return const ForegroundAlreadyInactive();
     }
-    await _coordinator.pauseProtection();
+
+    final stop = await _coordinator.pauseProtection();
     _emit(
       state.copyWith(
         protectionRequested: false,
@@ -413,5 +445,12 @@ class ScanController extends StateNotifier<ScanState> {
         clearStatusMessage: true,
       ),
     );
+
+    if (stop is RadioStopFailed) {
+      return ForegroundPauseFailed(
+        mayStillBeScanning: stop.mayStillBeScanning,
+      );
+    }
+    return const ForegroundPaused();
   }
 }

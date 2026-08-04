@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:unrecorded_core/unrecorded_core.dart';
@@ -6,6 +6,7 @@ import 'package:unrecorded_mobile/features/scan/scan_screen.dart';
 import 'package:unrecorded_mobile/features/scan/scan_state.dart';
 import 'package:unrecorded_mobile/services/scan_lifecycle_coordinator.dart';
 import 'package:unrecorded_mobile/services/scan_runtime.dart';
+import 'package:unrecorded_mobile/services/protection_state.dart';
 import 'package:unrecorded_mobile/services/scanner_provider.dart';
 import 'package:unrecorded_mobile/services/signal_ui_mapper.dart';
 import 'package:unrecorded_mobile/services/widget_sync_service.dart';
@@ -33,7 +34,7 @@ class StateHarnessController extends ScanController {
           ),
           pipeline: DetectionPipeline(),
           mapper: const SignalUiMapper(),
-          isBackgroundOwnsScanning: () => false,
+          backgroundClaim: BackgroundOwnershipClaim(),
         ) {
     state = value;
   }
@@ -54,3 +55,4 @@ Future<void> pumpScanScreen(WidgetTester tester, ScanState state) async {
   );
   await tester.pump();
 }
+

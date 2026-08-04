@@ -62,8 +62,14 @@ class _BackgroundScanTaskHandler extends TaskHandler {
     _coordinator = coordinator;
 
     final startFailure = await _coordinator!.startProtection();
-    if (startFailure != null) {
-      await _sendBlockedAndStop(startFailure);
+    if (startFailure.preflight != null) {
+      await _sendBlockedAndStop(startFailure.preflight!);
+      return;
+    }
+    if (startFailure.start is RadioStartFailed ||
+        startFailure.start is RadioStartCancelledAndStopped) {
+      _log('scanner start failed; stopping task');
+      await FlutterForegroundTask.stopService();
       return;
     }
 

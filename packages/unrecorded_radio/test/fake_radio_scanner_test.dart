@@ -5,6 +5,12 @@ import 'package:unrecorded_radio/unrecorded_radio.dart';
 
 import 'support/certainty_language.dart';
 
+Future<Stream<List<RadioScanResult>>> _started(FakeRadioScanner scanner) async {
+  final result = await scanner.start();
+  expect(result, isA<RadioStarted>());
+  return (result as RadioStarted).batches;
+}
+
 void main() {
   group('FakeRadioScanner', () {
     test('emits immediate first batch and periodic follow-up batches',
@@ -16,7 +22,7 @@ void main() {
       );
       addTearDown(scanner.stop);
       final batches = <List<RadioScanResult>>[];
-      scanner.scan().listen(batches.add);
+      (await _started(scanner)).listen(batches.add);
 
       await Future<void>.delayed(const Duration(milliseconds: 5));
       expect(batches, isNotEmpty, reason: 'first batch should be immediate');
@@ -37,7 +43,7 @@ void main() {
         tickInterval: const Duration(milliseconds: 20),
       );
       addTearDown(scanner.stop);
-      final first = await scanner.scan().first;
+      final first = await (await _started(scanner)).first;
       for (final result in first) {
         expect(result.id, isNotEmpty);
         expect(result.observedAt, isNotNull);
@@ -50,7 +56,7 @@ void main() {
         random: Random(3),
       );
       addTearDown(scanner.stop);
-      final batch = await scanner.scan().first;
+      final batch = await (await _started(scanner)).first;
       expect(
         batch.any((r) => (r.name ?? '').toLowerCase().contains('meta')),
         isFalse,
@@ -70,7 +76,7 @@ void main() {
         random: Random(4),
       );
       addTearDown(scanner.stop);
-      final batch = await scanner.scan().first;
+      final batch = await (await _started(scanner)).first;
       expect(batch.any((r) => r.name == 'Meta Smart Glasses'), isTrue);
       expect(batch.any((r) => r.name == 'JBL Flip 6'), isTrue);
       expect(batch.any((r) => r.name == 'AirPods Pro'), isTrue);
@@ -82,7 +88,7 @@ void main() {
         random: Random(5),
       );
       addTearDown(scanner.stop);
-      final batch = await scanner.scan().first;
+      final batch = await (await _started(scanner)).first;
       expect(batch.any((r) => r.name == 'Ray-Ban Meta'), isTrue);
     });
 
@@ -94,7 +100,7 @@ void main() {
         tickInterval: const Duration(milliseconds: 20),
       );
       addTearDown(scanner.stop);
-      final first = await scanner.scan().first;
+      final first = await (await _started(scanner)).first;
       expect(first, isNotEmpty);
       expect(first.every((r) => r.id.isNotEmpty), isTrue);
       for (final result in first) {
@@ -119,7 +125,7 @@ void main() {
         tickInterval: const Duration(milliseconds: 20),
       );
       final batches = <List<RadioScanResult>>[];
-      scanner.scan().listen(batches.add);
+      (await _started(scanner)).listen(batches.add);
       await Future<void>.delayed(const Duration(milliseconds: 10));
       await scanner.stop();
       final countAfterStop = batches.length;
@@ -127,14 +133,14 @@ void main() {
       expect(batches.length, countAfterStop);
     });
 
-    test('isScanning is true while scanning', () async {
+    test('isScanning is true only after start succeeds', () async {
       final scanner = FakeRadioScanner(
         scenario: FakeDemoScenario.low,
         random: Random(7),
       );
       expect(scanner.isScanning, isFalse);
 
-      final stream = scanner.scan();
+      final stream = await _started(scanner);
       final sub = stream.listen((_) {});
 
       expect(scanner.isScanning, isTrue);
@@ -142,6 +148,33 @@ void main() {
       await sub.cancel();
       await scanner.stop();
       expect(scanner.isScanning, isFalse);
+    });
+
+    test('startFailure returns RadioStartFailed', () async {
+      final scanner = FakeRadioScanner(
+        startFailure: const RadioScannerException('boom'),
+      );
+      final result = await scanner.start();
+      expect(result, isA<RadioStartFailed>());
+      expect(scanner.isScanning, isFalse);
+    });
+
+    test('stopFailure retains isScanning when mayStillBeScanning', () async {
+      final scanner = FakeRadioScanner(
+        scenario: FakeDemoScenario.low,
+        random: Random(8),
+        stopFailure: const RadioScannerException('stop boom'),
+      );
+      await _started(scanner);
+      expect(scanner.isScanning, isTrue);
+
+      final stopResult = await scanner.stop();
+      expect(stopResult, isA<RadioStopFailed>());
+      expect(
+        (stopResult as RadioStopFailed).mayStillBeScanning,
+        isTrue,
+      );
+      expect(scanner.isScanning, isTrue);
     });
   });
 }

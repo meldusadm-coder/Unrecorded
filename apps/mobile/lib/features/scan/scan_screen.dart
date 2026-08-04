@@ -11,6 +11,7 @@ import 'background_protection_toggle.dart';
 import 'notification_mode_banner.dart';
 import '../../router.dart';
 import '../../services/background_protection_controller.dart';
+import '../../services/protection_orchestrator_providers.dart';
 import '../../services/recent_risk_controller.dart';
 import '../../services/recent_risk_visibility.dart';
 import '../../services/scanner_provider.dart';
@@ -91,7 +92,7 @@ class ScanScreen extends ConsumerWidget {
               expandableDetail: PrivacyDisclaimer.detectionDisclaimer,
             ),
             const SizedBox(height: 12),
-            _buildNextStep(context, state, controller),
+            _buildNextStep(context, ref, state, controller),
             if (recentRisk != null) ...[
               const SizedBox(height: 16),
               RiskAlertCard(
@@ -137,18 +138,12 @@ class ScanScreen extends ConsumerWidget {
                   : const AppLogo(size: 24, forColoredBackground: true),
               color: state.protectionActive ? UnrecordedColors.danger : null,
               onPressed: () async {
+                final orch =
+                    ref.read(protectionOrchestratorProvider.notifier);
                 if (state.protectionActive) {
-                  final bgOwns = ref
-                      .read(backgroundProtectionControllerProvider)
-                      .ownsScanning;
-                  if (bgOwns) {
-                    await ref
-                        .read(backgroundProtectionControllerProvider.notifier)
-                        .disable();
-                  }
-                  await controller.pauseProtection();
+                  await orch.stopAllProtection();
                 } else {
-                  await controller.startProtection();
+                  await orch.turnProtectionOn();
                 }
               },
             ),
@@ -206,6 +201,7 @@ class ScanScreen extends ConsumerWidget {
 
   Widget _buildNextStep(
     BuildContext context,
+    WidgetRef ref,
     ScanState state,
     ScanController controller,
   ) {
@@ -235,7 +231,11 @@ class ScanScreen extends ConsumerWidget {
         return NextStepBanner(
           message: state.statusMessage ?? 'Something went wrong.',
           actionLabel: 'Try again',
-          onAction: controller.startProtection,
+          onAction: () {
+            ref
+                .read(protectionOrchestratorProvider.notifier)
+                .retryCurrentIssue();
+          },
         );
       case ScanStatus.idle:
       case ScanStatus.paused:
