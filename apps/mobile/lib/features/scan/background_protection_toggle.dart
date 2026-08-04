@@ -4,80 +4,87 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:unrecorded_core/unrecorded_core.dart';
-import '../../services/background_protection_controller.dart';
 
-/// Opt-in Android background protection toggle (off by default).
+import '../../services/protection_orchestrator_providers.dart';
+import '../../services/protection_state.dart';
+
+/// Compact Android background-mode preference toggle.
 class BackgroundProtectionToggle extends ConsumerWidget {
-  const BackgroundProtectionToggle({super.key});
+  const BackgroundProtectionToggle({
+    super.key,
+    this.preferred,
+    this.enabled,
+    this.subtitle,
+    this.visible = true,
+  });
+
+  /// When null, reads preference from the orchestrator tuple.
+  final bool? preferred;
+  final bool? enabled;
+  final String? subtitle;
+  final bool visible;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (!Platform.isAndroid) return const SizedBox.shrink();
+    if (!Platform.isAndroid || !visible) return const SizedBox.shrink();
 
-    final bgState = ref.watch(backgroundProtectionControllerProvider);
-    final controller =
-        ref.read(backgroundProtectionControllerProvider.notifier);
+    final orch = ref.watch(protectionOrchestratorProvider);
+    final value =
+        preferred ?? orch.lastConfirmedTuple?.backgroundModePreferred == true;
+    final canToggle = enabled ?? !orch.isBusy;
     final theme = Theme.of(context);
+    final statusLine = subtitle ??
+        _defaultSubtitle(
+          preferred: value,
+          owner: orch.confirmedOwner,
+          busy: orch.isBusy,
+        );
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(
-                AppCopy.backgroundProtectionTitle,
-                style: theme.textTheme.titleSmall,
-              ),
-              subtitle: Text(
-                AppCopy.backgroundProtectionSubtitle,
-                style: theme.textTheme.bodySmall?.copyWith(height: 1.4),
-              ),
-              value: bgState.enabled && bgState.serviceRunning,
-              onChanged: (enabled) async {
-                if (enabled) {
-                  final ok = await controller.enable();
-                  if (!context.mounted) return;
-                  if (!ok) {
-                    final message = ref
-                        .read(backgroundProtectionControllerProvider)
-                        .lastFailureMessage;
-                    if (message != null) {
-                      final isNotificationDenied = message ==
-                          AppCopy.backgroundProtectionNotificationRequired;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(message),
-                          action: isNotificationDenied
-                              // ignore: prefer_const_constructors
-                              ? SnackBarAction(
-                                  label: 'Settings',
-                                  onPressed: openAppSettings,
-                                )
-                              : null,
-                        ),
-                      );
-                    }
-                  }
-                } else {
-                  await controller.disable();
-                }
-              },
-            ),
-            if (bgState.enabled && bgState.serviceRunning) ...[
-              const SizedBox(height: 4),
-              Text(
-                AppCopy.backgroundProtectionOnHelper,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-            ],
-          ],
-        ),
+    return SwitchListTile(
+      contentPadding: EdgeInsets.zero,
+      title: Text(
+        AppCopy.backgroundProtectionTitle,
+        style: theme.textTheme.titleSmall,
       ),
+      subtitle: Text(
+        statusLine,
+        style: theme.textTheme.bodySmall?.copyWith(height: 1.35),
+      ),
+      value: value,
+      onChanged: !canToggle
+          ? null
+          : (next) async {
+              final outcome = await ref
+                  .read(protectionOrchestratorProvider.notifier)
+                  .setBackgroundModePreferred(next);
+              if (!context.mounted) return;
+              if (outcome is ProtectionFailed) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      outcome.issue.name == 'protocolPersistenceFailed'
+                          ? 'Could not save background preference.'
+                          : AppCopy.backgroundProtectionServiceStartFailed,
+                    ),
+                    action: SnackBarAction(
+                      label: 'Settings',
+                      onPressed: openAppSettings,
+                    ),
+                  ),
+                );
+              }
+            },
     );
+  }
+
+  static String _defaultSubtitle({
+    required bool preferred,
+    required ScannerOwner owner,
+    required bool busy,
+  }) {
+    if (busy) return 'Switching…';
+    if (owner == ScannerOwner.background) return 'Active in background';
+    if (preferred) return 'Preferred for next time';
+    return 'Preferred for next time';
   }
 }

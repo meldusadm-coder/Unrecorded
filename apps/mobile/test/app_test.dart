@@ -87,10 +87,19 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text(AppCopy.widgetHelpTitle), findsOneWidget);
+    expect(find.text(AppCopy.notificationsHelpTitle), findsOneWidget);
+
+    await tester.tap(find.text(AppCopy.widgetHelpTitle));
+    await tester.pumpAndSettle();
     expect(find.textContaining('Add the Unrecorded widget'), findsOneWidget);
     expect(find.textContaining('optional'), findsOneWidget);
-    expect(find.text(AppCopy.notificationsHelpTitle), findsOneWidget);
-    expect(find.text(AppCopy.widgetHelpLimitations), findsOneWidget);
+    expect(
+      find.textContaining('Widget updates can depend'),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text(AppCopy.notificationsHelpTitle));
+    await tester.pumpAndSettle();
     expect(find.text(AppCopy.notificationsHelpBody), findsOneWidget);
   });
 
@@ -122,12 +131,16 @@ void main() {
 
     expect(find.text('Settings & Privacy'), findsOneWidget);
     expect(find.text(AppCopy.riskNotificationsTitle), findsOneWidget);
-    expect(find.text('Local-first'), findsOneWidget);
+    expect(find.text('Privacy & data'), findsWidgets);
+
+    await tester.tap(find.byKey(const Key('privacy_data_tile')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('All scanning happens on your device'), findsWidgets);
 
     final alertsY =
         tester.getTopLeft(find.text(AppCopy.riskNotificationsTitle)).dy;
-    final localFirstY = tester.getTopLeft(find.text('Local-first')).dy;
-    expect(alertsY, lessThan(localFirstY));
+    final privacyY = tester.getTopLeft(find.text('Privacy & data').first).dy;
+    expect(alertsY, lessThan(privacyY));
   });
 
   testWidgets('settings screen can navigate back to scan screen',

@@ -31,8 +31,10 @@ void main() {
       expect(PrivacyDisclaimer.fundingNote, isNotEmpty);
       expect(
         PrivacyDisclaimer.fundingNote.toLowerCase(),
-        contains('privacy-respecting'),
+        contains('ads'),
       );
+      expect(PrivacyDisclaimer.fundingNoteShort, isNotEmpty);
+      expect(PrivacyDisclaimer.privacyModelConcise, contains('device'));
     });
   });
 }

@@ -7,11 +7,15 @@ import 'unrecorded_icon.dart';
 class PrivacyNoticeCard extends StatelessWidget {
   final String text;
   final Widget? icon;
+  final String? actionLabel;
+  final VoidCallback? onAction;
 
   const PrivacyNoticeCard({
     super.key,
     required this.text,
     this.icon,
+    this.actionLabel,
+    this.onAction,
   });
 
   @override
@@ -37,12 +41,27 @@ class PrivacyNoticeCard extends StatelessWidget {
             leading,
             const SizedBox(width: 10),
             Expanded(
-              child: Text(
-                text,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                  height: 1.4,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    text,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      height: 1.4,
+                    ),
+                  ),
+                  if (actionLabel != null && onAction != null)
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        minimumSize: const Size(48, 48),
+                        padding: EdgeInsets.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      onPressed: onAction,
+                      child: Text('$actionLabel ›'),
+                    ),
+                ],
               ),
             ),
           ],

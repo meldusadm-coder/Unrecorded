@@ -15,15 +15,23 @@ class PrivacyDisclaimer {
       'Unrecorded detects possible smart glasses or wearable recording '
       'devices nearby and alerts you to potential recording risk.';
 
-  /// Privacy-model summary for the settings screen.
+  /// Privacy-model summary for the settings screen (full sheet content).
   static const String privacyModel =
       'All scanning happens on your device. No account is required. '
       'No data is uploaded by default. No analytics or telemetry are included. '
       'Optional banner ads never receive scan results or nearby device data.';
 
-  /// Funding transparency note.
+  /// Concise on-screen reassurance for Settings.
+  static const String privacyModelConcise = 'Scanning stays on this device';
+
+  /// Funding transparency note (disclosure sheet body).
   static const String fundingNote =
-      'Official builds may later include small, privacy-respecting ads to '
-      'support development, with an optional pay-what-you-like way to remove '
-      'them. The core detection engine does not depend on ads or tracking.';
+      'Official builds may include small ads to support development. '
+      'Scan results and nearby-device data are not sent to ad networks. '
+      'You can choose a pay-what-you-like purchase to remove ads. '
+      'Core detection does not depend on payment or tracking.';
+
+  /// Short funding trigger line for Settings.
+  static const String fundingNoteShort =
+      'How Unrecorded is funded';
 }

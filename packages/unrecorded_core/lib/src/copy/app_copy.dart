@@ -84,19 +84,19 @@ class AppCopy {
 
   // Actions
   static const String turnOnProtection = 'Turn on protection';
-  static const String pauseProtection = 'Pause protection';
+  static const String turnOffProtection = 'Turn off protection';
+
+  /// Alias retained for transitional call sites; prefer [turnOffProtection].
+  static const String pauseProtection = turnOffProtection;
 
   // Notifications
   static const String riskNotificationsTitle = 'Risk alerts';
   static const String riskNotificationsSubtitle =
-      'Show a notification when possible recording risk is detected while '
-      'protection is active. Background behaviour may be limited by Android; '
-      'keep the app open for the most reliable scanning.';
+      'Notify when possible recording risk is detected.';
 
   static const String riskNotificationLevelTitle = 'Notify me for';
   static const String riskNotificationLevelSubtitle =
-      'Choose the minimum risk level before a notification is sent. '
-      'The in-app alert on the scan screen is unchanged.';
+      'Minimum risk level for a notification. In-app alerts are unchanged.';
 
   static const String protectionStatusNotificationTitle =
       'Unrecorded protection is active';
@@ -221,12 +221,16 @@ class AppCopy {
   static const String recentRiskReminderTitle = 'Recent risk reminder';
 
   static const String recentRiskReminderSubtitle =
-      'Show a short-lived reminder if you miss a possible-risk alert.';
+      'Short reminder if you miss a possible-risk alert.';
 
   static const String recentRiskReminderHelp =
-      'This is not a full history. Unrecorded only stores the latest '
-      'possible-risk time locally and automatically hides it after your '
-      'chosen window.';
+      'Reminders store only allowlisted reason categories locally, expire '
+      'after your chosen window, and clear when acknowledged. This is not '
+      'proof that anyone was recording. No device names, addresses, or raw '
+      'scan data are stored.';
+
+  static const String recentRiskPrivacyReminder =
+      'This is a privacy reminder, not proof that a device was recording.';
 
   static const String recentRiskMissedAlertTitle = 'What if I miss an alert?';
 
