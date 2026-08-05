@@ -1,0 +1,34 @@
+[
+  {
+    "question": "Can Unrecorded prove someone is recording?",
+    "answer": "No. Unrecorded shows possible privacy risk when nearby Bluetooth signals may match known smart-glasses patterns. That is a proximity and pattern indicator, not proof of active recording."
+  },
+  {
+    "question": "What does a high risk alert mean?",
+    "answer": "It means several visible Bluetooth indicators align with known wearable patterns. It is a prompt to pay attention to your surroundings, not a confirmed recording event."
+  },
+  {
+    "question": "Does Unrecorded upload scan data?",
+    "answer": "No. Scanning and risk scoring run on your device by default. Nearby Bluetooth observations are not uploaded to Meldlife Ltd servers."
+  },
+  {
+    "question": "Does the website use analytics or tracking scripts?",
+    "answer": "No. The marketing site is static and does not use cookies, analytics scripts, tracking pixels, behavioural advertising scripts, or browser fingerprinting."
+  },
+  {
+    "question": "When is scanning most reliable?",
+    "answer": "Foreground scanning while the app is open is most reliable. Background behaviour depends on Android permissions, foreground service rules, battery settings, and device manufacturer limits."
+  },
+  {
+    "question": "Can Unrecorded detect every camera or microphone?",
+    "answer": "No. Non-Bluetooth cameras, phones used as recorders, hidden BLE advertisements, and devices without recognisable patterns are outside this detection path."
+  },
+  {
+    "question": "Why does the app use Bluetooth signals?",
+    "answer": "Many smart glasses and wearables advertise Bluetooth Low Energy signals for pairing, reconnection, and companion apps. Those signals can provide useful proximity hints, but they do not reveal recording state."
+  },
+  {
+    "question": "Is Unrecorded open source?",
+    "answer": "Yes. The project is open source so people can inspect the rule-based detection engine, privacy model, and limitations."
+  }
+]

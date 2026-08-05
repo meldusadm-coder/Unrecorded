@@ -1,0 +1,44 @@
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "{{ site.host }}/#organization",
+      "name": "{{ site.orgName }}",
+      "url": "{{ site.host }}/",
+      "email": "{{ site.privacyEmail }}",
+      "sameAs": ["{{ site.github }}"]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "{{ site.host }}/#website",
+      "url": "{{ site.host }}/",
+      "name": "{{ site.name }}",
+      "description": "Local-first privacy awareness for possible nearby smart glasses and wearable recording devices.",
+      "publisher": { "@id": "{{ site.host }}/#organization" }
+    },
+    {
+      "@type": "MobileApplication",
+      "@id": "{{ site.host }}/#app",
+      "name": "{{ site.name }}",
+      "operatingSystem": "Android",
+      "applicationCategory": ["UtilitiesApplication", "SecurityApplication"],
+      "description": "Open-source, local-first privacy utility that warns when nearby Bluetooth signals may match smart glasses or wearable recording devices. Does not prove recording.",
+      "url": "{{ site.host }}/",
+      "downloadUrl": "{{ site.playStore }}",
+      "softwareVersion": "early prototype",
+      "license": "https://opensource.org/licenses/MPL-2.0",
+      "isAccessibleForFree": true,
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+        "description": "Core Bluetooth scanning and privacy risk indicators are free. Optional in-app purchase removes banner ads on official store builds."
+      },
+      "author": { "@id": "{{ site.host }}/#organization" },
+      "publisher": { "@id": "{{ site.host }}/#organization" }
+    }
+  ]
+}
+</script>

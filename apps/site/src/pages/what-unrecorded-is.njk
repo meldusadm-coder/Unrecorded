@@ -1,0 +1,60 @@
+---
+layout: "layouts/base.njk"
+permalink: "/what-unrecorded-is.html"
+title: "What Unrecorded Is and Is Not"
+description: "A plain-English explanation of what Unrecorded does, what it cannot know, who it is for, and how its privacy-first smart-glasses alerts work."
+canonicalPath: "/what-unrecorded-is.html"
+sitemapPriority: 0.85
+ogType: "website"
+breadcrumbLabel: "What Unrecorded is"
+date: "2026-08-05"
+---
+
+{% include "partials/breadcrumbs.njk" %}
+
+<main id="main" class="article-page">
+  <div class="container">
+    <h1>What Unrecorded is and is not</h1>
+    <p class="article-lead">
+      Unrecorded is a local-first privacy awareness app for nearby Bluetooth signals
+      that may match smart glasses or wearable recording devices.
+    </p>
+
+    <div class="disclaimer-box" role="note">
+      <p><strong>Product truth:</strong> {{ site.productTruth }}</p>
+    </div>
+
+    <h2>What it is</h2>
+    <ul>
+      <li>A privacy awareness tool for Android.</li>
+      <li>A local scanner for Bluetooth Low Energy signals visible to your device.</li>
+      <li>An explainable, rule-based risk indicator for patterns associated with known wearables.</li>
+      <li>An open-source project that keeps scan processing on device by default.</li>
+    </ul>
+
+    <h2>What it is not</h2>
+    <ul>
+      <li>It is not proof that anyone is recording.</li>
+      <li>It is not a camera, microphone, or lens detector.</li>
+      <li>It is not a guarantee that every smart-glasses model will be noticed.</li>
+      <li>It is not a cloud monitoring service, account system, or analytics product.</li>
+    </ul>
+
+    <h2>Who it is for</h2>
+    <p>
+      Unrecorded is for people who want calmer situational awareness in public spaces,
+      meetings, transit, classrooms, or other places where wearable recording devices
+      may be present. It is also for developers and privacy advocates who want an
+      inspectable detection model rather than a black box.
+    </p>
+
+    <h2>How to learn more</h2>
+    <ul>
+      <li><a href="/faq.html">Read the FAQ</a> for short answers.</li>
+      <li><a href="/detection-limitations.html">Read the detection limitations FAQ</a> for honest limits.</li>
+      <li><a href="/how-smart-glasses-broadcast-ble.html">Learn how smart glasses use BLE broadcasts</a>.</li>
+      <li><a href="/privacy.html">Review the privacy policy</a>.</li>
+      <li><a href="{{ site.github }}" rel="noopener noreferrer">Inspect the source on GitHub</a>.</li>
+    </ul>
+  </div>
+</main>
