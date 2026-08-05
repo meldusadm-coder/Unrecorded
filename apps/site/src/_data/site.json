@@ -1,0 +1,58 @@
+{
+  "name": "Unrecorded",
+  "host": "https://unrecorded.app",
+  "github": "https://github.com/meldusadm-coder/Unrecorded",
+  "playStore": "https://play.google.com/store/apps/details?id=app.unrecorded.unrecorded_mobile",
+  "orgName": "Meldlife Ltd",
+  "privacyEmail": "privacy@unrecorded.app",
+  "themeColor": "#5B4DFF",
+  "productTruth": "Unrecorded alerts you to possible nearby recording risk from Bluetooth signals that may match smart glasses or wearable patterns. It does not prove that someone is recording.",
+  "socialCard": "/assets/social-card.png",
+  "nav": [
+    {
+      "href": "/#mvp",
+      "label": "MVP"
+    },
+    {
+      "href": "/#how-it-works",
+      "label": "How it works"
+    },
+    {
+      "href": "/#limits",
+      "label": "Limits"
+    },
+    {
+      "href": "/what-unrecorded-is.html",
+      "label": "What it is"
+    },
+    {
+      "href": "/faq.html",
+      "label": "FAQ"
+    },
+    {
+      "href": "/privacy.html",
+      "label": "Privacy"
+    },
+    {
+      "href": "/how-smart-glasses-broadcast-ble.html",
+      "label": "BLE broadcasts"
+    },
+    {
+      "href": "/how-to-avoid-being-recorded-by-smart-glasses.html",
+      "label": "Public awareness"
+    },
+    {
+      "href": "/detection-limitations.html",
+      "label": "Limits FAQ"
+    },
+    {
+      "href": "/smart-glasses-ble-patterns.html",
+      "label": "BLE patterns"
+    },
+    {
+      "href": "https://github.com/meldusadm-coder/Unrecorded",
+      "label": "GitHub",
+      "external": true
+    }
+  ]
+}

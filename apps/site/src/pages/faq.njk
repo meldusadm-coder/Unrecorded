@@ -1,0 +1,61 @@
+---
+layout: "layouts/base.njk"
+permalink: "/faq.html"
+title: "Unrecorded FAQ"
+description: "Answers about Unrecorded smart-glasses alerts, Bluetooth limits, privacy, local processing, background scanning, and open-source development."
+canonicalPath: "/faq.html"
+sitemapPriority: 0.85
+ogType: "website"
+breadcrumbLabel: "FAQ"
+date: "2026-08-05"
+---
+
+{% include "partials/breadcrumbs.njk" %}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {% for item in faq %}
+    {
+      "@type": "Question",
+      "name": {{ item.question | json | safe }},
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": {{ item.answer | json | safe }}
+      }
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+
+<main id="main" class="article-page">
+  <div class="container">
+    <h1>Unrecorded FAQ</h1>
+    <p class="article-lead">
+      Short answers about what Unrecorded can notice, what it cannot know, and how
+      the app keeps scan processing local-first.
+    </p>
+
+    <div class="faq-list">
+      {% for item in faq %}
+        <section class="faq-item" aria-labelledby="faq-{{ loop.index }}">
+          <h2 id="faq-{{ loop.index }}">{{ item.question }}</h2>
+          <p>{{ item.answer }}</p>
+        </section>
+      {% endfor %}
+    </div>
+
+    <aside class="related-links" aria-labelledby="faq-related-heading">
+      <h2 id="faq-related-heading">More detail</h2>
+      <ul>
+        <li><a href="/what-unrecorded-is.html">What Unrecorded is and is not</a></li>
+        <li><a href="/detection-limitations.html">Detection limitations FAQ</a></li>
+        <li><a href="/how-smart-glasses-broadcast-ble.html">How smart glasses use BLE broadcasts</a></li>
+        <li><a href="/privacy.html">Privacy policy</a></li>
+      </ul>
+    </aside>
+  </div>
+</main>
