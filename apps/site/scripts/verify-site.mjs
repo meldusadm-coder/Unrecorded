@@ -25,15 +25,16 @@ const requiredFiles = [
   "assets/social-card.png",
 ];
 
+// Public URLs as Cloudflare Pages serves them (extensionless canonicals).
 const requiredPublicHtmlPaths = [
   "/",
-  "/privacy.html",
-  "/how-smart-glasses-broadcast-ble.html",
-  "/how-to-avoid-being-recorded-by-smart-glasses.html",
-  "/detection-limitations.html",
-  "/smart-glasses-ble-patterns.html",
-  "/what-unrecorded-is.html",
-  "/faq.html",
+  "/privacy",
+  "/how-smart-glasses-broadcast-ble",
+  "/how-to-avoid-being-recorded-by-smart-glasses",
+  "/detection-limitations",
+  "/smart-glasses-ble-patterns",
+  "/what-unrecorded-is",
+  "/faq",
 ];
 
 const requiredSitemapPaths = [...requiredPublicHtmlPaths, "/auth.md"];

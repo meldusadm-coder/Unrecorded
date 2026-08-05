@@ -1,15 +1,15 @@
 /
   Link: </sitemap.xml>; rel="sitemap"
   Link: </llms.txt>; rel="describedby"; type="text/markdown"
-  Link: </privacy.html>; rel="privacy-policy"
+  Link: </privacy>; rel="privacy-policy"
   Link: </auth.md>; rel="describedby"; type="text/markdown"
   Link: </.well-known/api-catalog>; rel="service"; type="application/linkset+json"
-  Link: </what-unrecorded-is.html>; rel="related"
-  Link: </faq.html>; rel="related"
-  Link: </how-smart-glasses-broadcast-ble.html>; rel="related"
-  Link: </how-to-avoid-being-recorded-by-smart-glasses.html>; rel="related"
-  Link: </detection-limitations.html>; rel="related"
-  Link: </smart-glasses-ble-patterns.html>; rel="related"
+  Link: </what-unrecorded-is>; rel="related"
+  Link: </faq>; rel="related"
+  Link: </how-smart-glasses-broadcast-ble>; rel="related"
+  Link: </how-to-avoid-being-recorded-by-smart-glasses>; rel="related"
+  Link: </detection-limitations>; rel="related"
+  Link: </smart-glasses-ble-patterns>; rel="related"
 
 /.well-known/api-catalog
   Content-Type: application/linkset+json; profile="https://www.rfc-editor.org/info/rfc9727"
