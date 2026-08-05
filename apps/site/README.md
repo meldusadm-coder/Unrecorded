@@ -4,16 +4,18 @@ Static marketing site and privacy policy for [Unrecorded](https://unrecorded.app
 
 ## What this is
 
-- `src/pages/index.njk` -> `/`
-- `src/pages/privacy.njk` -> `/privacy.html`
-- `src/pages/privacy-redirect.njk` -> `/privacy/index.html`
-- `src/pages/what-unrecorded-is.njk` -> `/what-unrecorded-is.html`
-- `src/pages/faq.njk` -> `/faq.html`
-- `src/pages/*.njk` -> four public smart-glasses guides
+- `src/pages/index.njk` -> `/` (file `index.html`)
+- `src/pages/privacy.njk` -> canonical `/privacy` (file `privacy.html`)
+- `src/pages/privacy-redirect.njk` -> `/privacy/` redirect helper
+- `src/pages/what-unrecorded-is.njk` -> canonical `/what-unrecorded-is`
+- `src/pages/faq.njk` -> canonical `/faq`
+- `src/pages/*.njk` -> four public smart-glasses guides (extensionless canonicals)
 - `src/assets/styles.css` -> `/assets/styles.css`
 - `src/sitemap.njk` -> generated `/sitemap.xml`
 - `src/llms.njk` -> generated `/llms.txt`
 - `src/robots.txt`, `src/app-ads.txt`, `src/auth.njk`, `src/_headers`, and `src/.well-known/**` -> public discovery files
+
+Cloudflare Pages always redirects `*.html` to extensionless paths (for example `/privacy.html` → `/privacy`). Canonicals, sitemap entries, and internal links use those extensionless URLs so they match what Google indexes. Do **not** add zone Redirect Rules that send extensionless URLs back to `*.html` — that creates a redirect loop with Pages.
 
 ## Run locally
 
@@ -77,8 +79,9 @@ Optional Cloudflare Markdown for Agents setup is documented in [docs/agent-disco
 
 ## Google Play and AdMob
 
-Use this URL in Play Console and AdMob app settings:
+Use either of these public policy URLs in Play Console and AdMob (both resolve to the same policy; Pages redirects `.html` to the extensionless path):
 
+**`https://unrecorded.app/privacy`**  
 **`https://unrecorded.app/privacy.html`**
 
 The policy names Google AdMob, local BLE processing, optional IAP, no accounts, and no core analytics. See [docs/release.md](../../docs/release.md#privacy-policy-url-required).
