@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.9.3+19
+
+### Added
+- Marketing site pages for what Unrecorded is / isn’t and a public FAQ, with
+  shared product-truth wording for humans and AI crawlers (#64).
+
+### Changed
+- `unrecorded.app` now builds with Eleventy (shared layout, generated
+  sitemap.xml / llms.txt) and a mobile-friendly disclosure nav (#64).
+- Cloudflare Pages must build `apps/site` with `npm run build` and publish
+  `_site` (no longer deploy flat HTML from the repo root of that folder).
+
+
 ## 0.9.2+18
 
 ### Fixed
