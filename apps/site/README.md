@@ -1,48 +1,45 @@
 # Unrecorded website (`unrecorded.app`)
 
-Static marketing site and privacy policy for [Unrecorded](https://unrecorded.app). No build step, no analytics, no cookies, and no third-party scripts.
+Static marketing site and privacy policy for [Unrecorded](https://unrecorded.app). The site is built with Eleventy into `_site/`. There are no analytics, cookies, accounts, telemetry, or third-party scripts on the website.
 
 ## What this is
 
-- **`index.html`** — public landing page
-- **`privacy.html`** — privacy policy (for app stores and the site)
-- **`how-smart-glasses-broadcast-ble.html`** — technical BLE advertising guide
-- **`how-to-avoid-being-recorded-by-smart-glasses.html`** — public situational-awareness guide
-- **`detection-limitations.html`** — detection limits FAQ for consumers and crawlers
-- **`smart-glasses-ble-patterns.html`** — open catalogue of known wearable BLE fingerprints
-- **`privacy/index.html`** — redirects to `privacy.html` for `/privacy/` URLs
-- **`src/styles.css`** — shared styles (brand tokens from `docs/brand-colors.json`)
-- **`assets/`** — favicon, social preview image, and copies of repo brand SVGs
-- **`robots.txt`** — crawl rules, AI bot directives, and Content Signals
-- **`sitemap.xml`** — canonical URL list for crawlers
-- **`llms.txt`** — machine-readable site index for AI agents ([llmstxt.org](https://llmstxt.org/))
-- **`auth.md`** — notes for agents that the site is public (no login)
-- **`.well-known/`** — content discovery catalog (RFC 9727) and OpenAPI for public endpoints
-- **`_headers`** — Cloudflare Pages response headers (Link headers + Content-Types)
+- `src/pages/index.njk` -> `/`
+- `src/pages/privacy.njk` -> `/privacy.html`
+- `src/pages/privacy-redirect.njk` -> `/privacy/index.html`
+- `src/pages/what-unrecorded-is.njk` -> `/what-unrecorded-is.html`
+- `src/pages/faq.njk` -> `/faq.html`
+- `src/pages/*.njk` -> four public smart-glasses guides
+- `src/assets/styles.css` -> `/assets/styles.css`
+- `src/sitemap.njk` -> generated `/sitemap.xml`
+- `src/llms.njk` -> generated `/llms.txt`
+- `src/robots.txt`, `src/app-ads.txt`, `src/auth.njk`, `src/_headers`, and `src/.well-known/**` -> public discovery files
 
-## AI / SEO files
+## Run locally
 
-Static files for crawler and agent discovery. Deployed with the rest of `apps/site`; no build step.
-
-| File | Purpose |
-|------|---------|
-| `robots.txt` | Allow public pages; explicit AI crawler rules; `Content-Signal: ai-train=no, search=yes, ai-input=yes`; references sitemap |
-| `sitemap.xml` | Lists canonical pages (home, privacy, four guides, auth.md) |
-| `llms.txt` | Short markdown index with links to key pages and GitHub |
-| `_headers` | Homepage `Link` headers + Content-Type for `.well-known` and `auth.md` |
-| `auth.md` | Public-site note for agents (no authentication on this domain) |
-| `.well-known/*` | Content discovery catalog, OpenAPI spec, status |
-
-**When to update:** add a `<url>` with `<lastmod>` to `sitemap.xml` and a link under `## Pages` in `llms.txt` whenever you add a new public HTML page. Update `robots.txt` only if crawl policy changes. Guide articles: `how-smart-glasses-broadcast-ble.html`, `how-to-avoid-being-recorded-by-smart-glasses.html`, `detection-limitations.html`, `smart-glasses-ble-patterns.html`. Regenerate `assets/social-card.png` from `social-card.svg` if the artwork changes.
-
-**Local preview:** `python3 -m http.server` serves `robots.txt`, `sitemap.xml`, and `llms.txt` but does **not** apply `_headers`. Use Wrangler to preview Link headers:
+From `apps/site`:
 
 ```bash
-npx wrangler pages dev apps/site
-curl -sI http://localhost:8788/ | grep -i '^link:'
+npm install
+npm run build
+npm test
+npm start
 ```
 
-**Optional (Cloudflare Pro+):** enable **Markdown for Agents** so requests with `Accept: text/markdown` get converted HTML responses. Step-by-step: [docs/agent-discovery.md](../../docs/agent-discovery.md).
+`npm test` runs an Eleventy build and then `scripts/verify-site.mjs`, which checks required public files, sitemap/llms coverage, product-truth copy, and stale `/src/styles.css` references.
+
+## Host on Cloudflare Pages
+
+Use Cloudflare Pages Git deploys. `_site/` is gitignored, so Pages must run the build instead of serving checked-in output.
+
+| Setting | Value |
+|---------|-------|
+| Root directory | `apps/site` |
+| Build command | `npm run build` |
+| Build output directory | `_site` |
+| Environment variable | `NODE_VERSION=20` |
+
+Do not configure Pages to publish `apps/site` directly. Old flat HTML files are no longer the source of truth; Eleventy templates under `src/` build the deployable site.
 
 ### Post-deploy verification
 
@@ -55,124 +52,28 @@ curl -s https://unrecorded.app/llms.txt | head
 curl -sI https://unrecorded.app/auth.md | grep -i content-type
 curl -s https://unrecorded.app/.well-known/api-catalog | head
 
-# Markdown for Agents (after enabling in Cloudflare dashboard)
+# Markdown for Agents, after enabling in Cloudflare dashboard on eligible plans
 curl -sI https://unrecorded.app/ -H 'Accept: text/markdown' | grep -iE '^(content-type|x-markdown-tokens):'
 ```
 
-Expected passes after deploy: `robotsTxt`, `sitemap`, `linkHeaders`, `robotsTxtAiRules`, `contentSignals`, `apiCatalog`, `authMd`. `markdownNegotiation` requires the Cloudflare setting in [docs/agent-discovery.md](../../docs/agent-discovery.md). MCP, agent skills, OAuth, and DNS-AID checks are not applicable for this static Android app site.
+`_headers` is applied by Cloudflare Pages, not by `npm start` or simple local static servers.
 
-## Run locally
+## AI / SEO files
 
-From this directory:
+Eleventy generates `sitemap.xml` and `llms.txt` from pages with `canonicalPath` front matter unless `sitemap: false` is set. `auth.md` is a small Eleventy template so it can stay in the sitemap while still publishing at `/auth.md`.
 
-```bash
-# Python 3
-python3 -m http.server 8080
+Keep `Content-Signal: ai-train=no, search=yes, ai-input=yes` in `robots.txt`. Static discovery files deploy with the built site:
 
-# or Node (if npx is available)
-npx --yes serve -l 8080
-```
+| File | Purpose |
+|------|---------|
+| `robots.txt` | Allow public pages; explicit AI crawler rules; references sitemap |
+| `sitemap.xml` | Generated canonical page list |
+| `llms.txt` | Generated markdown index for AI agents |
+| `auth.md` | Public-site note for agents; no authentication |
+| `.well-known/*` | Content discovery catalog, OpenAPI spec, status |
+| `_headers` | Link headers and content types for Cloudflare Pages |
 
-Open:
-
-- http://localhost:8080/
-- http://localhost:8080/privacy.html
-
-Paths use root-relative URLs (`/src/...`, `/assets/...`), so serve from `apps/site` (not a parent folder) unless your host rewrites paths.
-
-## Build
-
-There is **no build step**. Deploy the `apps/site` folder as static files.
-
-Optional checks before deploy:
-
-```bash
-# Validate HTML (if html5validator is installed)
-html5validator --also-check-css index.html privacy.html
-```
-
-## Host on Cloudflare Pages
-
-Use **Cloudflare Pages** (not a Worker) for this folder — there is no build step.
-
-### Option A — Git deploy (recommended)
-
-1. Sign in to the [Cloudflare dashboard](https://dash.cloudflare.com/) → **Workers & Pages** → **Create** → **Pages** → **Connect to Git**.
-2. Select the Unrecorded repository.
-3. Build settings:
-
-   | Setting | Value |
-   |---------|--------|
-   | Production branch | `main` (or your default) |
-   | Framework preset | **None** |
-   | Build command | *(leave empty)* |
-   | Build output directory | `apps/site` |
-
-4. **Save and deploy**. Each push to the production branch updates the site.
-5. **Custom domains** → **Set up a custom domain** → add `unrecorded.app` (and optionally `www.unrecorded.app`).
-6. If `unrecorded.app` uses Cloudflare DNS, accept the suggested records. Otherwise add the CNAME/TXT records Pages shows you at your registrar.
-7. **Redirect `www` → apex** (optional): **Rules** → **Redirect Rules**, or a single `www` CNAME with “Redirect to `https://unrecorded.app`”.
-
-Verify after deploy:
-
-- `https://unrecorded.app/`
-- `https://unrecorded.app/privacy.html` (required for Play / AdMob)
-
-### Option B — Direct upload with Wrangler
-
-One-off or CI deploy without Git integration:
-
-```bash
-# From repo root (install wrangler once: npm i -g wrangler)
-wrangler login
-wrangler pages project create unrecorded --production-branch main
-wrangler pages deploy apps/site --project-name=unrecorded --branch=main
-```
-
-Preview locally:
-
-```bash
-npx wrangler pages dev apps/site
-```
-
-### DNS checklist
-
-- Domain `unrecorded.app` on Cloudflare (or nameservers pointed to Cloudflare).
-- Pages custom domain shows **Active** with SSL.
-- Policy URL must be public worldwide (no Access / geo block on these paths).
-
-### What not to use
-
-- **Workers-only** deploy — unnecessary; Pages serves static files from the edge.
-- **Build command** — leave empty; a fake build step will fail.
-
-## Other hosting
-
-- **GitHub Pages** — publish from `/apps/site` via Actions or branch docs
-- **Netlify / Vercel** — static publish root `apps/site`
-
-## Branding assets
-
-| File | Source |
-|------|--------|
-| `assets/logo-mark.svg` | `packages/unrecorded_ui/assets/brand/unrecorded-logo-mark.svg` |
-| `assets/logo-horizontal.svg` | `packages/unrecorded_ui/assets/brand/unrecorded-logo-horizontal.svg` |
-| `assets/app-icon-accent.svg` | `packages/unrecorded_ui/assets/brand/unrecorded-app-icon-accent.svg` |
-| `assets/favicon.svg` | Derived from logo mark |
-| `assets/social-card.png` | Open Graph / Twitter preview image (1200×630 PNG) |
-| `assets/social-card.svg` | Source artwork for social card |
-
-Colour tokens match `packages/unrecorded_ui/lib/src/app_theme.dart` and `docs/brand-colors.json`. Update copies here if the mobile brand kit changes.
-
-## Editing copy
-
-| Content | File |
-|---------|------|
-| Landing page | `index.html` |
-| Privacy policy | `privacy.html` |
-| Styles | `src/styles.css` |
-
-After privacy policy changes, update the **effective date** in `privacy.html` and review before Google Play / app store submission.
+Optional Cloudflare Markdown for Agents setup is documented in [docs/agent-discovery.md](../../docs/agent-discovery.md).
 
 ## Google Play and AdMob
 
@@ -180,37 +81,31 @@ Use this URL in Play Console and AdMob app settings:
 
 **`https://unrecorded.app/privacy.html`**
 
-The policy names **Google AdMob**, local BLE processing, optional IAP, no accounts, and no core analytics. See [`docs/release.md`](../../docs/release.md#privacy-policy-url-required).
+The policy names Google AdMob, local BLE processing, optional IAP, no accounts, and no core analytics. See [docs/release.md](../../docs/release.md#privacy-policy-url-required).
 
 ### app-ads.txt (AdMob)
 
-To help protect AdMob earnings from ad fraud, publish this file at the root of the developer domain used by your store listings:
+Publish this file at:
 
-- Required URL: **`https://unrecorded.app/app-ads.txt`**
-- Required content (single line):
+**`https://unrecorded.app/app-ads.txt`**
 
-  ```text
-  google.com, pub-5555183606520770, DIRECT, f08c47fec0942fa0
-  ```
+Required content:
 
-- The domain in Google Play / App Store must match this host exactly.
-- After deployment, allow at least 24 hours for AdMob to crawl and verify.
-- In AdMob, check status at **Apps → app-ads.txt**.
+```text
+google.com, pub-5555183606520770, DIRECT, f08c47fec0942fa0
+```
 
-Quick verification checklist:
+After deployment, allow at least 24 hours for AdMob to crawl and verify.
 
-1. Deploy static site changes from `apps/site`.
-2. Open `https://unrecorded.app/app-ads.txt` and confirm it is public and returns HTTP 200.
-3. Confirm the file contains exactly the required line above.
-4. After 24+ hours, recheck your app's app-ads.txt status in AdMob.
+## Branding assets
 
-## TODOs before launch
+| File | Source |
+|------|--------|
+| `src/assets/logo-mark.svg` | `packages/unrecorded_ui/assets/brand/unrecorded-logo-mark.svg` |
+| `src/assets/logo-horizontal.svg` | `packages/unrecorded_ui/assets/brand/unrecorded-logo-horizontal.svg` |
+| `src/assets/app-icon-accent.svg` | `packages/unrecorded_ui/assets/brand/unrecorded-app-icon-accent.svg` |
+| `src/assets/favicon.svg` | Derived from logo mark |
+| `src/assets/social-card.png` | Open Graph / Twitter preview image (1200x630 PNG) |
+| `src/assets/social-card.svg` | Source artwork for social card |
 
-- [x] Legal entity: **Meldlife Ltd** — section 1 in `privacy.html`
-- [x] Privacy contact: **privacy@unrecorded.app** — sections 1, 16, 19, footer
-- [ ] Add registered company address in `privacy.html` if required by your jurisdiction or app store
-- [ ] Confirm **GitHub URL** (currently `https://github.com/meldusadm-coder/Unrecorded`)
-- [ ] Deploy site and verify `https://unrecorded.app/privacy.html` is publicly reachable (AdMob rejects geofenced or login-walled URLs)
-- [ ] Add **Google Play / App Store** links when available (replace “Coming soon” on the homepage)
-- [ ] Review privacy policy with counsel before store submission
-- [ ] Point DNS for `unrecorded.app` at the chosen static host
+Colour tokens match `packages/unrecorded_ui/lib/src/app_theme.dart` and `docs/brand-colors.json`.

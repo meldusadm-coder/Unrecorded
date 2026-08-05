@@ -1,0 +1,22 @@
+<header class="site-header">
+  <div class="container">
+    <a class="brand-link" href="/">
+      <img src="/assets/logo-mark.svg" width="36" height="36" alt="" aria-hidden="true" />
+      <span class="brand-name">{{ site.name }}</span>
+    </a>
+    <details class="nav-menu">
+      <summary>Menu</summary>
+      <nav class="site-nav" aria-label="Primary">
+        <ul class="nav-links">
+          {% for item in site.nav %}
+            <li>
+              <a href="{{ item.href }}"{% if item.external %} rel="noopener noreferrer"{% endif %}>
+                {{ item.label }}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </nav>
+    </details>
+  </div>
+</header>

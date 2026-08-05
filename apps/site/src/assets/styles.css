@@ -1,4 +1,5 @@
-/* Unrecorded marketing site — brand tokens from docs/brand-colors.json */
+/* served as /assets/styles.css */
+/* Unrecorded marketing site - brand tokens from docs/brand-colors.json */
 
 :root {
   --color-primary: #5b4dff;
@@ -91,7 +92,8 @@ a:hover {
 }
 
 a:focus-visible,
-button:focus-visible {
+button:focus-visible,
+summary:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 3px;
 }
@@ -124,7 +126,7 @@ button:focus-visible {
   position: sticky;
   top: 0;
   z-index: 50;
-  height: var(--header-height);
+  min-height: var(--header-height);
   display: flex;
   align-items: center;
   background: rgb(255 255 255 / 0.92);
@@ -162,30 +164,112 @@ button:focus-visible {
   letter-spacing: -0.02em;
 }
 
-.nav-links {
-  display: flex;
-  flex-wrap: wrap;
+.nav-menu {
+  margin-left: auto;
+}
+
+.nav-menu summary {
+  display: inline-flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: var(--space-md) var(--space-lg);
+  justify-content: center;
+  min-height: 3rem;
+  padding: 0 var(--space-md);
+  color: var(--color-primary-dark);
+  font-weight: 650;
+  cursor: pointer;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: var(--color-white);
+  list-style: none;
+}
+
+.nav-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.nav-menu summary::after {
+  content: "";
+  width: 0.45rem;
+  height: 0.45rem;
+  margin-left: var(--space-sm);
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg) translateY(-1px);
+}
+
+.nav-menu[open] summary::after {
+  transform: rotate(225deg) translateY(-1px);
+}
+
+.site-nav {
+  position: absolute;
+  left: var(--space-lg);
+  right: var(--space-lg);
+  top: calc(100% + 1px);
+  padding: var(--space-sm);
+  background: var(--color-white);
+  border: 1px solid var(--color-line);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+.nav-links {
+  display: grid;
+  gap: 0.25rem;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
 .nav-links a {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   min-height: 3rem;
-  padding-inline: var(--space-xs);
+  padding: 0 var(--space-md);
   text-decoration: none;
   font-size: 0.9375rem;
   font-weight: 500;
   color: var(--color-muted);
+  border-radius: var(--radius-sm);
 }
 
 .nav-links a:hover {
   color: var(--color-primary-dark);
+  background: var(--color-surface);
+}
+
+@media (min-width: 56rem) {
+  .nav-menu {
+    flex: 1;
+  }
+
+  .nav-menu summary {
+    display: none;
+  }
+
+  .nav-menu:not([open]) > .site-nav,
+  .site-nav {
+    position: static;
+    display: block;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-xs) var(--space-md);
+  }
+
+  .nav-links a {
+    padding-inline: var(--space-xs);
+    background: transparent;
+  }
 }
 
 #mvp,
@@ -1021,4 +1105,90 @@ button:focus-visible {
   margin: 0;
   font-size: 0.9375rem;
   color: var(--color-muted);
+}
+
+
+.site-disclaimer {
+  padding-block: var(--space-lg);
+  background: var(--color-surface-alt);
+  border-top: 1px solid var(--color-line);
+}
+
+.site-disclaimer p {
+  margin: 0;
+  color: var(--color-on-surface);
+  font-size: 0.9375rem;
+}
+
+.product-truth-section .disclaimer-box h2 {
+  margin: 0 0 var(--space-sm);
+  font-size: 1.25rem;
+}
+
+.related-links {
+  margin: var(--space-2xl) 0 0;
+  padding: var(--space-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+}
+
+.related-links h2 {
+  margin-top: 0;
+}
+
+.related-links ul {
+  margin-bottom: 0;
+}
+
+.faq-list {
+  display: grid;
+  gap: var(--space-lg);
+  margin-top: var(--space-xl);
+}
+
+.faq-item {
+  padding: var(--space-lg);
+  background: var(--color-white);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.faq-item h2 {
+  margin-top: 0;
+}
+
+@media (max-width: 32rem) {
+  :root {
+    --space-lg: 1rem;
+    --space-3xl: 3rem;
+    --space-4xl: 4rem;
+  }
+
+  .container {
+    width: min(100% - 2rem, var(--max-width));
+  }
+
+  .site-header .container {
+    align-items: center;
+  }
+
+  .site-nav {
+    left: 1rem;
+    right: 1rem;
+  }
+
+  .btn,
+  .hero-actions .btn {
+    width: 100%;
+  }
+
+  .limits-panel,
+  .card,
+  .guide-card,
+  .cta-box,
+  .disclaimer-box {
+    padding: var(--space-lg);
+  }
 }

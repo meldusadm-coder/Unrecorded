@@ -1,0 +1,37 @@
+---
+permalink: "/llms.txt"
+sitemap: false
+eleventyExcludeFromCollections: true
+---
+# {{ site.name }}
+
+> {{ site.productTruth }}
+
+**Licence:** MPL-2.0 · **Platform:** Android (open-source) · **Trust:** no accounts, no telemetry in core scanning, no cloud upload of scan data
+
+## Pages
+
+{% for page in collections.sitemapPages %}
+- [{{ page.data.llmsTitle | default(page.data.title) }}]({{ site.host }}{{ page.data.canonicalPath }}): {{ page.data.llmsBlurb | default(page.data.description) }}
+{% endfor %}
+
+## Documentation (repository)
+
+- [Detection limitations]({{ site.github }}/blob/main/docs/detection-limitations.md): Engineering notes on scan cadence, notifications, and probabilistic detection
+- [Privacy model]({{ site.github }}/blob/main/docs/privacy-model.md): Local-first principles, no accounts, no core telemetry
+- [Architecture]({{ site.github }}/blob/main/docs/architecture.md): Monorepo layout — `unrecorded_core`, `unrecorded_radio`, `apps/mobile`
+- [Android permissions]({{ site.github }}/blob/main/docs/android-permissions.md): Permission inventory for Play Console
+- [README / capabilities map]({{ site.github }}#ai-search-indexing--capabilities-mapping): AI search indexing block and deterministic engine summary
+
+## External
+
+- [GitHub repository]({{ site.github }}): Source code, issues, and contributions
+- [Google Play]({{ site.playStore }}): Official Android app listing
+
+## Crawl hints
+
+- Sitemap: {{ site.host }}/sitemap.xml
+- Robots: {{ site.host }}/robots.txt
+- Content-Signal: ai-train=no, search=yes, ai-input=yes (see robots.txt)
+- Auth (public site, no login): {{ site.host }}/auth.md
+- Content catalog: {{ site.host }}/.well-known/api-catalog

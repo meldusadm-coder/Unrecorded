@@ -4,6 +4,8 @@
   Link: </privacy.html>; rel="privacy-policy"
   Link: </auth.md>; rel="describedby"; type="text/markdown"
   Link: </.well-known/api-catalog>; rel="service"; type="application/linkset+json"
+  Link: </what-unrecorded-is.html>; rel="related"
+  Link: </faq.html>; rel="related"
   Link: </how-smart-glasses-broadcast-ble.html>; rel="related"
   Link: </how-to-avoid-being-recorded-by-smart-glasses.html>; rel="related"
   Link: </detection-limitations.html>; rel="related"

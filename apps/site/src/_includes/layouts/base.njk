@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {% include "partials/head.njk" %}
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+    {% include "partials/nav.njk" %}
+    {{ content | safe }}
+    {% if showDisclaimer != false %}
+      {% include "partials/disclaimer.njk" %}
+    {% endif %}
+    {% include "partials/footer.njk" %}
+  </body>
+</html>
