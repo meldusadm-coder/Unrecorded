@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/misc.dart' show ProviderException;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'android_protection_protocol_store.dart';
@@ -18,9 +20,13 @@ import 'scanner_provider.dart';
 import 'single_engine_protection_protocol_store.dart';
 
 /// Override in [ProviderScope] after [SharedPreferences.getInstance].
-final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
-  throw StateError('Override sharedPreferencesProvider in ProviderScope');
-});
+final sharedPreferencesProvider = Provider<SharedPreferences>(
+  (ref) {
+    throw StateError('Override sharedPreferencesProvider in ProviderScope');
+  },
+  // Always fails unless overridden — do not auto-retry (Riverpod 3 default).
+  retry: (retryCount, error) => null,
+);
 
 final backgroundProtectionPreflightProvider =
     Provider<BackgroundProtectionPreflight>((ref) {
@@ -42,6 +48,11 @@ final protectionProtocolStoreProvider =
   try {
     final prefs = ref.read(sharedPreferencesProvider);
     final store = SingleEngineProtectionProtocolStore(prefs: prefs);
+    ref.onDispose(() => unawaited(store.dispose()));
+    return store;
+  } on ProviderException catch (e) {
+    if (e.exception is! StateError) rethrow;
+    final store = FakeProtectionProtocolStore();
     ref.onDispose(() => unawaited(store.dispose()));
     return store;
   } on StateError {

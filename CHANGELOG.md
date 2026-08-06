@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.9.4+20
+
+### Changed
+- Google Play Billing Library via `in_app_purchase` 3.3.0 /
+  `in_app_purchase_android` 0.5.2 (Play Billing **7.1.1 → 8.0.0**).
+- Dependency majors: Riverpod 3, go_router 17, flutter_blue_plus 2,
+  google_mobile_ads 9, permission_handler 13, device_info_plus 13,
+  package_info_plus 10, flutter_foreground_task 10,
+  flutter_local_notifications 22, home_widget 0.9, flutter_lints 6.
+- Compatible lockfile upgrades for remaining transitive packages.
+- Adapt SharedPreferences protocol-store fallback for Riverpod 3
+  `ProviderException` wrapping (tests and non-Android without prefs override).
+
+
 ## 0.9.3+19
 
 ### Added
