@@ -20,7 +20,7 @@ import 'radio_stop_result.dart';
 /// Start/stop are serialised. [isScanning] is true only after
 /// [FlutterBluePlus.startScan] succeeds. A thrown [FlutterBluePlus.stopScan]
 /// always yields [RadioStopFailed] with `mayStillBeScanning: true` because
-/// flutter_blue_plus 1.36.8 sets `isScanningNow` false before the native
+/// flutter_blue_plus sets `isScanningNow` false before the native
 /// await, so Dart state cannot prove native stop after that exception.
 ///
 /// TODO: Add deeper native Android (Kotlin) scanner for background scanning.
@@ -156,7 +156,7 @@ class BleRadioScanner implements RadioScanner {
       try {
         await FlutterBluePlus.stopScan();
       } catch (e) {
-        // flutter_blue_plus 1.36.8 sets isScanningNow false before native
+        // flutter_blue_plus sets isScanningNow false before native
         // await, so a thrown stopScan can never prove native inactivity.
         return RadioStopFailed(
           RadioScannerException('Failed to stop BLE scan', cause: e),
