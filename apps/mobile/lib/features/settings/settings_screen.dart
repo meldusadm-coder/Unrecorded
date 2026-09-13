@@ -9,6 +9,7 @@ import '../../copy/feedback_copy.dart';
 import '../../copy/monetisation_copy.dart';
 import '../../services/app_version.dart';
 import '../../services/ad_consent_service.dart';
+import '../../services/ads_service.dart';
 import '../../services/entitlement_service.dart';
 import '../../services/notification_prefs.dart';
 import '../../services/recent_risk_controller.dart';
@@ -106,6 +107,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
   Future<void> _showAdPrivacyChoices() async {
     try {
       await ref.read(adConsentServiceProvider).showPrivacyOptionsForm();
+      if (!mounted) return;
+      ref.invalidate(adsServiceProvider);
       ref.invalidate(adPrivacyOptionsRequiredProvider);
     } catch (_) {
       if (!mounted) return;
@@ -247,10 +250,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
               ),
               dropdownMenuEntries: RecentRiskWindow.values
                   .map(
-                    (window) => DropdownMenuEntry(
-                      value: window,
-                      label: window.label,
-                    ),
+                    (window) =>
+                        DropdownMenuEntry(value: window, label: window.label),
                   )
                   .toList(),
               onSelected: (value) {
@@ -278,8 +279,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                 color: theme.colorScheme.primary,
               ),
               title: const Text('Privacy & data'),
-              subtitle:
-                  const Text('Local-first scanning, no account, no cloud'),
+              subtitle: const Text(
+                'Local-first scanning, no account, no cloud',
+              ),
               trailing: const UnrecordedListTrailing(),
               onTap: _openPrivacySheet,
             ),
@@ -308,8 +310,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                     color: theme.colorScheme.primary,
                   ),
                   title: const Text(MonetisationCopy.adPrivacyChoicesTitle),
-                  subtitle:
-                      const Text(MonetisationCopy.adPrivacyChoicesSubtitle),
+                  subtitle: const Text(
+                    MonetisationCopy.adPrivacyChoicesSubtitle,
+                  ),
                   trailing: const UnrecordedListTrailing(),
                   onTap: _showAdPrivacyChoices,
                 );
@@ -345,9 +348,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                 color: theme.colorScheme.primary,
               ),
               title: const Text(FeedbackCopy.sendFeedbackButton),
-              subtitle: const Text(
-                'Report bugs, confusion, or suggestions',
-              ),
+              subtitle: const Text('Report bugs, confusion, or suggestions'),
               trailing: const UnrecordedListTrailing(),
               onTap: () => context.push('/feedback'),
             ),
