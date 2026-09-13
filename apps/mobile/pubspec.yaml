@@ -15,7 +15,7 @@ dependencies:
   flutter_riverpod: ^3.4.2
   go_router: ^17.4.0
   flutter_blue_plus: ^2.3.11
-  permission_handler: ^13.0.0
+  permission_handler: ^13.0.2
   shared_preferences: ^2.5.5
   shared_preferences_android: ^2.4.27
   device_info_plus: ^13.2.0
