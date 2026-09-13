@@ -6,8 +6,8 @@ from urllib.request import Request, urlopen
 def main():
     for path, markers in {
         "/": ("Unrecorded",),
-        "/privacy.html": ("Privacy Policy", "Meldlife Ltd", "privacy@unrecorded.app"),
-        "/privacy": ("Privacy Policy", "Meldlife Ltd", "privacy@unrecorded.app"),
+        "/privacy.html": ('<h1>Privacy Policy</h1>', 'id="app-data"', 'id="retention"', "Meldlife Ltd", "privacy@unrecorded.app"),
+        "/privacy": ('<h1>Privacy Policy</h1>', 'id="app-data"', 'id="retention"', "Meldlife Ltd", "privacy@unrecorded.app"),
         "/app-ads.txt": ("google.com, pub-5555183606520770",),
     }.items():
         url = "https://unrecorded.app" + path

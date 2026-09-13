@@ -44,7 +44,7 @@ class ReleaseChecksTest(unittest.TestCase):
 
     def test_generic_success_page_is_not_a_privacy_policy(self):
         def response(*args, **kwargs):
-            item = io.BytesIO(b'Unrecorded - page not found')
+            item = io.BytesIO(b'Unrecorded <footer>Privacy Policy Meldlife Ltd privacy@unrecorded.app</footer>')
             item.status = 200
             return item
 
