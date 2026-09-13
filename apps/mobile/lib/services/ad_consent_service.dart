@@ -11,7 +11,8 @@ class AdConsentService {
   ConsentRequestParameters get _requestParameters => ConsentRequestParameters(
         consentDebugSettings: kDebugMode
             ? ConsentDebugSettings(
-                debugGeography: DebugGeography.debugGeographyEea)
+                debugGeography: DebugGeography.debugGeographyEea,
+              )
             : null,
       );
 

@@ -9,6 +9,7 @@ import '../../copy/feedback_copy.dart';
 import '../../copy/monetisation_copy.dart';
 import '../../services/app_version.dart';
 import '../../services/ad_consent_service.dart';
+import '../../services/ads_service.dart';
 import '../../services/entitlement_service.dart';
 import '../../services/notification_prefs.dart';
 import '../../services/recent_risk_controller.dart';

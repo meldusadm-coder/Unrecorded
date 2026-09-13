@@ -157,7 +157,14 @@ jobs:
           channel: stable
 
       - name: Install dependencies
-        run: flutter pub get
+        run: flutter pub upgrade
+
+      - name: Preserve resolved dependency lockfile
+        uses: actions/upload-artifact@v4
+        with:
+          name: resolved-pub-lock
+          path: pubspec.lock
+          retention-days: 7
 
       - name: Check formatting
         run: dart format --set-exit-if-changed .
