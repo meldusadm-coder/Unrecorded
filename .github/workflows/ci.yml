@@ -35,6 +35,8 @@ jobs:
         working-directory: apps/site
       - run: npm test
         working-directory: apps/site
+      - name: Release validation regression tests
+        run: python3 -m unittest discover -s tool/release -p 'test_*.py'
 
   scope:
     name: Resolve test scope
