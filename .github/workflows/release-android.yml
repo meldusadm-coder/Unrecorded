@@ -108,7 +108,7 @@ jobs:
             echo "banner_id=${ADMOB_SECRET}" >> "${GITHUB_OUTPUT}"
           fi
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: "17"
