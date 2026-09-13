@@ -4,7 +4,9 @@
 
 ### Changed
 - Explicitly target Android 16 (API 36) for current Google Play updates.
+- Refresh 53 compatible Dart dependencies, including ads, billing, Bluetooth and notifications.
 - Update vulnerable website YAML dependencies and add weekly dependency updates.
+- Pin Flutter 3.47.4 and update GitHub build actions; enforce the reviewed lockfile.
 - Require website build/security checks in CI and a valid live policy before Play upload.
 
 ### Fixed

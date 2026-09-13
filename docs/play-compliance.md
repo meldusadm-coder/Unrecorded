@@ -7,6 +7,7 @@ Version prepared: 0.9.5+21. This is a technical review, not confirmation of Play
 - Existing AGP 8.11.1 supports 16 KB packaging. Release CI now checks every bundled 64-bit native ELF library; physical/emulator testing on a 16 KB device is still needed.
 - Bluetooth permissions remain bounded: legacy location only through API 30, neverForLocation on Android 12+, connectedDevice foreground-service type, user-controlled background protection, no boot restart.
 - Ads wait for the UMP form callback and canRequestAds before SDK initialisation; changes to privacy choices invalidate and dispose ads. Scan data remains separate from ads.
+- Flutter 3.47.4 is pinned in CI/release, with refreshed compatible Pub dependencies and enforced lockfile resolution. GitHub checkout, Java/Node setup and artifact actions use current releases.
 - The website's vulnerable js-yaml dependencies were updated. npm audit and site verification are now required in CI. Dependabot monitors pub, npm, Gradle and Actions weekly against dev.
 
 ## Outstanding hosting and Console actions
