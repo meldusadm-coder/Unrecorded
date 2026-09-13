@@ -17,7 +17,7 @@ dependencies:
   flutter_blue_plus: ^2.3.11
   permission_handler: ^13.0.0
   shared_preferences: ^2.5.5
-  shared_preferences_android: ^2.4.27
+  shared_preferences_android: ^2.4.28
   device_info_plus: ^13.2.0
   package_info_plus: ^10.2.1
   google_mobile_ads: ^9.0.0
