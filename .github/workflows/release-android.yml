@@ -182,6 +182,9 @@ jobs:
           args+=(--dart-define=ADMOB_BANNER_ID="${{ steps.admob.outputs.banner_id }}")
           flutter build appbundle "${args[@]}"
 
+      - name: Verify native 16 KB page alignment
+        run: python3 tool/release/check_native_alignment.py apps/mobile/build/app/outputs/bundle/release/app-release.aab
+
       - name: Verify release AAB is signed
         run: |
           set -euo pipefail
@@ -288,6 +291,10 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: false
+
+      - name: Verify live privacy policy and public assets
+        if: env.UPLOAD_TO_PLAY == 'true'
+        run: python3 tool/release/check_public_site.py
 
       - name: Upload to Google Play
         id: play_upload

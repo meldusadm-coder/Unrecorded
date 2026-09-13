@@ -22,17 +22,19 @@ void main() {
     AdsService.skipPlatformAdCallsForTest = false;
   });
 
-  ProviderContainer buildContainer({Map<String, Object>? prefs}) {
+  ProviderContainer buildContainer({
+    Map<String, Object>? prefs,
+    bool consentAllowed = true,
+  }) {
     SharedPreferences.setMockInitialValues(prefs ?? {});
     return ProviderContainer(
       overrides: [
-        adConsentServiceProvider.overrideWithValue(_NoOpAdConsentService()),
+        adConsentServiceProvider.overrideWithValue(
+          _NoOpAdConsentService(consentAllowed),
+        ),
         entitlementServiceProvider.overrideWith((ref) async {
           final shared = await SharedPreferences.getInstance();
-          final service = EntitlementService(
-            shared,
-            iap: FakeInAppPurchase(),
-          );
+          final service = EntitlementService(shared, iap: FakeInAppPurchase());
           await service.init();
           return service;
         }),
@@ -62,6 +64,18 @@ void main() {
     container.dispose();
   });
 
+  test('consent denied skips ad SDK initialisation and requests', () async {
+    final container = buildContainer(consentAllowed: false);
+    addTearDown(container.dispose);
+    await container.read(adsServiceProvider.future);
+    expect(AdsService.platformInitAttemptCount, 0);
+    expect(AdsService.platformLoadBannerAttemptCount, 0);
+  });
+
+  test('consent unavailable fails closed', () async {
+    expect(await const AdConsentService().canRequestAds(), isFalse);
+  });
+
   test('adsMayShowProvider false when ads_removed in prefs', () async {
     final container = buildContainer(prefs: {'ads_removed': true});
 
@@ -76,14 +90,16 @@ void main() {
     container.dispose();
   });
 
-  test('adsMayShowProvider true when unpaid and entitlement resolved',
-      () async {
-    final container = buildContainer();
+  test(
+    'adsMayShowProvider true when unpaid and entitlement resolved',
+    () async {
+      final container = buildContainer();
 
-    await container.read(entitlementServiceProvider.future);
-    expect(container.read(adsMayShowProvider), isTrue);
-    container.dispose();
-  });
+      await container.read(entitlementServiceProvider.future);
+      expect(container.read(adsMayShowProvider), isTrue);
+      container.dispose();
+    },
+  );
 
   test('adsMayShowProvider false after purchase grants remove ads', () async {
     SharedPreferences.setMockInitialValues({});
@@ -126,6 +142,12 @@ void main() {
 }
 
 class _NoOpAdConsentService extends AdConsentService {
+  const _NoOpAdConsentService(this.allowed);
+  final bool allowed;
+
+  @override
+  Future<bool> canRequestAds() async => allowed;
+
   @override
   Future<void> requestConsentIfNeeded() async {}
 }

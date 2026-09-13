@@ -11,8 +11,7 @@ class AdConsentService {
   ConsentRequestParameters get _requestParameters => ConsentRequestParameters(
         consentDebugSettings: kDebugMode
             ? ConsentDebugSettings(
-                debugGeography: DebugGeography.debugGeographyEea,
-              )
+                debugGeography: DebugGeography.debugGeographyEea)
             : null,
       );
 
@@ -41,10 +40,24 @@ class AdConsentService {
       await updateConsentInfo();
       final consentInfo = ConsentInformation.instance;
       if (await consentInfo.isConsentFormAvailable()) {
-        await ConsentForm.loadAndShowConsentFormIfRequired((_) {});
+        final completer = Completer<void>();
+        await ConsentForm.loadAndShowConsentFormIfRequired((_) {
+          if (!completer.isCompleted) completer.complete();
+        });
+        await completer.future;
       }
     } catch (_) {
-      // Consent unavailable (e.g. tests) — continue with non-personalised default.
+      // The caller must still check canRequestAds before initialising ads.
+    }
+  }
+
+  /// Fail closed when UMP cannot establish permission to request ads.
+  Future<bool> canRequestAds() async {
+    if (kIsWeb) return false;
+    try {
+      return await ConsentInformation.instance.canRequestAds();
+    } catch (_) {
+      return false;
     }
   }
 
@@ -77,9 +90,7 @@ class AdConsentService {
   }
 
   /// Non-personalised ad request extras for banner loads.
-  static AdRequest get adRequest => const AdRequest(
-        nonPersonalizedAds: true,
-      );
+  static AdRequest get adRequest => const AdRequest(nonPersonalizedAds: true);
 }
 
 final adConsentServiceProvider = Provider<AdConsentService>((ref) {

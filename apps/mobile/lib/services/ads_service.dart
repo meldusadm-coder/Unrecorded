@@ -116,6 +116,7 @@ final adsServiceProvider = FutureProvider<AdsService>((ref) async {
 
   final consent = ref.read(adConsentServiceProvider);
   await consent.requestConsentIfNeeded();
+  if (!await consent.canRequestAds()) return AdsService();
 
   final service = AdsService(
     onBannerStateChanged: () {

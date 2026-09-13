@@ -19,6 +19,23 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  site:
+    name: Website build and security audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/site/package-lock.json
+      - run: npm ci
+        working-directory: apps/site
+      - run: npm audit --audit-level=low
+        working-directory: apps/site
+      - run: npm test
+        working-directory: apps/site
+
   scope:
     name: Resolve test scope
     runs-on: ubuntu-latest
@@ -208,10 +225,11 @@ jobs:
 
   release-gate:
     name: Release gate (copy + debug APK)
-    needs: [scope, lint, test-core, test-radio, test-ui, test-mobile]
+    needs: [scope, lint, test-core, test-radio, test-ui, test-mobile, site]
     if: |
       always() &&
       needs.lint.result == 'success' &&
+      needs.site.result == 'success' &&
       (needs.test-core.result == 'success' || needs.test-core.result == 'skipped') &&
       (needs.test-radio.result == 'success' || needs.test-radio.result == 'skipped') &&
       (needs.test-ui.result == 'success' || needs.test-ui.result == 'skipped') &&
@@ -255,7 +273,7 @@ jobs:
   ci-complete:
     name: Analyze & Test
     runs-on: ubuntu-latest
-    needs: [scope, lint, test-core, test-radio, test-ui, test-mobile]
+    needs: [scope, lint, test-core, test-radio, test-ui, test-mobile, site]
     if: always()
     steps:
       - name: Aggregate CI results
@@ -270,6 +288,7 @@ jobs:
             fi
           }
           check "Resolve test scope" "${{ needs.scope.result }}"
+          check "Website build and security audit" "${{ needs.site.result }}"
           check "Format & analyze" "${{ needs.lint.result }}"
           check "Core tests" "${{ needs.test-core.result }}"
           check "Radio tests" "${{ needs.test-radio.result }}"
