@@ -12,9 +12,9 @@ Version prepared: 0.9.5+21. This is a technical review, not confirmation of Play
 
 ## Outstanding hosting and Console actions
 
-The live /privacy.html and /privacy URLs returned HTTP 404 during this review. The Eleventy build creates the policy correctly. Cloudflare configuration needs inspection; do not mark issue #110 resolved until live verification and Console resubmission succeed.
+The live /privacy.html and /privacy URLs returned HTTP 404 during this review. The Eleventy build creates the policy correctly. Do not mark issue #110 resolved until live verification and Console resubmission succeed.
 
-Cloudflare Pages settings: production branch main, root apps/site, build command npm ci && npm test, output _site. Do not publish the source directory. Check custom-domain routing, Workers and redirect rules if these settings are already correct. Cloudflare Pages can redirect .html to the extensionless policy; the final response must contain the actual policy.
+`.github/workflows/deploy-site.yml` is the production deployment path: a relevant push to `main` runs the locked Eleventy build and verification, audits npm dependencies, and uploads `apps/site/_site` to the Cloudflare Pages project. It requires the `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` Actions secrets; `CLOUDFLARE_PAGES_PROJECT` may override the default project name `unrecorded`. Do not enable a second Cloudflare Git build or publish the source directory. If a successful Pages upload still leaves the domain unavailable, check its custom-domain assignment and Workers routes.
 
 Run `python3 tool/release/check_public_site.py` after deployment. Android release CI blocks Play upload if the public policy or required assets are invalid.
 
