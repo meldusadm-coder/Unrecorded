@@ -30,18 +30,20 @@ npm start
 
 `npm test` runs an Eleventy build and then `scripts/verify-site.mjs`, which checks required public files, sitemap/llms coverage, product-truth copy, and stale `/src/styles.css` references.
 
-## Host on Cloudflare Pages
+## Deploy to Cloudflare Pages
 
-Use Cloudflare Pages Git deploys. `_site/` is gitignored, so Pages must run the build instead of serving checked-in output.
+GitHub Actions owns the production build and deployment. On a relevant push to `main`, `.github/workflows/deploy-site.yml` installs the locked dependencies, audits them, runs the complete site verification, and uploads `apps/site/_site` to Cloudflare Pages.
 
-| Setting | Value |
-|---------|-------|
-| Root directory | `apps/site` |
-| Build command | `npm run build` |
-| Build output directory | `_site` |
-| Environment variable | `NODE_VERSION=20` |
+Configure these GitHub Actions secrets:
 
-Do not configure Pages to publish `apps/site` directly. Old flat HTML files are no longer the source of truth; Eleventy templates under `src/` build the deployable site.
+| Secret | Value |
+|--------|-------|
+| `CLOUDFLARE_ACCOUNT_ID` | Account containing the Pages project |
+| `CLOUDFLARE_API_TOKEN` | Scoped to Account / Cloudflare Pages / Edit |
+
+The workflow deploys to the `unrecorded` Pages project by default. If the existing project has a different name, set the repository Actions variable `CLOUDFLARE_PAGES_PROJECT` to that exact name.
+
+Do not configure a second Cloudflare Git build or publish `apps/site` directly. Old flat HTML files are no longer the source of truth; Eleventy templates under `src/` build the deployable `_site/` directory.
 
 ### Post-deploy verification
 

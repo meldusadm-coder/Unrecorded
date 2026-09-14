@@ -2,7 +2,7 @@
 
 Optional Cloudflare zone setting for [unrecorded.app](https://unrecorded.app). Helps AI agents request markdown instead of HTML when reading public pages about the Unrecorded Android app.
 
-Static content indexes (`llms.txt`, `sitemap.xml`, `auth.md`) are generated or copied by the Eleventy site build in `apps/site/`. Cloudflare Pages should use root directory `apps/site`, build command `npm run build`, output directory `_site`, and `NODE_VERSION=20`.
+Static content indexes (`llms.txt`, `sitemap.xml`, `auth.md`) are generated or copied by the Eleventy site build in `apps/site/`. The GitHub website deployment workflow builds with Node 22 and uploads `apps/site/_site` to Cloudflare Pages; Cloudflare's separate Git build must remain disabled.
 
 ## What this site does not publish
 
