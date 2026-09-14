@@ -1,0 +1,88 @@
+name: Deploy Website
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/site/**"
+      - ".github/workflows/deploy-site.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-site-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  deploy:
+    name: Build, verify and deploy
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://unrecorded.app
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/site/package-lock.json
+
+      - name: Install locked dependencies
+        working-directory: apps/site
+        run: npm ci
+
+      - name: Audit dependencies
+        working-directory: apps/site
+        run: npm audit --audit-level=low
+
+      - name: Build and verify site
+        working-directory: apps/site
+        run: npm test
+
+      - name: Validate deployment credentials
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          for name in CLOUDFLARE_ACCOUNT_ID CLOUDFLARE_API_TOKEN; do
+            if [[ -z "${!name:-}" ]]; then
+              echo "::error::Required GitHub Actions secret ${name} is not configured."
+              exit 1
+            fi
+          done
+
+      - name: Deploy to Cloudflare Pages
+        id: cloudflare
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          command: >-
+            pages deploy apps/site/_site
+            --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT || 'unrecorded' }}
+            --branch=main
+
+      - name: Verify deployed public release assets
+        env:
+          DEPLOYMENT_URL: ${{ steps.cloudflare.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          echo "Cloudflare deployment: ${DEPLOYMENT_URL}"
+          for attempt in {1..12}; do
+            if python3 tool/release/check_public_site.py; then
+              exit 0
+            fi
+            if [[ "${attempt}" == "12" ]]; then
+              echo "::error::Cloudflare deployed, but the required unrecorded.app assets are still unavailable. Check the Pages custom-domain assignment and Workers routes."
+              exit 1
+            fi
+            echo "Public domain not ready (attempt ${attempt}/12); retrying in 10 seconds."
+            sleep 10
+          done
