@@ -22,7 +22,7 @@ dependencies:
   package_info_plus: ^10.2.1
   google_mobile_ads: ^9.0.0
   in_app_purchase: ^3.3.0
-  home_widget: ^0.9.3
+  home_widget: ^0.10.0
   unrecorded_core:
     path: ../../packages/unrecorded_core
   unrecorded_radio:
