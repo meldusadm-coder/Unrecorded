@@ -21,7 +21,7 @@ dependencies:
   device_info_plus: ^13.2.0
   package_info_plus: ^10.2.1
   google_mobile_ads: ^9.0.0
-  in_app_purchase: ^3.3.0
+  in_app_purchase: ^3.3.1
   home_widget: ^0.9.3
   unrecorded_core:
     path: ../../packages/unrecorded_core
