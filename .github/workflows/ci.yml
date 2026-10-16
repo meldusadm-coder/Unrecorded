@@ -161,7 +161,7 @@ jobs:
         run: flutter pub get --enforce-lockfile
 
       - name: Preserve resolved dependency lockfile
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: resolved-pub-lock
           path: pubspec.lock
