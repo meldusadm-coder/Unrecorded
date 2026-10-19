@@ -64,7 +64,7 @@ jobs:
           fi
           echo "run_all=${run_all}" >> "$GITHUB_OUTPUT"
 
-      - uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@v4
         if: >-
           steps.mode.outputs.run_all != 'true' &&
           github.event_name == 'pull_request' &&
